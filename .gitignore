@@ -1,0 +1,59 @@
+# ==============================================================================
+# Fuzzy-Learning-Platform 嚴格版權保護與大檔過濾清單 (.gitignore)
+# 確保書籍翻拍圖檔、課程錄音、簡報教材與環境暫存檔絕不推送到公開倉庫
+# ==============================================================================
+
+# 1. 原始教材目錄與書籍翻拍資料夾（嚴禁公開發布）
+materials/
+chapter*_photos/
+book_photos/
+
+# 2. 所有圖片檔
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.gif
+*.bmp
+*.tiff
+*.svg
+
+# 3. 課堂錄音與影音檔
+*.wav
+*.m4a
+*.mp3
+*.aac
+*.ogg
+*.flac
+*.mp4
+*.mov
+*.avi
+
+# 4. 簡報與 PDF 教材檔案
+*.pdf
+*.pptx
+*.ppt
+*.docx
+
+# 5. Python 虛擬環境與快取檔
+.venv/
+venv/
+env/
+.fuzzy_env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# 6. 前端依賴與開發暫存
+node_modules/
+scratch/
+.env
+*.log
+
+# 7. 作業系統與編輯器產生之暫存檔
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/

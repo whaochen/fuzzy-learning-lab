@@ -1,0 +1,3581 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fuzzy 模糊邏輯理論與互動模擬學習平台 | 智慧學習地圖</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Plotly.js CDN -->
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <!-- MathJax Configuration & CDN (防斷行強化設定) -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      svg: {
+        fontCache: 'global'
+      },
+      options: {
+        renderActions: {
+          addMenu: []
+        }
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <!-- 預載本地教材資料 (透過外部腳本載入 window.FUZZY_COURSE_DATA，徹底解決 file:// CORS 阻擋，確保 F12 Console 零紅字報錯) -->
+  <script src="course_data.js"></script>
+  <script src="book_pages.js"></script>
+  <!-- 預載 Chapter 01 四大標準學習模組與 Plotly.js 多維度互動圖表引擎 -->
+  <script src="interactive_widgets.js"></script>
+  <!-- 預載 MATLAB Fuzzy Logic Designer 網頁旗艦工作台 (Web FIS Studio) -->
+  <script src="fis_studio.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: #0b1120;
+      background-image:
+        radial-gradient(at 15% 10%, rgba(56, 189, 248, 0.09) 0px, transparent 45%),
+        radial-gradient(at 85% 20%, rgba(99, 102, 241, 0.09) 0px, transparent 45%),
+        radial-gradient(at 50% 85%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+      color: #f1f5f9;
+      font-size: 1.0625rem; /* 17px 舒適基準字體 */
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* 閱讀排版與防碎裂換行規則 */
+    .prose-reading {
+      font-size: 1.08rem;
+      line-height: 1.85;
+      letter-spacing: 0.015em;
+      color: #e2e8f0;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .prose-reading p {
+      margin-bottom: 1.5rem;
+    }
+
+    /* 行內數學公式 (Inline Math) 嚴禁拆行或單字母斷裂 */
+    mjx-container[jax="SVG"]:not([display="true"]) {
+      display: inline-block !important;
+      white-space: nowrap !important;
+      vertical-align: -0.12em;
+      margin: 0 0.2em;
+      padding: 0 0.08em;
+    }
+
+    /* 獨立區塊數學公式 (Display Math) 置中與舒適留白 */
+    mjx-container[jax="SVG"][display="true"] {
+      display: block !important;
+      text-align: center !important;
+      margin: 1.25rem auto !important;
+      padding: 0.5rem 1.25rem !important;
+      overflow-x: auto;
+      overflow-y: hidden;
+      max-width: 100%;
+    }
+
+    /* 玻璃擬態與精緻卡片容器 */
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.72);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.16);
+      box-shadow: 0 10px 30px -10px rgba(2, 6, 23, 0.5);
+    }
+
+    .refined-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.65) 0%, rgba(15, 23, 42, 0.78) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 1.25rem;
+      transition: all 0.22s ease;
+    }
+
+    .refined-card:hover {
+      border-color: rgba(56, 189, 248, 0.35);
+    }
+
+    /* 獨立置中數學公式展示盒 */
+    .formula-display-card {
+      background: rgba(9, 14, 28, 0.78);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      border-radius: 1rem;
+      padding: 1.35rem 2rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.5rem;
+      box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.35);
+      overflow-x: auto;
+      text-align: center;
+      color: #e0f2fe;
+      font-size: 1.125rem;
+    }
+
+    /* 學習地圖節點樣式 */
+    .roadmap-node-completed {
+      background: linear-gradient(145deg, rgba(6, 78, 59, 0.45) 0%, rgba(15, 23, 42, 0.85) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.18);
+    }
+    .roadmap-node-active {
+      background: linear-gradient(145deg, rgba(12, 74, 110, 0.55) 0%, rgba(30, 41, 59, 0.9) 100%);
+      border: 2px solid #38bdf8;
+      box-shadow: 0 0 28px rgba(56, 189, 248, 0.25);
+    }
+    .roadmap-node-locked {
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px dashed rgba(100, 116, 139, 0.35);
+      opacity: 0.72;
+    }
+
+    /* 自訂捲軸 */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    input[type="range"] {
+      accent-color: #38bdf8;
+    }
+
+    .tab-active {
+      background: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(56, 189, 248, 0.3);
+    }
+
+    .chapter-active {
+      background: linear-gradient(90deg, rgba(56, 189, 248, 0.18) 0%, rgba(56, 189, 248, 0.04) 100%);
+      border-left: 4px solid #38bdf8;
+      color: #38bdf8;
+    }
+
+    @keyframes highlightPulse {
+      0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+      70% { box-shadow: 0 0 0 18px rgba(56, 189, 248, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
+    }
+    .pulse-focus {
+      animation: highlightPulse 1.8s ease-out 2;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-sky-500 selection:text-white">
+
+  <!-- 頂部導覽列 -->
+  <header class="sticky top-0 z-30 glass-panel border-b border-slate-800/90 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3.5 cursor-pointer" onclick="switchTab('roadmap')">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/25 font-bold text-2xl text-white">
+            μ
+          </div>
+          <div>
+            <div class="flex items-center gap-2.5">
+              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Fuzzy 模糊邏輯雙核心學習平台</h1>
+              <span id="header-progress-pill" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+                闖關進度 0%
+              </span>
+            </div>
+            <p class="text-sm text-slate-400 mt-0.5">
+              智慧學習地圖導引 × 《認識 Fuzzy》實體書全書 19 章 282 處重點導讀與頁碼對照 × 七大真實篇章 × Plotly 互動實驗室
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 五大教學與設計分頁切換器 (Tabs，預設首頁為智慧學習地圖) -->
+      <nav class="flex flex-wrap items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+        <button id="tab-btn-roadmap" onclick="switchTab('roadmap')" class="tab-active px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
+          <span>🗺️</span>
+          <span>智慧學習地圖</span>
+        </button>
+        <button id="tab-btn-theory" onclick="switchTab('theory')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
+          <span>📖</span>
+          <span>基礎理論導讀</span>
+        </button>
+        <button id="tab-btn-notes" onclick="switchTab('notes')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
+          <span>🎧</span>
+          <span>課堂重點與測驗</span>
+        </button>
+        <button id="tab-btn-lab" onclick="switchTab('lab')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
+          <span>🎛️</span>
+          <span>Fuzzy 互動實驗室</span>
+        </button>
+        <button id="tab-btn-fis" onclick="switchTab('fis')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
+          <span>🛠️</span>
+          <span>Web FIS Studio</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 當前闖關任務導引列 (在非地圖分頁顯示，隨頁面自然滾動不置頂遮擋主學習區) -->
+  <div id="active-mission-banner" class="hidden bg-slate-900/95 border-b border-sky-500/30 px-6 py-3">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <button onclick="switchTab('roadmap')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs sm:text-sm font-semibold border border-slate-700 transition flex items-center gap-1.5 shrink-0">
+          <span>← 返回學習地圖</span>
+        </button>
+        <div class="text-sm sm:text-base text-slate-200">
+          <span id="mission-banner-stage" class="text-xs font-bold uppercase tracking-wider text-sky-400 mr-2">STAGE 1</span>
+          <strong id="mission-banner-title" class="text-white">當前學習節點</strong>
+        </div>
+      </div>
+      <div class="flex items-center gap-3 shrink-0">
+        <button id="mission-complete-btn" onclick="toggleCurrentNodeComplete()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+          <span>✅ 標記本關完成並解鎖下一關</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主內容區 -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- ===================================================================== -->
+    <!-- 【首頁分頁：Fuzzy 智慧學習地圖（Learning Roadmap）】 -->
+    <!-- ===================================================================== -->
+    <section id="tab-panel-roadmap" class="space-y-10">
+
+      <!-- 學習地圖頂部總覽與進度儀表板 -->
+      <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-sky-500/30 relative overflow-hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-8 space-y-4">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold uppercase tracking-widest">
+                <span>🧭 Interactive Learning Roadmap</span>
+              </div>
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+                <span>📖 實體書 100% 伴讀導引：全書 19 大章節共 282 處精煉重點導讀與課本頁碼對照（零版權圖檔）</span>
+              </div>
+            </div>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              Fuzzy 模糊邏輯・《認識 Fuzzy》原書章節闖關學習地圖 (Stage 01 ～ 07)
+            </h2>
+            <p class="prose-reading text-slate-300 mb-0">
+              完全對齊《認識 Fuzzy》原書真實章節順序：第 1 章 緒論 ➔ 第 2 章 模糊集合 ➔ 第 3 章 模糊集合之運算與擴展原理 ➔ 第 4 章 模糊關係 ➔ 第 5 章 模糊邏輯與推論 ➔ 第 6 章 模糊控制 ➔ 第 7 章 模糊應用與進階系統。四段式教學架構（通論、課本各節導讀、互動模擬器、隨堂測驗）隨學隨打勾，解鎖完整智慧控制通關成就！
+            </p>
+          </div>
+
+          <!-- 右側闖關進度統計卡 -->
+          <div class="lg:col-span-4 refined-card p-6 border-sky-500/30 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-bold text-slate-300">整體學習完成度</span>
+              <span id="roadmap-percent-text" class="text-2xl font-extrabold text-emerald-400 font-mono">0%</span>
+            </div>
+            <div class="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
+              <div id="roadmap-progress-bar" class="h-full rounded-full bg-gradient-to-r from-sky-400 via-indigo-500 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
+              <span id="roadmap-count-text">已完成 0 / 28 個核心關卡</span>
+              <div class="flex items-center gap-3">
+                <button onclick="unlockAllRoadmapNodes()" class="text-sky-400 hover:text-sky-300 underline">全部解鎖</button>
+                <button onclick="resetRoadmapProgress()" class="text-slate-400 hover:text-rose-300 underline">重置進度</button>
+              </div>
+            </div>
+            <button id="continue-learning-btn" onclick="continueCurrentStage()" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2">
+              <span>🚀 進入當前進行中關卡</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 狀態圖例說明 -->
+        <div class="flex flex-wrap items-center gap-6 mt-7 pt-6 border-t border-slate-800/80 text-xs sm:text-sm text-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded-full bg-emerald-400 shadow shadow-emerald-500/50"></span>
+            <span><strong>已完成 (Completed)</strong>：已掌握並打勾通關</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded-full bg-sky-400 animate-pulse shadow shadow-sky-400/60"></span>
+            <span><strong>進行中 / 已解鎖 (In Progress)</strong>：當前推薦挑戰關卡</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="w-3.5 h-3.5 rounded-full bg-slate-600"></span>
+            <span><strong>尚未解鎖 (Locked)</strong>：完成前一關卡自動解鎖（亦可點擊預覽）</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 四大階段學習地圖主體 (由 JS 動態渲染) -->
+      <div id="roadmap-stages-container" class="space-y-8">
+        <!-- Stage 1 ~ Stage 4 卡片與關卡節點 -->
+      </div>
+
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 【分頁一：基礎理論導讀（Book & Slides）】 -->
+    <!-- ===================================================================== -->
+    <section id="tab-panel-theory" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- 左側章節與子模組導覽列 + 迷你學習路線圖 -->
+      <aside class="lg:col-span-4 xl:col-span-3 space-y-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1">
+        <div class="glass-panel rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-sky-400">理論章節與模組導覽</h2>
+            <span class="text-xs px-2.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">7 大核心篇章 (全數旗艦升級)</span>
+          </div>
+          <div id="chapter-nav-list" class="space-y-2">
+            <!-- 由 JS 動態渲染 7 大章節按鈕與四大標準學習模組子選單 -->
+          </div>
+        </div>
+
+        <!-- 側邊快速闖關導引卡 -->
+        <div class="glass-panel rounded-2xl p-5 space-y-3.5 border border-sky-500/25">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold uppercase tracking-wider text-sky-400">🗺️ 學習地圖快速跳轉</span>
+            <button onclick="switchTab('roadmap')" class="text-xs text-sky-300 hover:underline">展開全圖 →</button>
+          </div>
+          <div id="sidebar-mini-roadmap" class="space-y-2 text-xs">
+            <!-- 由 JS 渲染四大階段迷你進度 -->
+          </div>
+        </div>
+      </aside>
+
+      <!-- 右側理論圖文、數學公式與對照範例 (限制最佳閱讀寬度 max-w-4xl) -->
+      <div class="lg:col-span-8 xl:col-span-9 max-w-4xl w-full mx-auto space-y-8" id="chapter-content-container">
+        <!-- 由 JS 動態渲染章節內容 -->
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 【分頁二：課堂重點與音訊筆記（Lecture Notes & Quiz）】 -->
+    <!-- ===================================================================== -->
+    <section id="tab-panel-notes" class="hidden max-w-5xl mx-auto space-y-10">
+      <!-- 頂部摘要橫幅 -->
+      <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-sky-500/25 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="space-y-2 max-w-2xl">
+          <span class="text-xs font-bold uppercase tracking-widest text-sky-400">Audio Lecture Intelligence</span>
+          <h2 class="text-2xl sm:text-3xl font-bold text-white leading-tight">老師上課錄音重點、必考提醒與觀念除錯</h2>
+          <p class="text-base sm:text-lg text-slate-300 leading-relaxed">
+            彙整自 <code class="text-sky-300 bg-slate-900 px-2 py-0.5 rounded text-sm">materials/lecture_audio/</code> 課堂實況錄音與《認識 Fuzzy》第 2 章重點，提煉老師反覆強調的觀念陷阱與必考題型。
+          </p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <a href="#quiz-section" class="px-5 py-3 rounded-2xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-base transition shadow-lg shadow-sky-500/25">
+            ✍️ 前往隨堂觀念測驗
+          </a>
+        </div>
+      </div>
+
+      <!-- 課堂錄音單元卡片列表 -->
+      <div class="space-y-5">
+        <h3 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
+          <span class="text-sky-400">🎙️</span> 課堂錄音精華筆記
+        </h3>
+        <div id="lecture-notes-list" class="grid grid-cols-1 gap-7">
+          <!-- 由 JS 動態渲染 -->
+        </div>
+      </div>
+
+      <!-- 常見迷思 vs 正確觀念解析 -->
+      <div id="misconceptions-section" class="space-y-5">
+        <h3 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2.5">
+          <span class="text-amber-400">💡</span> 模糊邏輯常見四大迷思解析 (Myth vs. Truth)
+        </h3>
+        <div id="misconceptions-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- 由 JS 動態渲染 -->
+        </div>
+      </div>
+
+      <!-- 隨堂觀念小測驗 (Interactive Quiz) -->
+      <div id="quiz-section" class="glass-panel rounded-3xl p-7 sm:p-8 border border-indigo-500/30">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">Interactive Assessment</span>
+            <h3 class="text-2xl font-bold text-white mt-1">隨堂觀念小測驗 (含《認識 Fuzzy》第 2 章課後習題 2.7 & 2.8)</h3>
+            <p class="text-base text-slate-400 mt-1">點擊選項立即批改，並檢視完整數學推導解析</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <div class="bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-800 text-base">
+              目前得分：<span id="quiz-score-Text" class="font-bold text-emerald-400">0 / 5</span>
+            </div>
+            <button onclick="resetQuiz()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold text-slate-200 transition">
+              🔄 重新作答
+            </button>
+          </div>
+        </div>
+        <div id="quiz-list" class="space-y-7 mt-7">
+          <!-- 由 JS 動態渲染測驗題目 -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 【分頁三：Fuzzy 互動實驗室（Interactive Lab Hub 總樞紐）】 -->
+    <!-- ===================================================================== -->
+    <section id="tab-panel-lab" class="hidden space-y-8">
+
+      <!-- 實驗室總樞紐 Banner 橫幅與章節切換導覽列 -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-sky-500/30 relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold uppercase tracking-widest">
+                <span>🎛️ Interactive Simulation Hub</span>
+              </span>
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+                <span>⚡ 全書 7 大章節 • 21 座多維度視覺化互動實驗室全數在線</span>
+              </span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              全平台 Fuzzy 互動實驗總樞紐 (Interactive Simulation Hub)
+            </h2>
+            <p class="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
+              平台除提供核心「冷氣模糊溫控與重心法解模糊 (Mamdani Defuzzification)」外，更完整收錄了 Chapter 01 ～ 07 全章節專屬的 20 座互動實驗室（隸屬度函數塑形、笛卡兒積熱點矩陣、二維非線性 3D 控制曲面、擴展原理映射、Bellman-Zadeh 對稱決策、FCM 柔性分群、ANFIS 類神經萬能逼近等）。點選下方標籤即可切換旗艦實驗室或直達各章節專屬模擬器！
+            </p>
+          </div>
+
+          <!-- 右側實驗室總覽數據卡 -->
+          <div class="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shrink-0 text-center space-y-1.5 min-w-[190px]">
+            <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">實驗室總數量</div>
+            <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 font-mono">21 <span class="text-sm text-slate-400 font-normal">座</span></div>
+            <div class="text-xs text-emerald-400 font-medium">覆蓋全書 7 大章節</div>
+          </div>
+        </div>
+
+        <!-- 8 大導覽切換按鈕列 (Capsule Tabs) + Web FIS Studio 直達鈕 -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-800/80">
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="lab-tab-btn-flagship" onclick="switchLabHubTab('flagship')"
+              class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/25">
+              <span>⭐</span>
+              <span>旗艦實驗室：冷氣模糊溫控 (Mamdani)</span>
+            </button>
+            <button id="lab-tab-btn-fuzzy_sets" onclick="switchLabHubTab('fuzzy_sets')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>🌱</span>
+              <span>Ch.01 緒論與集合基礎 (3座)</span>
+            </button>
+            <button id="lab-tab-btn-fuzzy_relations_inference" onclick="switchLabHubTab('fuzzy_relations_inference')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>⚡</span>
+              <span>Ch.02 模糊關係與推論 (3座)</span>
+            </button>
+            <button id="lab-tab-btn-fuzzy_control_applications" onclick="switchLabHubTab('fuzzy_control_applications')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>🎛️</span>
+              <span>Ch.03 模糊控制與三維曲面 (4座)</span>
+            </button>
+            <button id="lab-tab-btn-fuzzy_numbers_extension" onclick="switchLabHubTab('fuzzy_numbers_extension')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>📈</span>
+              <span>Ch.04 擴展原理與模糊數 (2座)</span>
+            </button>
+            <button id="lab-tab-btn-fuzzy_decision_evaluation" onclick="switchLabHubTab('fuzzy_decision_evaluation')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>🎯</span>
+              <span>Ch.05 模糊決策與綜合評判 (2座)</span>
+            </button>
+            <button id="lab-tab-btn-fuzzy_clustering_pattern" onclick="switchLabHubTab('fuzzy_clustering_pattern')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>🌲</span>
+              <span>Ch.06 模糊分群與識別 (2座)</span>
+            </button>
+            <button id="lab-tab-btn-advanced_fuzzy_neuro" onclick="switchLabHubTab('advanced_fuzzy_neuro')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>🧠</span>
+              <span>Ch.07 類神經模糊 ANFIS (2座)</span>
+            </button>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2 shrink-0">
+            <span class="text-xs text-amber-300 font-semibold hidden lg:inline">🚀 高階工程模型直達：</span>
+            <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('marine_autopilot'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='marine_autopilot'; }, 80);"
+              class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+              <span>🚢</span><span>船舶自動舵</span>
+            </button>
+            <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('solar_pv_cooling'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='solar_pv_cooling'; }, 80);"
+              class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+              <span>☀️</span><span>光電散熱</span>
+            </button>
+            <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('bess_dispatch'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='bess_dispatch'; }, 80);"
+              class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+              <span>🔋</span><span>儲能調度</span>
+            </button>
+            <button onclick="switchTab('fis')"
+              class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 shadow-md shadow-amber-500/25">
+              <span>🛠️</span>
+              <span>進入工坊 →</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. 旗艦實驗室容器：原冷氣機溫控系統 (Mamdani COG/MOM) -->
+      <div id="lab-flagship-container" class="space-y-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- 左側：滑桿參數與規則控制台 -->
+        <div class="lg:col-span-5 space-y-6">
+
+          <!-- 1. 感測器輸入與推論算子設定 -->
+          <div class="glass-panel rounded-2xl p-6 border border-sky-500/30 space-y-5">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                <span>🌡️</span> 步驟 1：感測器輸入與推論設定
+              </h2>
+              <button onclick="resetLabDefaults()" class="text-sm text-sky-400 hover:text-sky-300 underline font-medium">
+                重置預設參數
+              </button>
+            </div>
+
+            <!-- 當前溫度輸入 x* -->
+            <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 space-y-3">
+              <div class="flex justify-between items-center">
+                <label class="text-base font-semibold text-slate-200">當前環境溫度輸入 $x^*$ (°C)</label>
+                <span id="lab-input-x-val" class="text-xl font-bold text-sky-400 font-mono">27.0 °C</span>
+              </div>
+              <input id="lab-input-x" type="range" min="10" max="40" step="0.5" value="27" oninput="updateLabSimulation()" class="w-full cursor-pointer" />
+              <div class="flex justify-between text-xs text-slate-400 font-mono">
+                <span>10°C (冷)</span>
+                <span>25°C (適中)</span>
+                <span>40°C (酷熱)</span>
+              </div>
+            </div>
+
+            <!-- 快速情境預設按鈕 -->
+            <div class="flex flex-wrap gap-2">
+              <button onclick="applyScenario(16)" class="text-xs sm:text-sm px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 transition font-medium">
+                ❄️ 清晨微涼 (16°C)
+              </button>
+              <button onclick="applyScenario(24)" class="text-xs sm:text-sm px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-slate-700 transition font-medium">
+                🍃 舒適室溫 (24°C)
+              </button>
+              <button onclick="applyScenario(27)" class="text-xs sm:text-sm px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-700 transition font-medium">
+                🌤️ 午後微熱 (27°C)
+              </button>
+              <button onclick="applyScenario(34)" class="text-xs sm:text-sm px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-300 border border-slate-700 transition font-medium">
+                🔥 盛夏高溫 (34°C)
+              </button>
+            </div>
+
+            <!-- 推論截頂算子選擇 -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1.5">推論蘊含算子 (Implication)</label>
+                <select id="lab-implication-method" onchange="updateLabSimulation()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
+                  <option value="min" selected>Mamdani Min (削平頭 Clipping)</option>
+                  <option value="prod">Larsen Product (等比縮放 Scaling)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-400 mb-1.5">解模糊化對照指標</label>
+                <select id="lab-defuzz-compare" onchange="updateLabSimulation()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-sky-500">
+                  <option value="cog_and_mom" selected>同時顯示 COG 與 MOM</option>
+                  <option value="cog_only">僅顯示 重心法 (COG)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. 三角形 (trimf) 與 梯形 (trapmf) 參數即時調整 -->
+          <div class="glass-panel rounded-2xl p-6 space-y-4">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>📐</span> 步驟 2：調整歸屬函數參數 ($\text{trimf}$ & $\text{trapmf}$)
+            </h2>
+
+            <!-- 集合 1：偏冷 (Cool) - 梯形 trapmf -->
+            <div class="refined-card p-4 border-sky-500/25 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-sky-400">🔹 偏冷 $\tilde{A}_{\text{cool}}$：梯形 $\text{trapmf}(x; a, b, c, d)$</span>
+                <span id="label-trap-cool" class="text-xs font-mono text-slate-300 bg-slate-900 px-2 py-0.5 rounded">[10, 10, 18, 24]</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div class="flex justify-between text-slate-300 mb-1"><span>平頂右端 $c$</span><span id="val-cool-c" class="font-mono text-sky-300">18</span></div>
+                  <input id="param-cool-c" type="range" min="12" max="24" step="1" value="18" oninput="updateLabSimulation()" class="w-full" />
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-300 mb-1"><span>右底角 $d$</span><span id="val-cool-d" class="font-mono text-sky-300">24</span></div>
+                  <input id="param-cool-d" type="range" min="18" max="30" step="1" value="24" oninput="updateLabSimulation()" class="w-full" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 集合 2：適中 (Warm/Comfort) - 三角形 trimf -->
+            <div class="refined-card p-4 border-emerald-500/25 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-emerald-400">🟢 適中 $\tilde{A}_{\text{warm}}$：三角形 $\text{trimf}(x; a, b, c)$</span>
+                <span id="label-tri-warm" class="text-xs font-mono text-slate-300 bg-slate-900 px-2 py-0.5 rounded">[18, 24, 30]</span>
+              </div>
+              <div class="grid grid-cols-3 gap-3 text-sm">
+                <div>
+                  <div class="flex justify-between text-slate-300 mb-1"><span>左角 $a$</span><span id="val-warm-a" class="font-mono text-emerald-300">18</span></div>
+                  <input id="param-warm-a" type="range" min="12" max="24" step="1" value="18" oninput="updateLabSimulation()" class="w-full" />
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-300 mb-1"><span>中心 $b$</span><span id="val-warm-b" class="font-mono text-emerald-300">24</span></div>
+                  <input id="param-warm-b" type="range" min="18" max="30" step="1" value="24" oninput="updateLabSimulation()" class="w-full" />
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-300 mb-1"><span>右角 $c$</span><span id="val-warm-c" class="font-mono text-emerald-300">30</span></div>
+                  <input id="param-warm-c" type="range" min="25" max="36" step="1" value="30" oninput="updateLabSimulation()" class="w-full" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 集合 3：偏熱 (Hot) - 梯形 trapmf -->
+            <div class="refined-card p-4 border-rose-500/25 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-bold text-rose-400">🔺 偏熱 $\tilde{A}_{\text{hot}}$：梯形 $\text{trapmf}(x; a, b, c, d)$</span>
+                <span id="label-trap-hot" class="text-xs font-mono text-slate-300 bg-slate-900 px-2 py-0.5 rounded">[25, 31, 40, 40]</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div class="flex justify-between text-slate-300 mb-1"><span>左底角 $a$</span><span id="val-hot-a" class="font-mono text-rose-300">25</span></div>
+                  <input id="param-hot-a" type="range" min="20" max="32" step="1" value="25" oninput="updateLabSimulation()" class="w-full" />
+                </div>
+                <div>
+                  <div class="flex justify-between text-slate-300 mb-1"><span>平頂左端 $b$</span><span id="val-hot-b" class="font-mono text-rose-300">31</span></div>
+                  <input id="param-hot-b" type="range" min="26" max="38" step="1" value="31" oninput="updateLabSimulation()" class="w-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 模糊規則庫 (IF-THEN Rules) 與權重設定 -->
+          <div class="glass-panel rounded-2xl p-6 space-y-3.5">
+            <h2 class="text-lg font-bold text-white flex items-center gap-2">
+              <span>⚙️</span> 步驟 3：IF-THEN 模糊規則庫與後件映射
+            </h2>
+            <p class="text-sm text-slate-300">可即時調整每條規則對應的冷氣風扇輸出集合：</p>
+
+            <div class="space-y-3 text-sm">
+              <!-- Rule 1 -->
+              <div class="flex items-center justify-between bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 gap-2">
+                <span class="text-slate-200 font-medium">$R^{(1)}$: IF 溫度 <strong class="text-sky-400">偏冷</strong> THEN</span>
+                <select id="rule-1-consequent" onchange="updateLabSimulation()" class="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-sm">
+                  <option value="low" selected>低速風 (Low)</option>
+                  <option value="med">中速風 (Medium)</option>
+                  <option value="high">高速風 (High)</option>
+                </select>
+                <span id="firing-r1" class="font-mono text-xs px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300">w₁=0.00</span>
+              </div>
+
+              <!-- Rule 2 -->
+              <div class="flex items-center justify-between bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 gap-2">
+                <span class="text-slate-200 font-medium">$R^{(2)}$: IF 溫度 <strong class="text-emerald-400">適中</strong> THEN</span>
+                <select id="rule-2-consequent" onchange="updateLabSimulation()" class="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-sm">
+                  <option value="low">低速風 (Low)</option>
+                  <option value="med" selected>中速風 (Medium)</option>
+                  <option value="high">高速風 (High)</option>
+                </select>
+                <span id="firing-r2" class="font-mono text-xs px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300">w₂=0.50</span>
+              </div>
+
+              <!-- Rule 3 -->
+              <div class="flex items-center justify-between bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 gap-2">
+                <span class="text-slate-200 font-medium">$R^{(3)}$: IF 溫度 <strong class="text-rose-400">偏熱</strong> THEN</span>
+                <select id="rule-3-consequent" onchange="updateLabSimulation()" class="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white text-sm">
+                  <option value="low">低速風 (Low)</option>
+                  <option value="med">中速風 (Medium)</option>
+                  <option value="high" selected>高速風 (High)</option>
+                </select>
+                <span id="firing-r3" class="font-mono text-xs px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300">w₃=0.33</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 右側：Plotly.js 雙圖表即時渲染與數學公式對照 -->
+        <div class="lg:col-span-7 space-y-6">
+
+          <!-- 頂部即時解模糊化儀表板 -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="refined-card p-5 border-sky-500/25">
+              <div class="text-xs font-semibold text-slate-400">各規則激發強度 $(w_1, w_2, w_3)$</div>
+              <div id="metric-firing-vector" class="text-xl font-bold font-mono text-white mt-1.5">[0.00, 0.50, 0.33]</div>
+              <div class="text-xs text-slate-400 mt-1">由輸入溫度 $x^*$ 對照前件求得</div>
+            </div>
+            <div class="refined-card p-5 border-emerald-500/40 bg-emerald-950/20">
+              <div class="text-xs text-emerald-300 font-bold">🎯 重心法輸出 $y^*_{\text{COG}}$</div>
+              <div id="metric-cog-output" class="text-2xl font-extrabold font-mono text-emerald-400 mt-1.5">62.4 %</div>
+              <div class="text-xs text-slate-300 mt-1">Center of Gravity (面積重心)</div>
+            </div>
+            <div class="refined-card p-5 border-amber-500/25">
+              <div class="text-xs text-amber-300 font-bold">📊 最大平均法 $y^*_{\text{MOM}}$</div>
+              <div id="metric-mom-output" class="text-2xl font-bold font-mono text-amber-400 mt-1.5">50.0 %</div>
+              <div class="text-xs text-slate-400 mt-1">Mean of Maximum (最高峰平均)</div>
+            </div>
+          </div>
+
+          <!-- 圖表一：前件部輸入歸屬函數圖 -->
+          <div class="glass-panel rounded-2xl p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h3 class="text-base font-bold text-white">
+                圖 1：前件部輸入歸屬函數 $\mu_{\tilde{A}_i}(x)$ 與當前溫度 $x^*$ 激發強度
+              </h3>
+              <span class="text-xs font-mono text-slate-400 bg-slate-900 px-2.5 py-1 rounded-lg">論域 $X \in [10, 40]\text{ °C}$</span>
+            </div>
+            <div id="plot-input-mf" class="w-full h-64"></div>
+          </div>
+
+          <!-- 圖表二：後件部推論聚合面積與重心法解模糊化結果 -->
+          <div class="glass-panel rounded-2xl p-5">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h3 class="text-base font-bold text-white">
+                圖 2：後件部規則聚合包絡線 $\mu_{\tilde{B}_{\text{agg}}}(y)$ 與重心法 (COG) 解模糊化定位
+              </h3>
+              <span class="text-xs font-mono text-slate-400 bg-slate-900 px-2.5 py-1 rounded-lg">風扇轉速論域 $Y \in [0, 100]\%$</span>
+            </div>
+            <div id="plot-output-defuzz" class="w-full h-72"></div>
+          </div>
+
+          <!-- 理論公式與當前數值即時對照面板 -->
+          <div id="lab-formula-trace-card" class="glass-panel rounded-2xl p-6 border border-indigo-500/30 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <h3 class="text-base font-bold text-indigo-300 flex items-center gap-2">
+                <span>🧮</span> 理論公式與當前即時數值對照 (Live Mathematical Trace)
+              </h3>
+              <span class="text-xs text-slate-400">隨滑桿拖曳即時代入公式</span>
+            </div>
+            <div id="live-formula-box" class="space-y-4">
+              <!-- 由 JS 動態填入當前參數的計算過程並觸發 MathJax -->
+            </div>
+          </div>
+
+        </div>
+      </div>
+      </div>
+      <!-- 結束旗艦實驗室容器 -->
+
+      <!-- 2. 章節實驗室展示與一鍵直達容器 (預設隱藏，點擊 Ch.01~Ch.07 標籤時顯示) -->
+      <div id="lab-chapter-container" class="hidden space-y-8">
+        <!-- 由 JS 動態注入該章節實驗室卡片、模擬圖導覽與一鍵直達按鈕 -->
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- 【分頁五：Web FIS Studio（MATLAB Fuzzy Logic Designer 網頁旗艦工作台）】 -->
+    <!-- ===================================================================== -->
+    <section id="tab-panel-fis" class="hidden space-y-8">
+
+      <!-- 頂部工作台 Banner 與工具列 -->
+      <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-amber-500/35 relative overflow-hidden shadow-2xl">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-widest">
+                <span>🛠️ Web FIS Studio</span>
+              </span>
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold">
+                <span>⚡ MATLAB Fuzzy Logic Designer 完整線上復刻版</span>
+              </span>
+              <span id="fis-system-badge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-700 text-slate-300 text-xs font-mono font-semibold">
+                MAMDANI • 2 Inputs • 1 Outputs • 3 Rules
+              </span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex flex-wrap items-center gap-3">
+              <span>Web FIS Studio 模糊控制器設計工作室</span>
+              <span id="fis-system-title" class="text-amber-400 font-mono text-xl sm:text-2xl font-bold bg-slate-900/90 px-3 py-1 rounded-xl border border-amber-500/30">TippingProblem</span>
+            </h2>
+            <p class="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
+              免安裝 MATLAB！直接在瀏覽器中從零設計、微調、視覺化測試並匯出任意模糊推論系統（FIS）。支援 Mamdani / Sugeno 雙模式、自訂歸屬函數、自然語言規則組裝、MATLAB 經典規則激發動態小圖 (Rule Viewer) 與 3D 控制曲面渲染！
+            </p>
+          </div>
+
+          <!-- 右側：三大高階工程場域預設專案與經典範本載入區 -->
+          <div class="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shrink-0 space-y-3 min-w-[320px]">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-300">選擇工程控制模型 (Presets)</span>
+              <span class="text-xs text-sky-400 font-mono font-bold">Sim-to-Real</span>
+            </div>
+            <select id="fis-preset-select" onchange="WebFISStudio.loadPreset(this.value)"
+              class="w-full bg-slate-950 border border-sky-500/40 rounded-xl px-3 py-2 text-sm text-sky-300 font-semibold focus:border-sky-400 focus:outline-none shadow-inner">
+              <optgroup label="🚀 三大高階工程場域實戰模型 (Sim-to-Real)">
+                <option value="marine_autopilot">🚢 船舶自動舵航向與減搖 (Marine Autopilot)</option>
+                <option value="solar_pv_cooling">☀️ 太陽光電微氣候散熱 (Solar PV Cooling)</option>
+                <option value="bess_dispatch">🔋 電池儲能微電網調度 (BESS Microgrid Dispatch)</option>
+              </optgroup>
+              <optgroup label="🎓 經典教學與工業控制範本">
+                <option value="tipping" selected>🍽️ 經典小費問題 (Tipping Problem)</option>
+                <option value="aircon">❄️ 冷氣變頻溫控 (Air Conditioner)</option>
+                <option value="pendulum">🎯 倒單擺平衡控制 (Inverted Pendulum)</option>
+                <option value="autobrake">🚗 汽車自動煞車系統 (Auto Brake Assist)</option>
+                <option value="custom_blank">🌱 從零自訂空白專案 (Start from Scratch)</option>
+              </optgroup>
+            </select>
+            <!-- 三大工程模型 1-Click 快捷膠囊列 -->
+            <div class="flex items-center gap-1.5 pt-0.5">
+              <button onclick="WebFISStudio.loadPreset('marine_autopilot'); document.getElementById('fis-preset-select').value='marine_autopilot';"
+                class="px-2.5 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-[11px] font-bold transition flex items-center gap-1">
+                <span>🚢</span><span>自動舵</span>
+              </button>
+              <button onclick="WebFISStudio.loadPreset('solar_pv_cooling'); document.getElementById('fis-preset-select').value='solar_pv_cooling';"
+                class="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-[11px] font-bold transition flex items-center gap-1">
+                <span>☀️</span><span>光電散熱</span>
+              </button>
+              <button onclick="WebFISStudio.loadPreset('bess_dispatch'); document.getElementById('fis-preset-select').value='bess_dispatch';"
+                class="px-2.5 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold transition flex items-center gap-1">
+                <span>🔋</span><span>儲能調度</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 大核心工作區切換膠囊 (Sub-Tabs) -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-6 mt-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="fis-tab-btn-viewer" onclick="WebFISStudio.switchSubTab('viewer')"
+              class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/25">
+              <span>🔍</span>
+              <span>規則推論動態檢視器 (Rule Viewer)</span>
+            </button>
+            <button id="fis-tab-btn-properties" onclick="WebFISStudio.switchSubTab('properties')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>⚙️</span>
+              <span>系統架構與算子 (FIS Properties)</span>
+            </button>
+            <button id="fis-tab-btn-mf" onclick="WebFISStudio.switchSubTab('mf')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>📈</span>
+              <span>歸屬函數編輯器 (MF Editor)</span>
+            </button>
+            <button id="fis-tab-btn-rules" onclick="WebFISStudio.switchSubTab('rules')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>📜</span>
+              <span>規則庫編輯器 (Rule Editor)</span>
+            </button>
+            <button id="fis-tab-btn-surface" onclick="WebFISStudio.switchSubTab('surface')"
+              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
+              <span>🌐</span>
+              <span>3D 控制曲面與程式碼匯出 (Surface & Export)</span>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="WebFISStudio.downloadMatlabFis()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+              <span>💾</span>
+              <span>下載 .fis 檔</span>
+            </button>
+            <button onclick="WebFISStudio.downloadPythonScript()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+              <span>🐍</span>
+              <span>下載 Python 檔</span>
+            </button>
+            <button onclick="WebFISStudio.downloadEmbeddedC()" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-sky-300 border border-sky-500/30 text-xs font-bold transition flex items-center gap-1.5 shadow-sm">
+              <span>⚡</span>
+              <span>下載 C 語言檔</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 範本情境深度導讀卡片（解說：點選載入範本會怎樣？點選自訂空白專案會怎樣？） -->
+      <div id="fis-story-banner-container" class="space-y-4"></div>
+
+      <!-- 5 大步驟新手闖關設計步進器 (Step-by-Step Guided Stepper) -->
+      <div id="fis-guided-stepper-container" class="space-y-4"></div>
+
+      <!-- 1. Rule Viewer (動態推論檢視) -->
+      <div id="fis-panel-viewer" class="space-y-6">
+        <div id="fis-viewer-content"></div>
+      </div>
+
+      <!-- 2. FIS Properties -->
+      <div id="fis-panel-properties" class="hidden space-y-6">
+        <div id="fis-properties-content"></div>
+      </div>
+
+      <!-- 3. MF Editor -->
+      <div id="fis-panel-mf" class="hidden space-y-6">
+        <div id="fis-mf-content"></div>
+      </div>
+
+      <!-- 4. Rule Editor -->
+      <div id="fis-panel-rules" class="hidden space-y-6">
+        <div id="fis-rules-content"></div>
+      </div>
+
+      <!-- 5. Surface Viewer & Code Export -->
+      <div id="fis-panel-surface" class="hidden space-y-8">
+        <!-- 3D 曲面卡片 -->
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-sky-500/30 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+            <div>
+              <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                <span>🌐</span> 3D 輸入輸出非線性控制曲面 (3D Control Surface)
+              </h3>
+              <p class="text-xs text-slate-400">即時根據當前所有歸屬函數與規則推論聚合掃描運算，支援滑鼠 360° 旋轉與縮放</p>
+            </div>
+            <button onclick="WebFISStudio.renderSurfacePlot()" class="px-4 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/35 font-bold text-xs sm:text-sm transition flex items-center gap-1.5">
+              <span>🔄</span> 重新計算並繪製曲面
+            </button>
+          </div>
+          <div id="fis-surface-plot-container" class="w-full h-[450px] rounded-2xl overflow-hidden bg-slate-950/80 border border-slate-800"></div>
+        </div>
+
+        <!-- 四大工程格式即時生成與一鍵匯出面板 (Code & Model Exporter) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Tab A: MATLAB .fis 匯出卡片 -->
+          <div class="refined-card p-5 border-amber-500/30 space-y-3.5 flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">📁</span>
+                  <h4 class="text-sm sm:text-base font-bold text-amber-300">Tab A: MATLAB .fis 格式</h4>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="WebFISStudio.copyCode('fis-code-matlab')" class="text-xs px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 font-bold transition">
+                    📋 複製
+                  </button>
+                  <button onclick="WebFISStudio.downloadMatlabFis()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+                    💾 下載
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-relaxed">標準 MATLAB .fis 語法，支援 readfis() 載入或直接拉入 Simulink Fuzzy Logic Controller 模組：</p>
+            </div>
+            <textarea id="fis-code-matlab" readonly class="w-full h-80 bg-slate-950 text-slate-200 font-mono text-xs p-3.5 rounded-xl border border-slate-800 focus:outline-none resize-none"></textarea>
+          </div>
+
+          <!-- Tab B: Python scikit-fuzzy 匯出卡片 -->
+          <div class="refined-card p-5 border-emerald-500/30 space-y-3.5 flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🐍</span>
+                  <h4 class="text-sm sm:text-base font-bold text-emerald-300">Tab B: Python scikit-fuzzy 腳本</h4>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="WebFISStudio.copyCode('fis-code-python')" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold transition">
+                    📋 複製
+                  </button>
+                  <button onclick="WebFISStudio.downloadPythonScript()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+                    💾 下載
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-relaxed">完整獨立可執行的 Python 控制腳本，依賴 scikit-fuzzy / numpy 函式庫，可直接導入資料科學專案：</p>
+            </div>
+            <textarea id="fis-code-python" readonly class="w-full h-80 bg-slate-950 text-slate-200 font-mono text-xs p-3.5 rounded-xl border border-slate-800 focus:outline-none resize-none"></textarea>
+          </div>
+
+          <!-- Tab C: 嵌入式 C 語言控制器與 2D 查表陣列 (.c) -->
+          <div class="refined-card p-5 border-sky-500/30 space-y-3.5 flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">⚡</span>
+                  <h4 class="text-sm sm:text-base font-bold text-sky-300">Tab C: 嵌入式 C 語言 (11×11 LUT)</h4>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="WebFISStudio.copyCode('fis-code-c')" class="text-xs px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 font-bold transition">
+                    📋 複製
+                  </button>
+                  <button onclick="WebFISStudio.downloadEmbeddedC()" class="text-xs px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+                    💾 下載
+                  </button>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 leading-relaxed">零動態記憶體 (Zero Malloc)、O(1) 雙線性插值，極速微秒級響應，可直接燒錄於 STM32 / ESP32 / Arduino / DSP：</p>
+            </div>
+            <textarea id="fis-code-c" readonly class="w-full h-80 bg-slate-950 text-sky-200 font-mono text-xs p-3.5 rounded-xl border border-slate-800 focus:outline-none resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- 原書圖檔與 Lightbox 燈箱已全數升級為實體課本重點導讀與頁碼對照指引 (Textbook Companion Guide) -->
+
+  <!-- 頁尾 -->
+  <footer class="border-t border-slate-800/80 py-6 px-6 text-center text-sm text-slate-500 mt-12">
+    Fuzzy-Learning-Platform • 智慧學習地圖 × Chapter 01 四大標準學習模組 × 《認識 Fuzzy》第二章書頁精讀 × Plotly.js 多維度互動實驗室
+  </footer>
+
+  <!-- 核心互動腳本 -->
+  <script>
+    // =========================================================================
+    // 四大階段「Fuzzy 智慧學習地圖 (Learning Roadmap)」結構定義
+    // =========================================================================
+        // =========================================================================
+    // 完全依照《認識 Fuzzy》原書真實章節架構編排之「智慧學習地圖 (Learning Roadmap)」
+    // 七大階段 (Stage 01 ~ Stage 07) • 28 個核心闖關節點 • 四段式教學架構
+    // =========================================================================
+    const ROADMAP_STAGES = [
+      {
+        stageId: 'stage_1',
+        stageNumber: 'Stage 01',
+        title: '緒論篇：第 1 章 緒論與模糊理論起源',
+        subtitle: '原書第 1 章（頁 1-1 ～ 1-7）、二分法極限、愛因斯坦名言與全書宏觀藍圖',
+        accentColor: 'sky',
+        badgeIcon: '🌱',
+        nodes: [
+          {
+            id: 's1_n1',
+            code: '1-1',
+            title: '【模組 1：通論】模糊思維起源、二分法侷限與愛因斯坦真實悖論',
+            desc: '掌握生活中的模糊語意溝通優勢、民國65年大考二分法教訓、愛因斯坦 1921 年精確與真實權衡名言，以及 Zadeh 二十年堅持。',
+            typeTag: '🧭 模組 1：本章通論',
+            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm1', scrollTo: 'ch1-module-sec-m1' }
+          },
+          {
+            id: 's1_n2',
+            code: '1-2',
+            title: '【模組 2：課本導讀】《認識 Fuzzy》第 1 章 各節導讀與頁碼對照（共 7 頁）',
+            desc: '對照實體課本頁 1-1 至 1-7，研讀札德創立論文、美日歐研究版圖、日本家電智慧化包裝與全書 19 章宏觀架構。',
+            typeTag: '📖 模組 2：課本各節導讀',
+            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm2', scrollTo: 'ch1-module-sec-m2' }
+          },
+          {
+            id: 's1_n3',
+            code: '1-3',
+            title: '【模組 3：互動實驗室】日常語意模糊量化儀與二分法 vs. 連續過渡模擬器',
+            desc: '操作互動圖表，體驗年齡、體重、溫度等日常抽象語言如何數量化為平滑連續的歸屬曲線。',
+            typeTag: '🎛️ 模組 3：互動實驗室',
+            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm3', scrollTo: 'ch1-module-sec-m3' }
+          },
+          {
+            id: 's1_n4',
+            code: '1-4',
+            title: '【模組 4：隨堂練習】緒論核心觀念、歷史發展與愛因斯坦名言測驗 (5題)',
+            desc: '挑戰 5 道由淺入深的緒論觀念考題，檢視對模糊理論哲學基礎與世界歷史脈絡的掌握度。',
+            typeTag: '✍️ 模組 4：隨堂練習與詳解',
+            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm4', scrollTo: 'ch1-module-sec-m4' }
+          }
+        ]
+      },
+      {
+        stageId: 'stage_2',
+        stageNumber: 'Stage 02',
+        title: '集合基礎篇：第 2 章 模糊集合理論與基礎定義',
+        subtitle: '原書第 2 章（頁 2-1 ～ 2-15）、意義數量化、四大典型歸屬函數與 α-截集',
+        accentColor: 'teal',
+        badgeIcon: '📐',
+        nodes: [
+          {
+            id: 's2_n1',
+            code: '2-1',
+            title: '【模組 1：通論】明確集合特性函數 vs. 模糊歸屬函數與 Zadeh 記法',
+            desc: '掌握明確特性函數 {0, 1} 與模糊歸屬度閉區間 [0, 1] 差異、連續積分符號、正則性、支撐集與凸模糊集合定義。',
+            typeTag: '🧭 模組 1：本章通論',
+            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm1', scrollTo: 'ch1-module-sec-m1' }
+          },
+          {
+            id: 's2_n2',
+            code: '2-2',
+            title: '【模組 2：課本導讀】《認識 Fuzzy》第 2 章 各節導讀與頁碼對照（共 15 頁）',
+            desc: '對照實體課本頁 2-1 至 2-15，研讀圖 2.1 胖老、圖 2.2 小朋友年齡方波 vs 鐘形、圖 2.7 典型造型與圖 2.9 α-cut 切割。',
+            typeTag: '📖 模組 2：課本各節導讀',
+            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm2', scrollTo: 'ch1-module-sec-m2' }
+          },
+          {
+            id: 's2_n3',
+            code: '2-3',
+            title: '【模組 3：互動實驗室】四大典型歸屬函數 (trimf/trapmf/gaussmf/smf) 與 α-截集',
+            desc: '操作 Plotly 互動實驗室，動態拖曳三角波、梯形、高斯鐘形與 S 形參數，實時觀察 α 水平截割曲線變動。',
+            typeTag: '🎛️ 模組 3：互動實驗室',
+            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm3', scrollTo: 'ch1-module-sec-m3' }
+          },
+          {
+            id: 's2_n4',
+            code: '2-4',
+            title: '【模組 4：隨堂練習】模糊集合基礎、歸屬度計算與課後習題 2.7 & 2.8 (8題)',
+            desc: '實戰演練 8 道精選題目（包含實體課本第 2 章習題 2.7、2.8 及跨校考題），附完整推導詳解。',
+            typeTag: '✍️ 模組 4：隨堂練習與詳解',
+            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm4', scrollTo: 'ch1-module-sec-m4' }
+          }
+        ]
+      },
+      {
+        stageId: 'stage_3',
+        stageNumber: 'Stage 03',
+        title: '運算擴展篇：第 3 章 模糊集合之運算與擴展原理',
+        subtitle: '原書第 3、4、5 章（共 58 頁）、廣義範數、Zadeh 擴展原理與模糊數算術',
+        accentColor: 'amber',
+        badgeIcon: '⚡',
+        nodes: [
+          {
+            id: 's3_n1',
+            code: '3-1',
+            title: '【模組 1：通論】交聯補運算、排中律與矛盾律失效、擴展原理與模糊算術',
+            desc: '深入交集 Min/t-norm、聯集 Max/s-norm，論證排中律破除；精通 Zadeh 擴展原理與三角形/梯形模糊數四則運算。',
+            typeTag: '🧭 模組 1：本章通論',
+            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm1', scrollTo: 'ch4-module-sec-m1' }
+          },
+          {
+            id: 's3_n2',
+            code: '3-2',
+            title: '【模組 2：課本導讀】《認識 Fuzzy》第 3、4、5 章 各節導讀與頁碼對照（共 58 頁）',
+            desc: '對照實體書第 3 章（基本運算 15 頁）、第 4 章（公理運算 12 頁）、第 5 章（模糊數算術與方程求解 31 頁）。',
+            typeTag: '📖 模組 2：課本各節導讀',
+            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm2', scrollTo: 'ch4-module-sec-m2' }
+          },
+          {
+            id: 's3_n3',
+            code: '3-3',
+            title: '【模組 3：互動實驗室】擴展原理非線性映射 & 三角形模糊數四則運算合成儀',
+            desc: '操作動態模擬器，驗證 y = x² 函數映射與三角形模糊數 (a, b, c) 加減乘除合成曲線。',
+            typeTag: '🎛️ 模組 3：互動實驗室',
+            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm3', scrollTo: 'ch4-module-sec-m3' }
+          },
+          {
+            id: 's3_n4',
+            code: '3-4',
+            title: '【模組 4：隨堂練習】擴展原理映射、α-cut 區間算術與方程式求解 (8題)',
+            desc: '挑戰 8 道運算與擴展原理進階計算題，含 α-cut 區間推導與王邱畫圖法逐步詳解。',
+            typeTag: '✍️ 模組 4：隨堂練習與詳解',
+            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm4', scrollTo: 'ch4-module-sec-m4' }
+          }
+        ]
+      },
+      {
+        stageId: 'stage_4',
+        stageNumber: 'Stage 04',
+        title: '關係合成篇：第 4 章 模糊關係與合成運算',
+        subtitle: '原書第 6 章（頁 6-1 ～ 6-14）、笛卡兒積空間、Max-Min/Product 合成與等價關係',
+        accentColor: 'indigo',
+        badgeIcon: '🔗',
+        nodes: [
+          {
+            id: 's4_n1',
+            code: '4-1',
+            title: '【模組 1：通論】明確關係 vs. 模糊關係、笛卡兒積熱點矩陣與等價關係',
+            desc: '掌握二維論域上的關聯性量化、Max-Min 與 Max-Product 合成三大定理證明，以及模糊等價關係之自反/對稱/傳遞性。',
+            typeTag: '🧭 模組 1：本章通論',
+            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm1', scrollTo: 'ch2-module-sec-m1' }
+          },
+          {
+            id: 's4_n2',
+            code: '4-2',
+            title: '【模組 2：課本導讀】《認識 Fuzzy》第 6 章 各節導讀與頁碼對照（共 16 頁）',
+            desc: '對照實體課本頁 6-1 至 6-16，研讀模糊關係矩陣表 6.1~6.8、合成運算逐步算例與工程關係模型。',
+            typeTag: '📖 模組 2：課本各節導讀',
+            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm2', scrollTo: 'ch2-module-sec-m2' }
+          },
+          {
+            id: 's4_n3',
+            code: '4-3',
+            title: '【模組 3：互動實驗室】笛卡兒積 2D/3D 熱點曲面 & 3×3 Max-Min 矩陣合成計算機',
+            desc: '互動輸入自訂模糊關係矩陣，即時展示 Max-Min 與 Max-Product 矩陣合成的逐步計算過程與熱點圖。',
+            typeTag: '🎛️ 模組 3：互動實驗室',
+            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm3', scrollTo: 'ch2-module-sec-m3' }
+          },
+          {
+            id: 's4_n4',
+            code: '4-4',
+            title: '【模組 4：隨堂練習】Max-Min / Max-Product 合成手算與等價關係判別 (6題)',
+            desc: '演練 6 道矩陣合成與傳遞閉包手算題，逐步對照數學推導步驟。',
+            typeTag: '✍️ 模組 4：隨堂練習與詳解',
+            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm4', scrollTo: 'ch2-module-sec-m4' }
+          }
+        ]
+      },
+      {
+        stageId: 'stage_5',
+        stageNumber: 'Stage 05',
+        title: '邏輯推論篇：第 5 章 模糊邏輯與模糊推論',
+        subtitle: '原書第 7、8、9、10 章（共 62 頁）、語言變數、GMP 推論工廠與四大解模糊化',
+        accentColor: 'rose',
+        badgeIcon: '🧠',
+        nodes: [
+          {
+            id: 's5_n1',
+            code: '5-1',
+            title: '【模組 1：通論】語言變數、模糊命題、廣義假言推理 (GMP) 與四大解模糊化',
+            desc: '精通語言變數架構、Zadeh/Mamdani/Larsen 模糊蘊含、推論工廠多規則前項激發度運算與 COG/MOM/BOA 解模糊化。',
+            typeTag: '🧭 模組 1：本章通論',
+            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm1', scrollTo: 'ch2-module-sec-m1' }
+          },
+          {
+            id: 's5_n2',
+            code: '5-2',
+            title: '【模組 2：課本導讀】《認識 Fuzzy》第 7～10 章 各節導讀與頁碼對照（共 62 頁）',
+            desc: '對照實體書第 7 章（模糊邏輯）、第 8 章（推論工廠）、第 9 章（計算實例）與第 10 章（模糊化與解模糊化）。',
+            typeTag: '📖 模組 2：課本各節導讀',
+            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm2', scrollTo: 'ch2-module-sec-m2' }
+          },
+          {
+            id: 's5_n3',
+            code: '5-3',
+            title: '【模組 3：互動實驗室】Mamdani 推論工廠動態激發 & 四大解模糊化對比實驗室',
+            desc: '操作多規則激發裁切模擬器，即時切換 COG 重心法、MOM 最大平均法、BOA 面積等分法，比較其工程響應特性。',
+            typeTag: '🎛️ 模組 3：互動實驗室',
+            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm3', scrollTo: 'ch2-module-sec-m3' }
+          },
+          {
+            id: 's5_n4',
+            code: '5-4',
+            title: '【模組 4：隨堂練習】推論工廠逐步推導、離散重心法手算與家電規則庫 (8題)',
+            desc: '挑戰 8 道手動計算前項激發度、後項面積聯集與重心積分題目，附全公式步驟詳解。',
+            typeTag: '✍️ 模組 4：隨堂練習與詳解',
+            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm4', scrollTo: 'ch2-module-sec-m4' }
+          }
+        ]
+      },
+      {
+        stageId: 'stage_6',
+        stageNumber: 'Stage 06',
+        title: '控制工程篇：第 6 章 模糊控制器設計與工程應用',
+        subtitle: '原書第 11、13、14、15 章（共 60 頁）、FLC 架構、3D 控制曲面與通用逼近器',
+        accentColor: 'emerald',
+        badgeIcon: '🎛️',
+        nodes: [
+          {
+            id: 's6_n1',
+            code: '6-1',
+            title: '【模組 1：通論】FLC 四大單元、相平面阻尼、3D 控制曲面與李亞普諾夫穩定性',
+            desc: '精通輸入誤差 e 與變化率 Δe 之縮放因子整定、5×5 FAM 規則庫設計、非線性控制曲面流形與 T-S 模糊動態模型。',
+            typeTag: '🧭 模組 1：本章通論',
+            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm1', scrollTo: 'ch3-module-sec-m1' }
+          },
+          {
+            id: 's6_n2',
+            code: '6-2',
+            title: '【模組 2：課本導讀】《認識 Fuzzy》第 11、13、14、15 章 各節導讀與頁碼對照（共 60 頁）',
+            desc: '對照實體書第 11 章（控制器設計 15 頁）、第 13 章（倒單擺實務 15 頁）、第 14 章（ABS 煞車 15 頁）與第 15 章（通用逼近器 15 頁）。',
+            typeTag: '📖 模組 2：課本各節導讀',
+            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm2', scrollTo: 'ch3-module-sec-m2' }
+          },
+          {
+            id: 's6_n3',
+            code: '6-3',
+            title: '【模組 3：互動實驗室】冷氣 5×5 FAM 溫控模擬器 & 3D 非線性控制曲面動態旋轉儀',
+            desc: '調整溫度誤差與變化率滑桿，觀察 FAM 規則高亮激發，並在 3D 控制曲面上動態即時標示工作點軌跡。',
+            typeTag: '🎛️ 模組 3：互動實驗室',
+            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm3', scrollTo: 'ch3-module-sec-m3' }
+          },
+          {
+            id: 's6_n4',
+            code: '6-4',
+            title: '【模組 4：隨堂練習】FAM 規則阻尼調校、倒單擺平衡與 TSK 煞車控制 (8題)',
+            desc: '實戰演練 8 道工程實務設計題（含縮放因子計算、仙台地鐵加減速控制及通用逼近定理證明）。',
+            typeTag: '✍️ 模組 4：隨堂練習與詳解',
+            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm4', scrollTo: 'ch3-module-sec-m4' }
+          }
+        ]
+      },
+      {
+        stageId: 'stage_7',
+        stageNumber: 'Stage 07',
+        title: '應用智慧篇：第 7 章 模糊應用與進階系統',
+        subtitle: '原書第 12、16、17、18、19 章（共 79 頁）、Bellman-Zadeh 決策、FCM 分群與 ANFIS',
+        accentColor: 'violet',
+        badgeIcon: '🚀',
+        nodes: [
+          {
+            id: 's7_n1',
+            code: '7-1',
+            title: '【模組 1：通論】Bellman-Zadeh 決策、MCDM 評判、FCM 柔性分群與 ANFIS 五層架構',
+            desc: '掌握目標與約束對稱交集決策、多指標權重合成 B = W ○ R、FCM 隸屬度矩陣交替迭代，以及 ANFIS 混合學習算法。',
+            typeTag: '🧭 模組 1：本章通論',
+            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm1', scrollTo: 'ch5-module-sec-m1' }
+          },
+          {
+            id: 's7_n2',
+            code: '7-2',
+            title: '【模組 2：課本導讀】《認識 Fuzzy》第 12、16～19 章 各節導讀與頁碼對照（共 79 頁）',
+            desc: '對照實體書第 12 章（FCM 分群）、第 16 章（圖形識別）、第 17 章（模糊決策）、第 18 章（ANFIS 整合）與第 19 章（未來展望）。',
+            typeTag: '📖 模組 2：課本各節導讀',
+            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm2', scrollTo: 'ch5-module-sec-m2' }
+          },
+          {
+            id: 's7_n3',
+            code: '7-3',
+            title: '【模組 3：互動實驗室】Bellman-Zadeh 最佳決策搜尋 & FCM 柔性聚類 & ANFIS 擬合',
+            desc: '操作 3 座前沿互動實驗室：搜尋最佳妥協決策點、在 2D 散佈圖動態迭代 FCM 聚類中心、觀察 ANFIS 網路權重自適應演化。',
+            typeTag: '🎛️ 模組 3：互動實驗室',
+            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm3', scrollTo: 'ch5-module-sec-m3' }
+          },
+          {
+            id: 's7_n4',
+            code: '7-4',
+            title: '【模組 4：隨堂練習】MCDM 評判矩陣、FCM 目標函數優化與 ANFIS 學習推導 (8題)',
+            desc: '挑戰 8 道進階智慧系統綜合題目，包含綜合評判算子、FCM 拉格朗日乘子推導與混合學習矩陣構造。',
+            typeTag: '✍️ 模組 4：隨堂練習與詳解',
+            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm4', scrollTo: 'ch5-module-sec-m4' }
+          }
+        ]
+      }
+    ];
+
+    // 全域狀態
+    let courseData = window.FUZZY_COURSE_DATA || null;
+    let activeChapterId = 'ch1_intro';
+    let selectedBookPageFilter = 'all'; // 'all' 或 '2-1' ~ '2-15'
+    let quizAnswers = {};
+    let completedNodes = [];
+    let currentActiveNodeId = 's1_n1';
+
+    // 載入與儲存學習地圖進度 (localStorage)
+    function loadRoadmapProgress() {
+      try {
+        const saved = localStorage.getItem('fuzzy_roadmap_completed_v2');
+        if (saved) {
+          completedNodes = JSON.parse(saved);
+        } else {
+          completedNodes = [];
+        }
+      } catch (e) {
+        completedNodes = [];
+      }
+      updateCurrentActiveNode();
+    }
+
+    function saveRoadmapProgress() {
+      try {
+        localStorage.setItem('fuzzy_roadmap_completed_v2', JSON.stringify(completedNodes));
+      } catch (e) {}
+      updateCurrentActiveNode();
+      renderRoadmap();
+      renderSidebarMiniRoadmap();
+      updateMissionBanner();
+    }
+
+    function getAllNodesFlat() {
+      const list = [];
+      ROADMAP_STAGES.forEach(st => {
+        st.nodes.forEach(n => list.push({ ...n, stageNumber: st.stageNumber, stageTitle: st.title }));
+      });
+      return list;
+    }
+
+    function updateCurrentActiveNode() {
+      const allNodes = getAllNodesFlat();
+      const firstUnfinished = allNodes.find(n => !completedNodes.includes(n.id));
+      currentActiveNodeId = firstUnfinished ? firstUnfinished.id : allNodes[allNodes.length - 1].id;
+    }
+
+    // 判斷節點狀態：'completed' | 'active' | 'locked'
+    function getNodeStatus(nodeId) {
+      if (completedNodes.includes(nodeId)) return 'completed';
+      if (nodeId === currentActiveNodeId) return 'active';
+      const allNodes = getAllNodesFlat();
+      const idx = allNodes.findIndex(n => n.id === nodeId);
+      if (idx === 0) return 'active';
+      const prevNode = allNodes[idx - 1];
+      if (completedNodes.includes(prevNode.id)) return 'active';
+      return 'locked';
+    }
+
+    // 簡易 Markdown 粗體與段落轉譯輔助函式（保留所有 $...$ 與 $$...$$ 供 MathJax 渲染）
+    function formatRichText(text) {
+      if (!text) return '';
+      return text
+        .replace(/\*\*(.+?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+        .replace(/\n\n+/g, '</p><p class="mb-5">')
+        .replace(/\n/g, '<br />');
+    }
+
+    // 安全呼叫 MathJax 與 Plotly 輔助函式 (防崩潰保護)
+    function safeTypesetMath(elements) {
+      try {
+        if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+          const p = elements ? window.MathJax.typesetPromise(elements) : window.MathJax.typesetPromise();
+          if (p && typeof p.catch === 'function') {
+            p.catch(err => console.warn('MathJax typeset warning:', err));
+          }
+        }
+      } catch (err) {
+        console.warn('MathJax error:', err);
+      }
+    }
+
+    function safePlotlyReact(target, traces, layout, config) {
+      try {
+        if (window.Plotly && typeof window.Plotly.react === 'function') {
+          window.Plotly.react(target, traces, layout, config);
+        }
+      } catch (err) {
+        console.warn('Plotly render error:', err);
+      }
+    }
+
+    // 初始化載入 (直接讀取預載的 window.FUZZY_COURSE_DATA，不使用 fetch 以徹底避免 file:// CORS 紅字報錯)
+    function initApp() {
+      try { setupModalZoomEvents(); } catch(e) { console.warn(e); }
+      if (!courseData && window.FUZZY_COURSE_DATA) {
+        courseData = window.FUZZY_COURSE_DATA;
+      }
+
+      if (!courseData) {
+        console.warn('嘗試稍候載入教材資料 window.FUZZY_COURSE_DATA...');
+        setTimeout(initApp, 100);
+        return;
+      }
+
+      try { loadRoadmapProgress(); } catch (e) { console.error(e); }
+      try { renderRoadmap(); } catch (e) { console.error(e); }
+      try { renderSidebarMiniRoadmap(); } catch (e) { console.error(e); }
+      try { renderChapterNav(); } catch (e) { console.error(e); }
+      try { renderChapterContent(activeChapterId); } catch (e) { console.error(e); }
+      try { renderLectureNotes(); } catch (e) { console.error(e); }
+      try { renderMisconceptions(); } catch (e) { console.error(e); }
+      try { renderQuizzes(); } catch (e) { console.error(e); }
+      try { updateLabSimulation(); } catch (e) { console.error(e); }
+      try {
+        if (window.WebFISStudio && typeof window.WebFISStudio.init === 'function') {
+          window.WebFISStudio.init();
+        }
+      } catch (e) { console.warn(e); }
+    }
+
+    // =========================================================================
+    // 學習地圖渲染與連動邏輯
+    // =========================================================================
+    function renderRoadmap() {
+      try {
+        const allNodes = getAllNodesFlat();
+        const doneCount = completedNodes.length;
+        const totalCount = allNodes.length;
+        const pct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
+
+        const pctEl = document.getElementById('roadmap-percent-text');
+        if (pctEl) pctEl.textContent = `${pct}%`;
+        const barEl = document.getElementById('roadmap-progress-bar');
+        if (barEl) barEl.style.width = `${pct}%`;
+        const countEl = document.getElementById('roadmap-count-text');
+        if (countEl) countEl.textContent = `已完成 ${doneCount} / ${totalCount} 個核心關卡`;
+        const pillEl = document.getElementById('header-progress-pill');
+        if (pillEl) pillEl.textContent = `闖關進度 ${pct}% (${doneCount}/${totalCount})`;
+
+        const activeNodeObj = allNodes.find(n => n.id === currentActiveNodeId) || allNodes[0];
+        const continueBtn = document.getElementById('continue-learning-btn');
+        if (continueBtn && activeNodeObj) {
+          if (doneCount === totalCount && totalCount > 0) {
+            continueBtn.innerHTML = `<span>🏆 恭喜全數通關！前往互動實驗室自由探索</span>`;
+          } else {
+            continueBtn.innerHTML = `<span>🚀 繼續挑戰：${activeNodeObj.code} ${activeNodeObj.title.slice(0, 16)}...</span>`;
+          }
+        }
+
+        const container = document.getElementById('roadmap-stages-container');
+        if (!container) return;
+
+        container.innerHTML = ROADMAP_STAGES.map((stage) => {
+          const stageDoneCount = stage.nodes.filter(n => completedNodes.includes(n.id)).length;
+          const isStageAllDone = stageDoneCount === stage.nodes.length;
+          const gridCols = stage.nodes.length === 4 ? 'lg:grid-cols-2' : (stage.nodes.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2');
+
+        const nodesHtml = stage.nodes.map(node => {
+          const status = getNodeStatus(node.id);
+          let cardStyle = 'roadmap-node-locked';
+          let statusBadge = `<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">🔒 尚未解鎖</span>`;
+          let actionBtnText = '預覽關卡內容 →';
+          let checkBtnClass = 'border-slate-600 text-slate-400 hover:border-sky-400 hover:text-sky-300';
+
+          if (status === 'completed') {
+            cardStyle = 'roadmap-node-completed';
+            statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✅ 已完成</span>`;
+            actionBtnText = '複習本關教材 →';
+            checkBtnClass = 'bg-emerald-500 border-emerald-400 text-slate-950 font-bold';
+          } else if (status === 'active') {
+            cardStyle = 'roadmap-node-active';
+            statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-500/25 text-sky-300 border border-sky-400/50 animate-pulse">🔥 進行中・已解鎖</span>`;
+            actionBtnText = '立即開始學習 →';
+            checkBtnClass = 'border-sky-400 text-sky-300 hover:bg-sky-500/20';
+          }
+
+          return `
+            <div class="rounded-2xl p-6 transition-all flex flex-col justify-between gap-5 ${cardStyle}">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700 text-xs font-mono font-bold text-sky-300">關卡 ${node.code}</span>
+                    <span class="text-xs text-slate-400 font-medium">${node.typeTag}</span>
+                  </div>
+                  ${statusBadge}
+                </div>
+
+                <h4 onclick="navigateToRoadmapNode('${node.id}')" class="text-lg sm:text-xl font-bold text-white hover:text-sky-300 cursor-pointer transition leading-snug">
+                  ${node.title}
+                </h4>
+
+                <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
+                  ${node.desc}
+                </p>
+              </div>
+
+              <div class="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
+                <!-- 手動打勾完成按鈕 -->
+                <button onclick="toggleNodeComplete('${node.id}', event)"
+                  class="px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-semibold transition flex items-center gap-2 ${checkBtnClass}">
+                  <span>${status === 'completed' ? '✓ 已標記完成' : '☐ 標記完成'}</span>
+                </button>
+
+                <!-- 進入關卡連動按鈕 -->
+                <button onclick="navigateToRoadmapNode('${node.id}')"
+                  class="px-4 py-2 rounded-xl ${status === 'active' ? 'bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold shadow-md shadow-sky-500/20' : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-semibold'} text-xs sm:text-sm transition">
+                  ${actionBtnText}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="glass-panel rounded-3xl p-6 sm:p-8 border ${isStageAllDone ? 'border-emerald-500/35' : 'border-slate-800'} space-y-6 relative">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+              <div class="flex items-start sm:items-center gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center text-2xl shrink-0 shadow-inner">
+                  ${stage.badgeIcon}
+                </div>
+                <div>
+                  <div class="flex items-center gap-2.5">
+                    <span class="text-xs font-extrabold uppercase tracking-widest text-sky-400">${stage.stageNumber}</span>
+                    ${isStageAllDone ? '<span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">🎉 本階段已通關</span>' : ''}
+                  </div>
+                  <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">${stage.title}</h3>
+                  <p class="text-sm sm:text-base text-slate-400 mt-0.5">${stage.subtitle}</p>
+                </div>
+              </div>
+              <div class="bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800 text-xs sm:text-sm text-slate-300 font-mono shrink-0 self-start sm:self-center">
+                階段進度：<strong class="${isStageAllDone ? 'text-emerald-400' : 'text-sky-400'}">${stageDoneCount} / ${stage.nodes.length}</strong>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 ${gridCols} gap-5">
+              ${nodesHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([container]);
+      }
+    } catch (err) {
+      console.error('renderRoadmap error:', err);
+    }
+  }
+
+    function renderSidebarMiniRoadmap() {
+      const box = document.getElementById('sidebar-mini-roadmap');
+      if (!box) return;
+      const allNodes = getAllNodesFlat();
+      box.innerHTML = allNodes.map(n => {
+        const isDone = completedNodes.includes(n.id);
+        const isCurrent = n.id === currentActiveNodeId;
+        return `
+          <button onclick="navigateToRoadmapNode('${n.id}')"
+            class="w-full text-left px-3 py-2 rounded-xl transition flex items-center justify-between gap-2 ${isCurrent ? 'bg-sky-500/20 border border-sky-500/40 text-white font-semibold' : 'hover:bg-slate-800/70 text-slate-300'}">
+            <span class="truncate">${isDone ? '✅' : (isCurrent ? '🔥' : '🔒')} ${n.code} ${n.title.split('：')[0]}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    // 點擊學習地圖節點：自動切換分頁、載入對應章節/模組/筆記/測驗/模擬器並高亮捲動
+    function navigateToRoadmapNode(nodeId) {
+      const allNodes = getAllNodesFlat();
+      const target = allNodes.find(n => n.id === nodeId);
+      if (!target) return;
+
+      currentActiveNodeId = nodeId;
+      const act = target.action;
+
+      if (act.tab === 'theory') {
+        activeChapterId = act.chapterId;
+        renderChapterNav();
+        renderChapterContent(activeChapterId);
+        switchTab('theory');
+        if (act.ch1Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh1Module === 'function') {
+          setTimeout(() => {
+            FuzzyWidgets.switchCh1Module(act.ch1Module);
+          }, 80);
+        }
+        if (act.ch2Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh2Module === 'function') {
+          setTimeout(() => {
+            FuzzyWidgets.switchCh2Module(act.ch2Module);
+          }, 80);
+        }
+        if (act.ch3Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh3Module === 'function') {
+          setTimeout(() => {
+            FuzzyWidgets.switchCh3Module(act.ch3Module);
+          }, 80);
+        }
+        if (act.ch4Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh4Module === 'function') {
+          setTimeout(() => {
+            FuzzyWidgets.switchCh4Module(act.ch4Module);
+          }, 80);
+        }
+        if (act.ch5Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh5Module === 'function') {
+          setTimeout(() => {
+            FuzzyWidgets.switchCh5Module(act.ch5Module);
+          }, 80);
+        }
+        if (act.ch6Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh6Module === 'function') {
+          setTimeout(() => {
+            FuzzyWidgets.switchCh6Module(act.ch6Module);
+          }, 80);
+        }
+        if (act.ch7Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh7Module === 'function') {
+          setTimeout(() => {
+            FuzzyWidgets.switchCh7Module(act.ch7Module);
+          }, 80);
+        }
+      } else if (act.tab === 'notes') {
+        switchTab('notes');
+      } else if (act.tab === 'lab') {
+        switchTab('lab');
+        if (act.scenarioTemp !== undefined) {
+          applyScenario(act.scenarioTemp);
+        }
+      }
+
+      updateMissionBanner();
+      renderSidebarMiniRoadmap();
+
+      setTimeout(() => {
+        if (act.scrollTo) {
+          const el = document.getElementById(act.scrollTo);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            el.classList.remove('pulse-focus');
+            void el.offsetWidth;
+            el.classList.add('pulse-focus');
+          }
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 150);
+    }
+
+    function continueCurrentStage() {
+      navigateToRoadmapNode(currentActiveNodeId);
+    }
+
+    function toggleNodeComplete(nodeId, event) {
+      if (event) event.stopPropagation();
+      const idx = completedNodes.indexOf(nodeId);
+      if (idx >= 0) {
+        completedNodes.splice(idx, 1);
+      } else {
+        completedNodes.push(nodeId);
+      }
+      saveRoadmapProgress();
+    }
+
+    function toggleCurrentNodeComplete() {
+      if (!completedNodes.includes(currentActiveNodeId)) {
+        completedNodes.push(currentActiveNodeId);
+      }
+      saveRoadmapProgress();
+      navigateToRoadmapNode(currentActiveNodeId);
+    }
+
+    function unlockAllRoadmapNodes() {
+      completedNodes = getAllNodesFlat().map(n => n.id);
+      saveRoadmapProgress();
+    }
+
+    function resetRoadmapProgress() {
+      completedNodes = [];
+      saveRoadmapProgress();
+    }
+
+    function updateMissionBanner() {
+      try {
+        const allNodes = getAllNodesFlat();
+        const node = allNodes.find(n => n.id === currentActiveNodeId) || allNodes[0];
+        if (!node) return;
+        const isDone = completedNodes.includes(node.id);
+
+        const stageEl = document.getElementById('mission-banner-stage');
+        if (stageEl) stageEl.textContent = `${node.stageNumber} • 關卡 ${node.code}`;
+        const titleEl = document.getElementById('mission-banner-title');
+        if (titleEl) titleEl.textContent = node.title;
+
+        const btn = document.getElementById('mission-complete-btn');
+        if (btn) {
+          if (isDone) {
+            btn.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 font-bold text-sm transition flex items-center gap-2';
+            btn.innerHTML = '<span>✓ 本關已完成（點擊前往下一關）</span>';
+          } else {
+            btn.className = 'px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20 flex items-center gap-2';
+            btn.innerHTML = '<span>✅ 標記本關完成並解鎖下一關</span>';
+          }
+        }
+      } catch (err) {
+        console.error('updateMissionBanner error:', err);
+      }
+    }
+
+    // 切換五大教學與設計分頁
+    function switchTab(tabName) {
+      try {
+        const tabs = ['roadmap', 'theory', 'notes', 'lab', 'fis'];
+        tabs.forEach(t => {
+          const btn = document.getElementById(`tab-btn-${t}`);
+          const panel = document.getElementById(`tab-panel-${t}`);
+          if (!btn || !panel) return;
+          if (t === tabName) {
+            btn.classList.add('tab-active');
+            btn.classList.remove('text-slate-300');
+            panel.classList.remove('hidden');
+          } else {
+            btn.classList.remove('tab-active');
+            btn.classList.add('text-slate-300');
+            panel.classList.add('hidden');
+          }
+        });
+
+        const banner = document.getElementById('active-mission-banner');
+        if (banner) {
+          if (tabName === 'roadmap') {
+            banner.classList.add('hidden');
+            renderRoadmap();
+          } else {
+            banner.classList.remove('hidden');
+            updateMissionBanner();
+          }
+        }
+
+        if (tabName === 'lab') {
+          setTimeout(() => {
+            try {
+              if (currentLabHubTab === 'flagship') {
+                updateLabSimulation();
+                if (window.Plotly && window.Plotly.Plots) {
+                  window.Plotly.Plots.resize('plot-input-mf');
+                  window.Plotly.Plots.resize('plot-output-defuzz');
+                }
+              } else {
+                renderLabChapterView(currentLabHubTab);
+              }
+            } catch (e) { console.warn(e); }
+          }, 60);
+        } else if (tabName === 'fis') {
+          setTimeout(() => {
+            try {
+              if (window.WebFISStudio && typeof window.WebFISStudio.init === 'function') {
+                window.WebFISStudio.init();
+              }
+            } catch (e) { console.warn('WebFISStudio error:', e); }
+          }, 60);
+        } else {
+          safeTypesetMath();
+        }
+      } catch (err) {
+        console.error('switchTab error:', err);
+      }
+    }
+
+    // =========================================================================
+    // 《認識 Fuzzy》全書 19 章 282 頁逐頁精讀與全螢幕電子書式燈箱 (Lightbox Modal)
+    // 支援：全書章節 Sub-tabs 切換、頁碼快速膠囊、前後翻頁 (❮ / ❯)、鍵盤 ← / → 快速鍵
+    // =========================================================================
+    let currentModalIndex = 0;
+    let currentModalPageId = '1-1';
+    let customUploadedPhotos = {}; // 儲存使用者手動選擇的圖檔 ObjectURL
+
+        // 各大主章節當前選中的書本子章節與頁碼過濾器
+    let currentBookSubChapter = {
+      ch1_intro: 1,
+      ch2_fuzzy_sets: 2,
+      ch3_operations_extension: 3,
+      ch4_fuzzy_relations: 6,
+      ch5_logic_inference: 7,
+      ch6_fuzzy_control: 11,
+      ch7_advanced_applications: 12,
+      fuzzy_sets: 2,
+      fuzzy_relations_inference: 6,
+      fuzzy_control_applications: 11,
+      fuzzy_numbers_extension: 3,
+      fuzzy_decision_evaluation: 17,
+      fuzzy_clustering_pattern: 12,
+      advanced_fuzzy_neuro: 18
+    };
+
+    let currentBookPageFilter = {
+      ch1_intro: 'all',
+      ch2_fuzzy_sets: 'all',
+      ch3_operations_extension: 'all',
+      ch4_fuzzy_relations: 'all',
+      ch5_logic_inference: 'all',
+      ch6_fuzzy_control: 'all',
+      ch7_advanced_applications: 'all',
+      fuzzy_sets: 'all',
+      fuzzy_relations_inference: 'all',
+      fuzzy_control_applications: 'all',
+      fuzzy_numbers_extension: 'all',
+      fuzzy_decision_evaluation: 'all',
+      fuzzy_clustering_pattern: 'all',
+      advanced_fuzzy_neuro: 'all'
+    };
+
+    let currentBookPageFilter = {
+      fuzzy_sets: 'all',
+      fuzzy_relations_inference: 'all',
+      fuzzy_control_applications: 'all',
+      fuzzy_numbers_extension: 'all',
+      fuzzy_decision_evaluation: 'all',
+      fuzzy_clustering_pattern: 'all',
+      advanced_fuzzy_neuro: 'all'
+    };
+
+        function getBookPagesList() {
+      if (window.BOOK_PHOTOS_ALL && Array.isArray(window.BOOK_PHOTOS_ALL) && window.BOOK_PHOTOS_ALL.length > 0) {
+        return window.BOOK_PHOTOS_ALL;
+      }
+      if (window.BOOK_PAGES && Array.isArray(window.BOOK_PAGES) && window.BOOK_PAGES.length > 0) {
+        return window.BOOK_PAGES;
+      }
+      if (window.FUZZY_COURSE_DATA && Array.isArray(window.FUZZY_COURSE_DATA.all_book_pages)) {
+        return window.FUZZY_COURSE_DATA.all_book_pages;
+      }
+      return [];
+    }
+
+    function getChaptersCatalogList() {
+      if (window.BOOK_CATALOG && Array.isArray(window.BOOK_CATALOG) && window.BOOK_CATALOG.length > 0) {
+        return window.BOOK_CATALOG;
+      }
+      if (window.CHAPTERS_CATALOG && Array.isArray(window.CHAPTERS_CATALOG) && window.CHAPTERS_CATALOG.length > 0) {
+        return window.CHAPTERS_CATALOG;
+      }
+      if (window.FUZZY_COURSE_DATA && Array.isArray(window.FUZZY_COURSE_DATA.chapters_catalog)) {
+        return window.FUZZY_COURSE_DATA.chapters_catalog;
+      }
+      return [];
+    }
+
+    function getChaptersCatalogList() {
+      if (window.CHAPTERS_CATALOG && Array.isArray(window.CHAPTERS_CATALOG) && window.CHAPTERS_CATALOG.length > 0) {
+        return window.CHAPTERS_CATALOG;
+      }
+      if (window.FUZZY_COURSE_DATA && Array.isArray(window.FUZZY_COURSE_DATA.chapters_catalog)) {
+        return window.FUZZY_COURSE_DATA.chapters_catalog;
+      }
+      if (window.courseData && Array.isArray(window.courseData.chapters_catalog)) {
+        return window.courseData.chapters_catalog;
+      }
+      return [];
+    }
+
+    function getBookPageImagePath(p) {
+      return "";
+    }
+
+        // =========================================================================
+    // 原書全螢幕燈箱縮放 (Wheel Zoom & Pan) 與雙欄檢視模式狀態
+    // =========================================================================
+    let modalZoomScale = 1.0;
+    let modalPanX = 0;
+    let modalPanY = 0;
+    let isModalPanning = false;
+    let startPanX = 0;
+    let startPanY = 0;
+    let modalViewMode = 'split'; // 'split' (圖文對照) | 'photo' (純照片) | 'text' (純 OCR 文本)
+
+    function setModalViewMode(mode) {
+      modalViewMode = mode;
+      const photoCol = document.getElementById('modal-photo-col');
+      const textCol = document.getElementById('modal-text-col');
+      const splitBtn = document.getElementById('modal-mode-split-btn');
+      const photoBtn = document.getElementById('modal-mode-photo-btn');
+      const textBtn = document.getElementById('modal-mode-text-btn');
+      const zoomControls = document.getElementById('modal-zoom-controls');
+
+      // 重設按鈕樣式
+      const inactiveClass = 'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 text-slate-300 hover:text-white';
+      const activeClass = 'px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 bg-sky-500 text-slate-950 shadow-sm';
+
+      if (splitBtn) splitBtn.className = mode === 'split' ? activeClass : inactiveClass;
+      if (photoBtn) photoBtn.className = mode === 'photo' ? activeClass : inactiveClass;
+      if (textBtn) textBtn.className = mode === 'text' ? activeClass : inactiveClass;
+
+      if (!photoCol || !textCol) return;
+
+      if (mode === 'split') {
+        photoCol.className = 'lg:col-span-6 flex flex-col items-center justify-between p-3 sm:p-5 border-b lg:border-b-0 lg:border-r border-slate-800/90 relative overflow-hidden bg-slate-950';
+        textCol.className = 'lg:col-span-6 flex flex-col p-4 sm:p-6 lg:p-7 overflow-y-auto max-h-[75vh] space-y-6 bg-slate-900/60 select-text';
+        if (zoomControls) zoomControls.classList.remove('hidden');
+      } else if (mode === 'photo') {
+        photoCol.className = 'lg:col-span-12 flex flex-col items-center justify-between p-4 sm:p-6 relative overflow-hidden bg-slate-950 w-full';
+        textCol.className = 'hidden';
+        if (zoomControls) zoomControls.classList.remove('hidden');
+      } else if (mode === 'text') {
+        photoCol.className = 'hidden';
+        textCol.className = 'lg:col-span-12 flex flex-col p-6 sm:p-9 overflow-y-auto max-h-[78vh] space-y-7 bg-slate-900/70 select-text max-w-4xl mx-auto w-full';
+        if (zoomControls) zoomControls.classList.add('hidden');
+      }
+
+      const allPages = getBookPagesList();
+      if (allPages && allPages[currentModalIndex]) {
+        safeTypesetMath([textCol]);
+      }
+    }
+
+    function copyModalPageText() {
+      const allPages = getBookPagesList();
+      if (!allPages || !allPages[currentModalIndex]) return;
+      const p = allPages[currentModalIndex];
+
+      let textToCopy = `【《認識 Fuzzy》${p.chapter_title} • 頁 ${p.page_id}】\n`;
+      textToCopy += `標題：${p.title}\n`;
+      if (p.section) textToCopy += `小節：${p.section}\n`;
+      textToCopy += `\n----------------------------------------\n`;
+      textToCopy += `【本頁 OCR 完整核心摘要與理論精華】\n`;
+      textToCopy += `${(p.summary || '').replace(/\*\*/g, '')}\n`;
+
+      if (p.formulas && p.formulas.length) {
+        textToCopy += `\n【本頁關鍵數學公式推導 (LaTeX)】\n`;
+        p.formulas.forEach((f, idx) => {
+          textToCopy += `公式 (${idx + 1}): ${f}\n`;
+        });
+      }
+
+      if (p.book_examples && p.book_examples.length) {
+        textToCopy += `\n【原書圖表範例與考點提示】\n`;
+        p.book_examples.forEach((ex, idx) => {
+          textToCopy += `• ${ex.replace(/\*\*/g, '')}\n`;
+        });
+      }
+
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const btn = document.getElementById('modal-copy-btn');
+        if (btn) {
+          const origHtml = btn.innerHTML;
+          btn.innerHTML = '<span>✅ 已複製本頁 OCR 全文！</span>';
+          btn.classList.add('bg-emerald-500', 'text-slate-950');
+          btn.classList.remove('text-emerald-300');
+          setTimeout(() => {
+            btn.innerHTML = origHtml;
+            btn.classList.remove('bg-emerald-500', 'text-slate-950');
+            btn.classList.add('text-emerald-300');
+          }, 1800);
+        }
+      }).catch(err => {
+        console.warn('複製失敗:', err);
+      });
+    }
+
+    function applyModalTransform() {
+      const imgEl = document.getElementById('modal-page-img');
+      const pillEl = document.getElementById('modal-zoom-pill');
+      if (imgEl) {
+        imgEl.style.transform = `scale(${modalZoomScale}) translate(${modalPanX}px, ${modalPanY}px)`;
+      }
+      if (pillEl) {
+        pillEl.textContent = `${Math.round(modalZoomScale * 100)}%`;
+      }
+    }
+
+    function setModalZoom(scale) {
+      modalZoomScale = Math.max(0.6, Math.min(4.0, scale));
+      if (modalZoomScale <= 1.0) {
+        modalPanX = 0;
+        modalPanY = 0;
+      }
+      applyModalTransform();
+      const container = document.getElementById('modal-img-container');
+      if (container) {
+        container.style.cursor = modalZoomScale > 1.0 ? 'grab' : 'default';
+      }
+    }
+
+    function zoomInModal() {
+      setModalZoom(modalZoomScale + 0.25);
+    }
+
+    function zoomOutModal() {
+      setModalZoom(modalZoomScale - 0.25);
+    }
+
+    function resetModalZoom() {
+      modalZoomScale = 1.0;
+      modalPanX = 0;
+      modalPanY = 0;
+      applyModalTransform();
+      const container = document.getElementById('modal-img-container');
+      if (container) {
+        container.style.cursor = 'default';
+      }
+    }
+
+    function setupModalZoomEvents() {
+      const container = document.getElementById('modal-img-container');
+      if (!container) return;
+
+      // 滾輪縮放
+      container.addEventListener('wheel', function(e) {
+        const modal = document.getElementById('book-photo-modal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.15 : -0.15;
+        setModalZoom(modalZoomScale + delta);
+      }, { passive: false });
+
+      // 按住拖曳平移
+      container.addEventListener('mousedown', function(e) {
+        if (modalZoomScale > 1.0) {
+          isModalPanning = true;
+          startPanX = e.clientX - modalPanX;
+          startPanY = e.clientY - modalPanY;
+          container.style.cursor = 'grabbing';
+          e.preventDefault();
+        }
+      });
+
+      window.addEventListener('mousemove', function(e) {
+        if (isModalPanning) {
+          modalPanX = e.clientX - startPanX;
+          modalPanY = e.clientY - startPanY;
+          applyModalTransform();
+        }
+      });
+
+      window.addEventListener('mouseup', function() {
+        if (isModalPanning) {
+          isModalPanning = false;
+          const c = document.getElementById('modal-img-container');
+          if (c) c.style.cursor = modalZoomScale > 1.0 ? 'grab' : 'default';
+        }
+      });
+    }
+
+    function renderModalPage(idx) {
+      resetModalZoom();
+      const allPages = getBookPagesList();
+      if (!allPages.length) return;
+      if (idx < 0) idx = 0;
+      if (idx >= allPages.length) idx = allPages.length - 1;
+      currentModalIndex = idx;
+      const p = allPages[idx];
+      currentModalPageId = p.page_id;
+
+      const badgeEl = document.getElementById('modal-page-badge');
+      const titleEl = document.getElementById('modal-page-title');
+      const counterEl = document.getElementById('modal-page-counter');
+      const expectedPathEl = document.getElementById('modal-expected-path');
+      const imgEl = document.getElementById('modal-page-img');
+      const fallbackEl = document.getElementById('modal-img-fallback');
+      const selectEl = document.getElementById('modal-page-select');
+
+      // 更新頂部資訊
+      if (counterEl) counterEl.textContent = `第 ${idx + 1} / ${allPages.length} 頁`;
+      if (badgeEl) badgeEl.textContent = `《認識 Fuzzy》${p.chapter_title || ('第 ' + p.chapter + ' 章')} • 頁 ${p.page_id}`;
+      if (titleEl) titleEl.textContent = p.title;
+
+      // 更新圖片路徑
+      const imgPath = getBookPageImagePath(p);
+      if (expectedPathEl) expectedPathEl.textContent = p.source_file || imgPath;
+
+      if (fallbackEl) fallbackEl.classList.add('hidden');
+      if (imgEl) {
+        imgEl.classList.remove('hidden');
+        imgEl.src = imgPath;
+      }
+
+      // 更新右側 OCR 結構化數位精讀面板 (完全可選取、可複製)
+      const textSectionEl = document.getElementById('modal-text-section');
+      const textTitleEl = document.getElementById('modal-text-title');
+      const textSummaryEl = document.getElementById('modal-text-summary');
+      const formulasContainer = document.getElementById('modal-formulas-container');
+      const formulasListEl = document.getElementById('modal-text-formulas');
+      const examplesContainer = document.getElementById('modal-examples-container');
+      const examplesListEl = document.getElementById('modal-text-examples');
+
+      if (textSectionEl) textSectionEl.textContent = p.section || `第 ${p.chapter || 1} 章 • 頁 ${p.page_id}`;
+      if (textTitleEl) textTitleEl.textContent = p.title || '';
+      if (textSummaryEl) textSummaryEl.innerHTML = formatRichText(p.summary || '（此頁以全幅圖表與結構示意為主）');
+
+      // 渲染本頁數學公式 (LaTeX)
+      if (formulasContainer && formulasListEl) {
+        if (p.formulas && p.formulas.length > 0) {
+          formulasContainer.classList.remove('hidden');
+          formulasListEl.innerHTML = p.formulas.map(f => `
+            <div class="formula-display-card text-teal-200">
+              ${f}
+            </div>
+          `).join('');
+        } else {
+          formulasContainer.classList.add('hidden');
+        }
+      }
+
+      // 渲染原書圖表範例與重點提示
+      if (examplesContainer && examplesListEl) {
+        if (p.book_examples && p.book_examples.length > 0) {
+          examplesContainer.classList.remove('hidden');
+          examplesListEl.innerHTML = p.book_examples.map(ex => `
+            <li class="leading-relaxed">${formatRichText(ex)}</li>
+          `).join('');
+        } else {
+          examplesContainer.classList.add('hidden');
+        }
+      }
+
+      // 觸發 MathJax 對 OCR 文字區重新排版
+      const textCol = document.getElementById('modal-text-col');
+      if (textCol) {
+        safeTypesetMath([textCol]);
+      }
+
+      // 同步跳轉下拉選單
+      if (selectEl) {
+        if (selectEl.options.length !== allPages.length) {
+          selectEl.innerHTML = allPages.map((item, i) => `
+            <option value="${item.page_id}" ${i === idx ? 'selected' : ''}>
+              ${item.page_id} (${item.chapter_title ? item.chapter_title.split('：')[0] : ('第 ' + item.chapter + ' 章')})
+            </option>
+          `).join('');
+        } else {
+          selectEl.value = p.page_id;
+        }
+      }
+    }
+
+        // 燈箱與照片已被全新實體課本導讀取代，保留空函數以確保 F12 零報錯
+    function openBookPhotoModal(pageId) {
+      console.log('實體課本導讀已內嵌於卡片，頁碼：' + pageId);
+    }
+    function closeBookPhotoModal() {}
+    function prevBookPhotoModal() {}
+    function nextBookPhotoModal() {}
+    function setModalViewMode() {}
+    function copyModalPageText() {}
+    function zoomInModal() {}
+    function zoomOutModal() {}
+    function resetModalZoom() {});
+
+        function refreshParentBookGallery(parentChapterId) {
+      if (parentChapterId === 'fuzzy_sets') {
+        renderChapter2BookPagesSection();
+      } else if (parentChapterId === 'fuzzy_relations_inference') {
+        renderChapter34BookPagesSection();
+      } else if (parentChapterId === 'fuzzy_control_applications') {
+        renderChapter56BookPagesSection();
+      } else if (parentChapterId === 'fuzzy_numbers_extension') {
+        renderChapter4BookPagesSection();
+      } else if (parentChapterId === 'fuzzy_decision_evaluation') {
+        renderChapter5BookPagesSection();
+      } else if (parentChapterId === 'fuzzy_clustering_pattern') {
+        renderChapter6BookPagesSection();
+      } else if (parentChapterId === 'advanced_fuzzy_neuro') {
+        renderChapter7BookPagesSection();
+      }
+    }
+
+    function switchBookSubChapter(parentChapterId, subChapterNum) {
+      currentBookSubChapter[parentChapterId] = Number(subChapterNum);
+      currentBookPageFilter[parentChapterId] = 'all';
+      refreshParentBookGallery(parentChapterId);
+    }
+
+    function filterBookSubPage(parentChapterId, pageId) {
+      currentBookPageFilter[parentChapterId] = pageId;
+      refreshParentBookGallery(parentChapterId);
+    }
+
+
+
+    // 保留向下相容函式
+    function filterChapter2Page(pageId) { filterBookSubPage('fuzzy_sets', pageId); }
+    function filterChapter34Page(pageId) { filterBookSubPage('fuzzy_relations_inference', pageId); }
+    function filterChapter56Page(pageId) { filterBookSubPage('fuzzy_control_applications', pageId); }
+
+    function getJumpPlotInfo(p) {
+      if (!p || !p.page_id) return null;
+      const pid = p.parent_chapter_id;
+      const pageId = p.page_id;
+      const ch = p.chapter;
+
+      if (pid === 'fuzzy_sets') {
+        if (ch === 1 || ['2-1', '2-2', '2-3', '2-4', '2-5', '2-6', '2-7'].includes(pageId)) {
+          return { plotId: 'a', label: '📊 前往【模擬圖 (a)】邊界過渡驗證', action: "FuzzyWidgets.jumpToCh1Plot('a')" };
+        }
+        if (['2-8', '2-9'].includes(pageId)) {
+          return { plotId: 'b', label: '📐 前往【模擬圖 (b)】歸屬函數造型實驗', action: "FuzzyWidgets.jumpToCh1Plot('b')" };
+        }
+        if (ch === 3 && ['3-1', '3-2', '3-3', '3-4', '3-5'].includes(pageId)) {
+          return { plotId: 'c', label: '⚡ 前往【模擬圖 (c)】模糊聯集/交集/補集運算器', action: "FuzzyWidgets.jumpToCh1Plot('c')" };
+        }
+        return { plotId: 'd', label: '🔪 前往【模擬圖 (d)】α-截集與核/支集驗證', action: "FuzzyWidgets.jumpToCh1Plot('d')" };
+      }
+
+      if (pid === 'fuzzy_relations_inference') {
+        if (ch === 6 && ['6-1', '6-2', '6-3', '6-4', '6-5', '6-6', '6-7', '6-8', '6-9', '6-10'].includes(pageId)) {
+          return { plotId: 'a', label: '📊 前往【模擬圖 (a)】笛卡兒積熱力與曲面實驗', action: "FuzzyWidgets.jumpToCh2Plot('a')" };
+        }
+        if (ch === 6) {
+          return { plotId: 'b', label: '⚡ 前往【模擬圖 (b)】關係合成運算器 (Max-Min / Product)', action: "FuzzyWidgets.jumpToCh2Plot('b')" };
+        }
+        if (ch === 4 && ['4-1', '4-2', '4-3', '4-4'].includes(pageId)) {
+          return { plotId: 'a', label: '📊 前往【模擬圖 (a)】笛卡兒積熱力與曲面實驗', action: "FuzzyWidgets.jumpToCh2Plot('a')" };
+        }
+        if (ch === 4) {
+          return { plotId: 'b', label: '⚡ 前往【模擬圖 (b)】關係合成運算器 (Max-Min / Product)', action: "FuzzyWidgets.jumpToCh2Plot('b')" };
+        }
+        if (ch === 5 && parseInt(pageId.split('-')[1] || '0') <= 15) {
+          return { plotId: 'c', label: '📐 前往【模擬圖 (c)】單規則截頂 vs 縮放推論', action: "FuzzyWidgets.jumpToCh2Plot('c')" };
+        }
+        return { plotId: 'd', label: '⚖️ 前往【模擬圖 (d)】四大解模糊化比較器', action: "FuzzyWidgets.jumpToCh2Plot('d')" };
+      }
+
+      if (pid === 'fuzzy_control_applications') {
+        if (ch === 6 && parseInt(pageId.split('-')[1] || '0') <= 10) {
+          return { plotId: 'a', label: '📊 前往【模擬圖 (a)】FAM 冷氣溫控模擬', action: "FuzzyWidgets.jumpToCh3Plot('a')" };
+        }
+        if (ch === 6 || ch === 7 || ch === 8) {
+          return { plotId: 'b', label: '🌐 前往【模擬圖 (b)】3D 非線性控制曲面', action: "FuzzyWidgets.jumpToCh3Plot('b')" };
+        }
+        if (ch >= 9 && ch <= 10) {
+          return { plotId: 'c', label: '⚡ 前往【模擬圖 (c)】Mamdani vs TSK (Sugeno) 對照', action: "FuzzyWidgets.jumpToCh3Plot('c')" };
+        }
+        return { plotId: 'd', label: '🩺 前往【模擬圖 (d)】重症醫療預警決策', action: "FuzzyWidgets.jumpToCh3Plot('d')" };
+      }
+
+      if (pid === 'fuzzy_numbers_extension') {
+        if (parseInt(pageId.split('-')[1] || '0') <= 7) {
+          return { plotId: 'a', label: '📈 前往【模擬圖 (a)】擴展原理函數映射', action: "FuzzyWidgets.jumpToCh4Plot('a')" };
+        }
+        return { plotId: 'b', label: '🧮 前往【模擬圖 (b)】模糊數四則運算與 α-Cut', action: "FuzzyWidgets.jumpToCh4Plot('b')" };
+      }
+
+      if (pid === 'fuzzy_decision_evaluation') {
+        if (ch === 13) {
+          return { plotId: 'a', label: '🎯 前往【模擬圖 (a)】Bellman-Zadeh 最佳決策搜尋', action: "FuzzyWidgets.jumpToCh5Plot('a')" };
+        }
+        return { plotId: 'b', label: '📊 前往【模擬圖 (b)】多指標綜合評判實驗室', action: "FuzzyWidgets.jumpToCh5Plot('b')" };
+      }
+
+      if (pid === 'fuzzy_clustering_pattern') {
+        if (ch === 12) {
+          return { plotId: 'a', label: '🌲 前往【模擬圖 (a)】傳遞閉包分群樹模擬器', action: "FuzzyWidgets.jumpToCh6Plot('a')" };
+        }
+        return { plotId: 'b', label: '🔬 前往【模擬圖 (b)】FCM 2D 柔性分群散佈圖', action: "FuzzyWidgets.jumpToCh6Plot('b')" };
+      }
+
+      if (pid === 'advanced_fuzzy_neuro') {
+        if (ch === 11) {
+          return { plotId: 'a', label: '🧠 前往【模擬圖 (a)】ANFIS 學習擬合模擬器', action: "FuzzyWidgets.jumpToCh7Plot('a')" };
+        }
+        return { plotId: 'b', label: '🎛️ 前往【模擬圖 (b)】自適應模糊 vs PID 步階響應', action: "FuzzyWidgets.jumpToCh7Plot('b')" };
+      }
+
+      return null;
+    }
+
+    // 統一的多章節原書精讀渲染引擎
+    function renderParentBookGallery(parentChapterId, targetContainerId, accentColor) {
+      const holder = document.getElementById(targetContainerId);
+      if (!holder) return;
+
+      const normParentId = normalizeChapterId(parentChapterId);
+      const allCatalog = getChaptersCatalogList();
+      const parentSubChapters = allCatalog.filter(c => normalizeChapterId(c.parent_chapter_id) === normParentId);
+      
+      if (!parentSubChapters.length) {
+        holder.innerHTML = `<div class="p-8 text-center text-slate-400">目前尚無此單元之教材章節</div>`;
+        return;
+      }
+
+      let activeSubCh = currentBookSubChapter[normParentId] || currentBookSubChapter[parentChapterId];
+      if (!parentSubChapters.some(c => c.ch === activeSubCh)) {
+        activeSubCh = parentSubChapters[0].ch;
+        currentBookSubChapter[normParentId] = activeSubCh;
+        currentBookSubChapter[parentChapterId] = activeSubCh;
+      }
+
+      // 1. 章節切換 Tabs / Pills (當該篇章包含多個原書章節時)
+      let subTabsHtml = '';
+      if (parentSubChapters.length > 1) {
+        const optionsHtml = parentSubChapters.map(c => `
+          <option value="${c.ch}" ${c.ch === activeSubCh ? 'selected' : ''}>
+            第 ${c.ch} 章：${c.title.replace(/^第\s*\d+\s*章[：:]\s*/, '')} (${c.photo_count} 頁)
+          </option>
+        `).join('');
+
+        const gridPillsHtml = parentSubChapters.map(c => {
+          const isCur = c.ch === activeSubCh;
+          const shortTitle = c.title.replace(/^第\s*\d+\s*章[：:]\s*/, '');
+          return `
+            <button onclick="switchBookSubChapter('${normParentId}', ${c.ch})"
+              class="text-left p-3 rounded-2xl border transition flex flex-col justify-between ${
+                isCur
+                  ? 'bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold shadow-lg shadow-sky-500/25 border-sky-400'
+                  : 'bg-slate-900/90 hover:bg-slate-800 text-slate-300 border-slate-800 hover:border-slate-700'
+              }">
+              <div class="flex items-center justify-between w-full">
+                <span class="text-xs font-mono uppercase tracking-wider ${isCur ? 'text-sky-100' : 'text-sky-400'} font-bold">第 ${c.ch} 章</span>
+                <span class="text-[10px] px-2 py-0.5 rounded-full ${isCur ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'}">${c.photo_count} 頁重點</span>
+              </div>
+              <span class="text-xs sm:text-sm font-medium truncate mt-1.5 ${isCur ? 'text-white' : 'text-slate-200'}">${shortTitle}</span>
+            </button>
+          `;
+        }).join('');
+
+        subTabsHtml = `
+          <div class="space-y-3 bg-slate-950/70 p-4 sm:p-5 rounded-3xl border border-slate-800/90 mb-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
+              <div class="flex items-center gap-2">
+                <span class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                  <span>📚</span> 《認識 Fuzzy》實體書章節切換
+                </span>
+                <span class="text-xs px-2.5 py-1 rounded-full bg-sky-500/15 text-sky-300 border border-sky-500/30">共 ${parentSubChapters.reduce((sum, c) => sum + c.photo_count, 0)} 處課本對照重點</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-400">下拉選單：</span>
+                <select onchange="switchBookSubChapter('${normParentId}', Number(this.value))"
+                  class="bg-slate-900 text-slate-200 text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-slate-700 focus:outline-none focus:border-sky-400">
+                  ${optionsHtml}
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 pt-1">
+              ${gridPillsHtml}
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. 當前子章節之書頁
+      const chKey = 'ch' + activeSubCh;
+      let chapterPages = (window.BOOK_PHOTOS && window.BOOK_PHOTOS[chKey]) ? window.BOOK_PHOTOS[chKey] : null;
+      if (!chapterPages || !chapterPages.length) {
+        const allBookPages = getBookPagesList();
+        chapterPages = allBookPages.filter(p => p.chapter === activeSubCh);
+      }
+      const activePageFilter = currentBookPageFilter[normParentId] || currentBookPageFilter[parentChapterId] || 'all';
+
+      const filteredPages = activePageFilter === 'all'
+        ? chapterPages
+        : chapterPages.filter(p => p.page_id === activePageFilter);
+
+      // 3. 頁碼膠囊列
+      const pillMap = {
+        sky: 'bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/25 border-sky-400',
+        teal: 'bg-teal-500 text-slate-950 font-bold shadow-md shadow-teal-500/25 border-teal-400',
+        indigo: 'bg-indigo-500 text-white font-bold shadow-md shadow-indigo-500/25 border-indigo-400',
+        emerald: 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/25 border-emerald-400',
+        amber: 'bg-amber-500 text-slate-950 font-bold shadow-md shadow-amber-500/25 border-amber-400',
+        rose: 'bg-rose-500 text-white font-bold shadow-md shadow-rose-500/25 border-rose-400',
+        cyan: 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/25 border-cyan-400',
+        violet: 'bg-violet-500 text-white font-bold shadow-md shadow-violet-500/25 border-violet-400'
+      };
+      const pillActiveClass = pillMap[accentColor] || pillMap['sky'];
+
+      const pillsHtml = [
+        `<button onclick="filterBookSubPage('${normParentId}', 'all')"
+          class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition border ${
+            activePageFilter === 'all'
+              ? pillActiveClass
+              : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800'
+          }">展開全部 ${chapterPages.length} 頁導讀</button>`,
+        ...chapterPages.map(p => `
+          <button onclick="filterBookSubPage('${normParentId}', '${p.page_id}')"
+            class="px-3 py-1.5 rounded-xl text-xs sm:text-sm font-mono font-semibold transition border ${
+              activePageFilter === p.page_id
+                ? pillActiveClass
+                : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800'
+            }">
+            頁 ${p.page_id}
+          </button>
+        `)
+      ].join('');
+
+      // 4. 書頁重點導讀與實體書對照卡片 (無任何 <img> 翻拍圖檔，版面寬敞舒適，公式不斷行)
+      const cardsHtml = filteredPages.map(p => {
+        const formulasHtml = (p.formulas && p.formulas.length)
+          ? p.formulas.map(f => `<div class="formula-display-card">${f}</div>`).join('')
+          : '';
+
+        const jumpInfo = getJumpPlotInfo(p);
+        const jumpBtnHtml = jumpInfo ? `
+          <button onclick="${jumpInfo.action}"
+            class="px-3.5 py-1.5 rounded-xl bg-${accentColor}-500/20 hover:bg-${accentColor}-500/30 text-${accentColor}-300 border border-${accentColor}-500/35 text-xs sm:text-sm font-semibold transition flex items-center gap-1.5">
+            <span>${jumpInfo.label}</span>
+          </button>
+        ` : '';
+
+        const badgeText = p.book_ref_badge || `請參照《認識 Fuzzy》第 ${p.chapter} 章 頁 ${p.page_id}`;
+
+        const examplesHtml = (p.book_examples && p.book_examples.length) ? `
+          <div class="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 space-y-2.5 mt-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+              <div class="text-xs font-bold uppercase tracking-wider text-${accentColor}-400 flex items-center gap-2">
+                <span>📘</span> 實體課本圖表與範例指引 (Textbook Companion Guide)
+              </div>
+              <span class="text-xs text-amber-300/90 font-medium">請翻閱實體書核對以下重點解析</span>
+            </div>
+            <ul class="space-y-2 prose-reading text-sm sm:text-base text-slate-200 list-disc list-inside pt-1">
+              ${p.book_examples.map(ex => `<li>${formatRichText(ex)}</li>`).join('')}
+            </ul>
+          </div>
+        ` : '';
+
+        return `
+          <article class="refined-card p-6 sm:p-8 space-y-5 border-l-4 border-l-${accentColor}-400 hover:border-l-${accentColor}-300 transition-all">
+            <!-- 頂部資訊列：章節、小節、頁碼與醒目的課本參照徽章 -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
+              <div class="flex flex-wrap items-center gap-2.5">
+                <span class="px-3 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-sky-300 text-xs font-mono font-bold tracking-wide">
+                  📄 課本頁碼 ${p.page_id}
+                </span>
+                <span class="text-xs sm:text-sm font-semibold text-slate-300">${p.section}</span>
+                <span class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800/90 text-slate-400 border border-slate-700/50">${p.chapter_title}</span>
+              </div>
+
+              <!-- 右上角：跳轉模擬圖 + 醒目的「📖 課本參照徽章」 -->
+              <div class="flex flex-wrap items-center gap-2.5">
+                ${jumpBtnHtml}
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/15 via-sky-500/10 to-indigo-500/15 border border-amber-500/40 text-amber-300 text-xs sm:text-sm font-bold shadow-sm">
+                  <span>📖</span>
+                  <span>${badgeText}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 卡片核心內容：大標題、觀念導讀、數學公式與課本範例指引 -->
+            <div class="space-y-4">
+              <h4 class="text-xl sm:text-2xl font-bold text-white leading-snug">${p.title}</h4>
+              
+              <div class="prose-reading text-slate-200">
+                <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-${accentColor}-400 mb-1.5">
+                  <span>💡</span> 觀念精煉導讀 (Key Concept Overview)
+                </div>
+                ${formatRichText(p.summary)}
+              </div>
+
+              ${formulasHtml}
+              ${examplesHtml}
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      holder.innerHTML = `
+        <div class="space-y-6">
+          ${subTabsHtml}
+          <!-- 頁碼切換列 -->
+          <div class="flex flex-wrap items-center gap-2 p-3 bg-slate-950/60 rounded-2xl border border-slate-800/80">
+            <span class="text-xs text-slate-400 font-semibold px-2">快速跳至頁碼：</span>
+            ${pillsHtml}
+          </div>
+          <!-- 導讀卡片清單 -->
+          <div class="space-y-6">
+            ${cardsHtml}
+          </div>
+        </div>
+      `;
+
+      safeTypesetMath([holder]);
+    }
+
+        function renderChapter2BookPagesSection() {
+      renderParentBookGallery('fuzzy_sets', 'chapter2-book-gallery-body', 'sky');
+    }
+
+    function renderChapter34BookPagesSection() {
+      renderParentBookGallery('fuzzy_relations_inference', 'chapter34-book-gallery-body', 'indigo');
+    }
+
+    function renderChapter56BookPagesSection() {
+      renderParentBookGallery('fuzzy_control_applications', 'chapter56-book-gallery-body', 'emerald');
+    }
+
+    function renderChapter4BookPagesSection() {
+      renderParentBookGallery('fuzzy_numbers_extension', 'chapter4-book-gallery-body', 'amber');
+    }
+
+    function renderChapter5BookPagesSection() {
+      renderParentBookGallery('fuzzy_decision_evaluation', 'chapter5-book-gallery-body', 'rose');
+    }
+
+    function renderChapter6BookPagesSection() {
+      renderParentBookGallery('fuzzy_clustering_pattern', 'chapter6-book-gallery-body', 'cyan');
+    }
+
+    function renderChapter7BookPagesSection() {
+      renderParentBookGallery('advanced_fuzzy_neuro', 'chapter7-book-gallery-body', 'violet');
+    }
+
+    // =========================================================================
+    /* // 《認識 Fuzzy》第 3、4 章（頁 3-1 ～ 4-6）
+    // 逐頁精讀渲染與原書照片全螢幕燈箱連動
+    // =========================================================================
+    // 舊有未使用的 Legacy 函數已安全清理;
+
+      navList.innerHTML = courseData.chapters.map(ch => {
+        const isActive = ch.id === activeChapterId;
+        const info = modStateMap[ch.id];
+
+        let subMenuHtml = '';
+        if (isActive && info) {
+          const num = info.chNum;
+          const curMod = info.mod;
+          const fn = info.switchFn;
+          const col = info.color;
+          const activeBg = `bg-gradient-to-r from-${col}-500 to-${col === 'amber' ? 'orange' : col === 'sky' ? 'indigo' : col === 'rose' ? 'pink' : col === 'cyan' ? 'blue' : 'purple'}-600 text-white font-bold shadow-md`;
+
+          subMenuHtml = `
+            <div class="mt-1.5 ml-3 pl-3 border-l-2 border-${col}-500/35 space-y-1.5 py-1.5">
+              <div class="text-[11px] font-bold uppercase tracking-wider text-${col}-400/90 px-2 pb-0.5">
+                Chapter 0${num} 四大標準學習模組
+              </div>
+              <button id="ch${num}-subtab-btn-all" onclick="FuzzyWidgets.${fn}('all', true)"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'all' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
+                <span>📑</span>
+                <span>展開全部 4 大模組</span>
+              </button>
+              <button id="ch${num}-subtab-btn-m1" onclick="FuzzyWidgets.${fn}('m1', true)"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm1' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
+                <span>🏛️</span>
+                <span>【模組 1】通論 (Overview)</span>
+              </button>
+              <button id="ch${num}-subtab-btn-m2" onclick="FuzzyWidgets.${fn}('m2', true)"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm2' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
+                <span>📘</span>
+                <span>【模組 2】專書逐頁精讀</span>
+              </button>
+              <button id="ch${num}-subtab-btn-m3" onclick="FuzzyWidgets.${fn}('m3', true)"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm3' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
+                <span>📊</span>
+                <span>【模組 3】多維度模擬圖</span>
+              </button>
+              <button id="ch${num}-subtab-btn-m4" onclick="FuzzyWidgets.${fn}('m4', true)"
+                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm4' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
+                <span>✍️</span>
+                <span>【模組 4】題目練習與詳解</span>
+              </button>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="space-y-1">
+            <button onclick="selectChapter('${ch.id}')"
+              class="w-full text-left px-4 py-3 rounded-xl transition flex flex-col gap-0.5 ${isActive ? 'chapter-active font-bold' : 'hover:bg-slate-800/70 text-slate-300'}">
+              <span class="text-xs uppercase tracking-wider ${isActive ? 'text-sky-400' : 'text-slate-500'}">${ch.number}</span>
+              <span class="text-base leading-snug">${ch.title.split(' (')[0]}</span>
+            </button>
+            ${subMenuHtml}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectChapter(chapterId) {
+      activeChapterId = chapterId;
+            const chapterToNodeMap = {
+        fuzzy_sets: 's1_n1',
+        fuzzy_relations_inference: 's2_n1',
+        fuzzy_control_applications: 's3_n1',
+        fuzzy_numbers_extension: 's4_n1',
+        fuzzy_decision_evaluation: 's5_n1',
+        fuzzy_clustering_pattern: 's6_n1',
+        advanced_fuzzy_neuro: 's7_n1'
+      };
+      if (chapterToNodeMap[chapterId]) {
+        currentActiveNodeId = chapterToNodeMap[chapterId];
+        updateMissionBanner();
+        renderSidebarMiniRoadmap();
+      }
+      renderChapterNav();
+      renderChapterContent(chapterId);
+    }
+
+        function renderChapterContent(chapterId) {
+      const normId = normalizeChapterId(chapterId);
+      const ch = courseData.chapters.find(c => normalizeChapterId(c.id) === normId) || courseData.chapters[0];
+      if (!ch) return;
+
+      const container = document.getElementById('chapter-content-container');
+
+      const headerCardHtml = `
+        <!-- 章節標頭卡 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-sky-500/25 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <span class="text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">${ch.number}</span>
+            <div class="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm text-slate-300">
+              <span class="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">📘 ${ch.book_source}</span>
+              <span class="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">📑 ${ch.slide_source}</span>
+            </div>
+          </div>
+          <div class="space-y-2">
+            <h2 class="text-2xl sm:text-3xl font-bold text-white leading-tight">${ch.title}</h2>
+            <p class="text-base sm:text-lg text-sky-300 font-medium">${ch.subtitle}</p>
+          </div>
+          <div class="prose-reading border-t border-slate-800/90 pt-5 mb-0">
+            <p class="mb-0">${formatRichText(ch.overview)}</p>
+          </div>
+        </div>
+      `;
+
+      const footerNavHtml = `
+        <!-- 章節底部打卡與下一關引導 -->
+        <div class="glass-panel rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
+          <button onclick="switchTab('roadmap')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">
+            🗺️ 返回智慧學習地圖
+          </button>
+          <button onclick="toggleCurrentNodeComplete()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20">
+            ✅ 學完本章節・標記完成並前往下一關 →
+          </button>
+        </div>
+      `;
+
+      // 渲染四大標準學習模組
+      container.innerHTML = `
+        ${headerCardHtml}
+        ${window.FuzzyWidgets ? FuzzyWidgets.getChapterInteractiveHtml(normId) : ''}
+        ${footerNavHtml}
+      `;
+
+      // 呼叫書頁課本導讀畫廊渲染
+      const colorMap = {
+        ch1_intro: 'sky',
+        ch2_fuzzy_sets: 'teal',
+        ch3_operations_extension: 'amber',
+        ch4_fuzzy_relations: 'indigo',
+        ch5_logic_inference: 'rose',
+        ch6_fuzzy_control: 'emerald',
+        ch7_advanced_applications: 'violet'
+      };
+      const curColor = colorMap[normId] || 'sky';
+
+      // 嘗試填充可能存在的 gallery 容器
+      const galleryHolders = [
+        'ch1-book-gallery-body',
+        'ch2-book-gallery-body',
+        'ch3-book-gallery-body',
+        'ch4-book-gallery-body',
+        'ch5-book-gallery-body',
+        'ch6-book-gallery-body',
+        'ch7-book-gallery-body',
+        'chapter2-book-gallery-body',
+        'chapter34-book-gallery-body',
+        'chapter56-book-gallery-body',
+        'chapter4-book-gallery-body',
+        'chapter5-book-gallery-body',
+        'chapter6-book-gallery-body',
+        'chapter7-book-gallery-body'
+      ];
+
+      for (const hid of galleryHolders) {
+        if (document.getElementById(hid)) {
+          renderParentBookGallery(normId, hid, curColor);
+          break;
+        }
+      }
+
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.initChapterWidgets === 'function') {
+        setTimeout(() => FuzzyWidgets.initChapterWidgets(normId), 60);
+      }
+      safeTypesetMath([container]);
+    }
+
+      const conceptsHtml = ch.key_concepts.map((c, idx) => `
+        <article class="refined-card p-6 sm:p-7 space-y-4">
+          <div class="flex items-center gap-3.5">
+            <span class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-300 text-sm font-bold flex items-center justify-center border border-sky-500/35 shrink-0">${idx + 1}</span>
+            <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">${c.term}</h4>
+          </div>
+          <div class="prose-reading pl-1">
+            ${formatRichText(c.explanation)}
+          </div>
+          <div class="formula-display-card">
+            ${c.formula}
+          </div>
+        </article>
+      `).join('');
+
+      const tableHeaders = ch.comparison_table.headers.map(h =>
+        `<th class="px-5 py-4 text-left text-xs sm:text-sm font-bold uppercase tracking-wider text-sky-300 border-b border-slate-700/80 bg-slate-900/95">${h}</th>`
+      ).join('');
+
+      const tableRows = ch.comparison_table.rows.map(row => `
+        <tr class="border-b border-slate-800/70 hover:bg-slate-800/40 transition">
+          ${row.map((cell, i) => `<td class="px-5 py-4 text-base leading-relaxed ${i === 0 ? 'font-bold text-white whitespace-nowrap' : 'text-slate-200'}">${cell}</td>`).join('')}
+        </tr>
+      `).join('');
+
+      container.innerHTML = `
+        ${headerCardHtml}
+
+        <!-- 視覺化互動圖表實驗室 -->
+        ${window.FuzzyWidgets ? FuzzyWidgets.getChapterInteractiveHtml(chapterId) : ''}
+
+        <!-- 核心理論與數學公式 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-9 space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <h3 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
+              <span class="text-sky-400">📐</span> 核心定義與數學公式推導
+            </h3>
+            <span class="text-xs text-slate-400 hidden sm:inline">行內變數防斷行・長公式置中展開</span>
+          </div>
+          <div class="space-y-6">
+            ${conceptsHtml}
+          </div>
+        </div>
+
+        <!-- 觀念對照表 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-9 space-y-5">
+          <h3 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
+            <span class="text-indigo-400">📊</span> 教材結構化觀念對照表
+          </h3>
+          <div class="overflow-x-auto rounded-2xl border border-slate-800 shadow-inner">
+            <table class="w-full border-collapse">
+              <thead><tr>${tableHeaders}</tr></thead>
+              <tbody>${tableRows}</tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 書本與跨校講義實務範例對照 (精緻雙層卡片設計) -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-emerald-500/30 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+            <h3 class="text-xl sm:text-2xl font-bold text-emerald-300 flex items-center gap-2.5">
+              <span>✍️</span> ${ch.worked_example.title}
+            </h3>
+            <button onclick="jumpToChapterLab('${ch.id}')" class="text-sm px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 transition font-bold flex items-center gap-1.5 shadow-sm hover:shadow-emerald-500/20">
+              🎛️ 在本章【模組 3：互動實驗室】驗證 →
+            </button>
+          </div>
+
+          <!-- 題目敘述精緻卡片 -->
+          <div class="refined-card p-6 sm:p-7 border-l-4 border-l-sky-400 space-y-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-xs font-bold uppercase tracking-wider text-sky-300">
+              <span>📌 題目敘述 (Problem Statement)</span>
+            </div>
+            <div class="prose-reading text-slate-100">
+              ${formatRichText(ch.worked_example.problem)}
+            </div>
+          </div>
+
+          <!-- 逐步推導詳解精緻卡片 -->
+          <div class="refined-card p-6 sm:p-7 border-l-4 border-l-emerald-400 space-y-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider text-emerald-300">
+              <span>🧮 逐步推導詳解 (Step-by-Step Derivation)</span>
+            </div>
+            <div class="prose-reading text-slate-100">
+              ${formatRichText(ch.worked_example.solution)}
+            </div>
+          </div>
+
+          <!-- 跨校講義補充卡片 -->
+          <div class="bg-indigo-950/45 rounded-2xl p-6 border border-indigo-500/35 prose-reading text-indigo-100">
+            ${formatRichText(ch.worked_example.slide_tip)}
+          </div>
+        </div>
+
+        ${footerNavHtml}
+      `;
+
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.initChapterWidgets === 'function') {
+        setTimeout(() => FuzzyWidgets.initChapterWidgets(chapterId), 60);
+      }
+
+      safeTypesetMath([container]);
+    }
+
+    // =========================================================================
+    // 分頁二：課堂重點、迷思與隨堂測驗渲染
+    // =========================================================================
+    function renderLectureNotes() {
+      const list = document.getElementById('lecture-notes-list');
+      list.innerHTML = courseData.lecture_notes.map(lec => `
+        <article id="lec-card-${lec.id}" class="glass-panel rounded-3xl p-7 sm:p-8 space-y-6 border border-slate-800 hover:border-sky-500/35 transition">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h4 class="text-xl sm:text-2xl font-bold text-white">${lec.title}</h4>
+            <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+              <span class="px-3 py-1.5 rounded-xl bg-slate-900 text-sky-300 border border-slate-800 font-mono">🎵 ${lec.audio_file}</span>
+              <span class="px-3 py-1.5 rounded-xl bg-slate-900 text-slate-300 border border-slate-800 font-mono">⏱ ${lec.duration}</span>
+            </div>
+          </div>
+
+          <!-- 老師原音語錄 -->
+          <blockquote class="bg-amber-500/10 border-l-4 border-amber-400 p-5 rounded-r-2xl text-base sm:text-lg text-amber-200 leading-relaxed">
+            👨‍🏫 <strong class="font-bold">課堂原音叮嚀：</strong>${lec.professor_quote}
+          </blockquote>
+
+          <!-- 課堂重點條列 -->
+          <div class="space-y-3">
+            <div class="text-xs font-bold uppercase tracking-widest text-sky-400">本堂核心筆記</div>
+            <ul class="space-y-3.5 prose-reading list-disc list-inside">
+              ${lec.key_takeaways.map(k => `<li class="leading-relaxed">${formatRichText(k)}</li>`).join('')}
+            </ul>
+          </div>
+
+          <!-- 考點提示 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            ${lec.exam_highlights.map(ex => `
+              <div class="refined-card p-5 border-rose-500/30 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-base font-bold text-rose-300">🎯 ${ex.topic}</span>
+                  <span class="text-xs font-bold text-amber-400 shrink-0">${ex.importance}</span>
+                </div>
+                <p class="text-sm sm:text-base text-slate-200 leading-relaxed">${ex.detail}</p>
+              </div>
+            `).join('')}
+          </div>
+        </article>
+      `).join('');
+    }
+
+    function renderMisconceptions() {
+      const list = document.getElementById('misconceptions-list');
+      list.innerHTML = courseData.misconceptions.map(m => `
+        <div class="refined-card p-6 sm:p-7 space-y-4">
+          <div class="text-base sm:text-lg font-bold text-rose-400 flex items-start gap-2.5 leading-snug">
+            <span class="shrink-0">❌</span>
+            <span>${m.myth}</span>
+          </div>
+          <div class="text-base sm:text-lg font-bold text-emerald-400 flex items-start gap-2.5 leading-snug">
+            <span class="shrink-0">✅</span>
+            <span>${m.truth}</span>
+          </div>
+          <div class="prose-reading text-base bg-slate-950/70 p-4 rounded-xl border border-slate-800/90">
+            ${formatRichText(m.explanation)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderQuizzes() {
+      const list = document.getElementById('quiz-list');
+      list.innerHTML = courseData.quizzes.map((q, qIdx) => {
+        const selected = quizAnswers[q.id];
+        const isAnswered = selected !== undefined;
+        const isCorrect = selected === q.answer_index;
+
+        const optionsHtml = q.options.map((opt, optIdx) => {
+          let btnClass = 'bg-slate-900/90 hover:bg-slate-800 border-slate-700/80 text-slate-100';
+          let badge = String.fromCharCode(65 + optIdx);
+
+          if (isAnswered) {
+            if (optIdx === q.answer_index) {
+              btnClass = 'bg-emerald-950/70 border-emerald-500/70 text-emerald-200 font-semibold';
+              badge = '✓';
+            } else if (optIdx === selected && selected !== q.answer_index) {
+              btnClass = 'bg-rose-950/70 border-rose-500/70 text-rose-200';
+              badge = '✗';
+            } else {
+              btnClass = 'bg-slate-900/40 border-slate-800/50 text-slate-500';
+            }
+          }
+
+          return `
+            <button onclick="answerQuiz('${q.id}', ${optIdx})"
+              class="w-full text-left p-4 rounded-2xl border transition flex items-center gap-3.5 text-base ${btnClass}">
+              <span class="w-7 h-7 shrink-0 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center text-sm font-bold">${badge}</span>
+              <span class="leading-relaxed">${opt}</span>
+            </button>
+          `;
+        }).join('');
+
+        return `
+          <div id="quiz-card-${q.id}" class="refined-card p-6 sm:p-7 space-y-5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs sm:text-sm font-bold text-indigo-400">第 ${qIdx + 1} 題・${q.chapter}</span>
+              ${isAnswered ? `<span class="text-xs sm:text-sm font-bold px-3 py-1 rounded-full ${isCorrect ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}">${isCorrect ? '答對了！' : '觀念需釐清'}</span>` : ''}
+            </div>
+            <div class="text-lg sm:text-xl font-bold text-white leading-relaxed">${q.question}</div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              ${optionsHtml}
+            </div>
+            ${isAnswered ? `
+              <div class="bg-slate-950/90 p-5 rounded-2xl border border-indigo-500/35 prose-reading text-base text-slate-200">
+                <strong class="text-indigo-300">💡 題解與公式剖析：</strong> ${formatRichText(q.explanation)}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      updateQuizScore();
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([list]);
+      }
+    }
+
+    function answerQuiz(quizId, optionIndex) {
+      quizAnswers[quizId] = optionIndex;
+      const q = courseData.quizzes.find(item => item.id === quizId);
+      if (q && optionIndex === q.answer_index) {
+        if (quizId === 'q1' && !completedNodes.includes('s1_n4')) {
+          completedNodes.push('s1_n4');
+          saveRoadmapProgress();
+        }
+        if (quizId === 'q5' && !completedNodes.includes('s3_n2')) {
+          completedNodes.push('s3_n2');
+          saveRoadmapProgress();
+        }
+      }
+      renderQuizzes();
+    }
+
+    function resetQuiz() {
+      quizAnswers = {};
+      renderQuizzes();
+    }
+
+    function updateQuizScore() {
+      const total = courseData.quizzes.length;
+      let correct = 0;
+      courseData.quizzes.forEach(q => {
+        if (quizAnswers[q.id] === q.answer_index) correct++;
+      });
+      document.getElementById('quiz-score-Text').textContent = `${correct} / ${total}`;
+    }
+
+    // =========================================================================
+    // 分頁三：Fuzzy 互動實驗室數學核心 (trimf, trapmf, Mamdani, COG, MOM)
+    // =========================================================================
+    function trimf(x, a, b, c) {
+      if (x <= a || x >= c) return 0;
+      if (x === b) return 1;
+      if (x < b) return b === a ? 1 : (x - a) / (b - a);
+      return c === b ? 1 : (c - x) / (c - b);
+    }
+
+    function trapmf(x, a, b, c, d) {
+      if (x <= a || x >= d) return 0;
+      if (x >= b && x <= c) return 1;
+      if (x < b) return b === a ? 1 : (x - a) / (b - a);
+      return d === c ? 1 : (d - x) / (d - c);
+    }
+
+    function evalConsequentMF(type, y) {
+      if (type === 'low') return trapmf(y, -1, 0, 20, 45);
+      if (type === 'med') return trimf(y, 25, 50, 75);
+      if (type === 'high') return trapmf(y, 55, 80, 100, 101);
+      return 0;
+    }
+
+    function applyScenario(tempVal) {
+      document.getElementById('lab-input-x').value = tempVal;
+      updateLabSimulation();
+    }
+
+    function resetLabDefaults() {
+      document.getElementById('lab-input-x').value = 27;
+      document.getElementById('param-cool-c').value = 18;
+      document.getElementById('param-cool-d').value = 24;
+      document.getElementById('param-warm-a').value = 18;
+      document.getElementById('param-warm-b').value = 24;
+      document.getElementById('param-warm-c').value = 30;
+      document.getElementById('param-hot-a').value = 25;
+      document.getElementById('param-hot-b').value = 31;
+      document.getElementById('rule-1-consequent').value = 'low';
+      document.getElementById('rule-2-consequent').value = 'med';
+      document.getElementById('rule-3-consequent').value = 'high';
+      document.getElementById('lab-implication-method').value = 'min';
+      updateLabSimulation();
+    }
+
+    function updateLabSimulation() {
+      const xStar = parseFloat(document.getElementById('lab-input-x').value);
+      let coolC = parseFloat(document.getElementById('param-cool-c').value);
+      let coolD = Math.max(coolC + 1, parseFloat(document.getElementById('param-cool-d').value));
+
+      let warmA = parseFloat(document.getElementById('param-warm-a').value);
+      let warmB = Math.max(warmA + 1, parseFloat(document.getElementById('param-warm-b').value));
+      let warmC = Math.max(warmB + 1, parseFloat(document.getElementById('param-warm-c').value));
+
+      let hotA = parseFloat(document.getElementById('param-hot-a').value);
+      let hotB = Math.max(hotA + 1, parseFloat(document.getElementById('param-hot-b').value));
+
+      const implMethod = document.getElementById('lab-implication-method').value;
+      const compareMode = document.getElementById('lab-defuzz-compare').value;
+
+      const r1Cons = document.getElementById('rule-1-consequent').value;
+      const r2Cons = document.getElementById('rule-2-consequent').value;
+      const r3Cons = document.getElementById('rule-3-consequent').value;
+
+      document.getElementById('lab-input-x-val').textContent = `${xStar.toFixed(1)} °C`;
+      document.getElementById('val-cool-c').textContent = coolC;
+      document.getElementById('val-cool-d').textContent = coolD;
+      document.getElementById('label-trap-cool').textContent = `[10, 10, ${coolC}, ${coolD}]`;
+
+      document.getElementById('val-warm-a').textContent = warmA;
+      document.getElementById('val-warm-b').textContent = warmB;
+      document.getElementById('val-warm-c').textContent = warmC;
+      document.getElementById('label-tri-warm').textContent = `[${warmA}, ${warmB}, ${warmC}]`;
+
+      document.getElementById('val-hot-a').textContent = hotA;
+      document.getElementById('val-hot-b').textContent = hotB;
+      document.getElementById('label-trap-hot').textContent = `[${hotA}, ${hotB}, 40, 40]`;
+
+      const w1 = trapmf(xStar, 9.9, 10, coolC, coolD);
+      const w2 = trimf(xStar, warmA, warmB, warmC);
+      const w3 = trapmf(xStar, hotA, hotB, 40, 40.1);
+
+      document.getElementById('firing-r1').textContent = `w₁=${w1.toFixed(2)}`;
+      document.getElementById('firing-r2').textContent = `w₂=${w2.toFixed(2)}`;
+      document.getElementById('firing-r3').textContent = `w₃=${w3.toFixed(2)}`;
+      document.getElementById('metric-firing-vector').textContent = `[${w1.toFixed(2)}, ${w2.toFixed(2)}, ${w3.toFixed(2)}]`;
+
+      const xArr = [];
+      const yCool = [];
+      const yWarm = [];
+      const yHot = [];
+      for (let x = 10; x <= 40.001; x += 0.25) {
+        xArr.push(x);
+        yCool.push(trapmf(x, 9.9, 10, coolC, coolD));
+        yWarm.push(trimf(x, warmA, warmB, warmC));
+        yHot.push(trapmf(x, hotA, hotB, 40, 40.1));
+      }
+
+      const inputTraces = [
+        {
+          x: xArr, y: yCool, name: '偏冷 (trapmf)',
+          mode: 'lines', line: { color: '#38bdf8', width: 2.5 },
+          fill: 'tozeroy', fillcolor: 'rgba(56, 189, 248, 0.08)'
+        },
+        {
+          x: xArr, y: yWarm, name: '適中 (trimf)',
+          mode: 'lines', line: { color: '#34d399', width: 2.5 },
+          fill: 'tozeroy', fillcolor: 'rgba(52, 211, 153, 0.08)'
+        },
+        {
+          x: xArr, y: yHot, name: '偏熱 (trapmf)',
+          mode: 'lines', line: { color: '#fb7185', width: 2.5 },
+          fill: 'tozeroy', fillcolor: 'rgba(251, 113, 133, 0.08)'
+        },
+        {
+          x: [xStar, xStar], y: [0, 1.05], name: `當前輸入 x*=${xStar}°C`,
+          mode: 'lines', line: { color: '#facc15', width: 2.5, dash: 'dash' }
+        },
+        {
+          x: [xStar, xStar, xStar], y: [w1, w2, w3],
+          name: '激發交點', mode: 'markers',
+          marker: { size: 10, color: ['#38bdf8', '#34d399', '#fb7185'], line: { color: '#fff', width: 1.5 } }
+        }
+      ];
+
+      const darkPlotLayoutBase = {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(15, 23, 42, 0.65)',
+        font: { color: '#cbd5e1', family: 'Inter, Noto Sans TC, sans-serif', size: 12 },
+        margin: { t: 22, r: 20, b: 44, l: 48 },
+        legend: { orientation: 'h', y: 1.15, x: 0 },
+        xaxis: { gridcolor: 'rgba(148, 163, 184, 0.12)', zeroline: false },
+        yaxis: { range: [0, 1.08], gridcolor: 'rgba(148, 163, 184, 0.12)', title: '歸屬度 μ' }
+      };
+
+      Plotly.react('plot-input-mf', inputTraces, {
+        ...darkPlotLayoutBase,
+        xaxis: { ...darkPlotLayoutBase.xaxis, title: '環境溫度 x (°C)', range: [10, 40] }
+      }, { responsive: true, displayModeBar: false });
+
+      const yDomain = [];
+      const bLowBase = [];
+      const bMedBase = [];
+      const bHighBase = [];
+      const bAgg = [];
+
+      let numIntegral = 0;
+      let denIntegral = 0;
+      let maxMu = 0;
+
+      for (let y = 0; y <= 100.001; y += 0.5) {
+        yDomain.push(y);
+        bLowBase.push(evalConsequentMF('low', y));
+        bMedBase.push(evalConsequentMF('med', y));
+        bHighBase.push(evalConsequentMF('high', y));
+
+        const c1 = evalConsequentMF(r1Cons, y);
+        const c2 = evalConsequentMF(r2Cons, y);
+        const c3 = evalConsequentMF(r3Cons, y);
+
+        const imp1 = implMethod === 'min' ? Math.min(w1, c1) : w1 * c1;
+        const imp2 = implMethod === 'min' ? Math.min(w2, c2) : w2 * c2;
+        const imp3 = implMethod === 'min' ? Math.min(w3, c3) : w3 * c3;
+
+        const muAgg = Math.max(imp1, imp2, imp3);
+        bAgg.push(muAgg);
+
+        numIntegral += y * muAgg;
+        denIntegral += muAgg;
+        if (muAgg > maxMu) maxMu = muAgg;
+      }
+
+      const yCOG = denIntegral > 1e-6 ? (numIntegral / denIntegral) : 0;
+
+      let momSum = 0;
+      let momCount = 0;
+      if (maxMu > 1e-6) {
+        for (let i = 0; i < yDomain.length; i++) {
+          if (Math.abs(bAgg[i] - maxMu) < 1e-4) {
+            momSum += yDomain[i];
+            momCount++;
+          }
+        }
+      }
+      const yMOM = momCount > 0 ? (momSum / momCount) : 0;
+
+      document.getElementById('metric-cog-output').textContent = `${yCOG.toFixed(1)} %`;
+      document.getElementById('metric-mom-output').textContent = `${yMOM.toFixed(1)} %`;
+
+      const outputTraces = [
+        {
+          x: yDomain, y: bLowBase, name: '低速風母集',
+          mode: 'lines', line: { color: 'rgba(56, 189, 248, 0.35)', width: 1.5, dash: 'dot' }
+        },
+        {
+          x: yDomain, y: bMedBase, name: '中速風母集',
+          mode: 'lines', line: { color: 'rgba(52, 211, 153, 0.35)', width: 1.5, dash: 'dot' }
+        },
+        {
+          x: yDomain, y: bHighBase, name: '高速風母集',
+          mode: 'lines', line: { color: 'rgba(251, 113, 133, 0.35)', width: 1.5, dash: 'dot' }
+        },
+        {
+          x: yDomain, y: bAgg, name: '聚合後模糊集 μ_agg(y)',
+          mode: 'lines', line: { color: '#a855f7', width: 3 },
+          fill: 'tozeroy', fillcolor: 'rgba(168, 85, 247, 0.28)'
+        },
+        {
+          x: [yCOG, yCOG], y: [0, 1.05],
+          name: `重心法 COG = ${yCOG.toFixed(1)}%`,
+          mode: 'lines', line: { color: '#10b981', width: 3.5 }
+        }
+      ];
+
+      if (compareMode === 'cog_and_mom') {
+        outputTraces.push({
+          x: [yMOM, yMOM], y: [0, 1.05],
+          name: `最大平均法 MOM = ${yMOM.toFixed(1)}%`,
+          mode: 'lines', line: { color: '#f59e0b', width: 2.5, dash: 'dashdot' }
+        });
+      }
+
+      Plotly.react('plot-output-defuzz', outputTraces, {
+        ...darkPlotLayoutBase,
+        xaxis: { ...darkPlotLayoutBase.xaxis, title: '冷氣風扇輸出轉速 y (%)', range: [0, 100] }
+      }, { responsive: true, displayModeBar: false });
+
+      const implSymbol = implMethod === 'min' ? '\\min\\big(w_l,\\, \\mu_{\\tilde{B}^l}(y)\\big)' : 'w_l \\cdot \\mu_{\\tilde{B}^l}(y)';
+      const formulaBox = document.getElementById('live-formula-box');
+      formulaBox.innerHTML = `
+        <div class="refined-card p-5 space-y-2">
+          <div class="text-sm font-bold text-sky-300">1. 前件部歸屬函數評估（當輸入 $x^* = ${xStar.toFixed(1)}^\\circ\\text{C}$）：</div>
+          <div class="formula-display-card">
+            $$\\begin{aligned}
+              w_1 &= \\mu_{\\text{cool}}(${xStar.toFixed(1)}) = \\text{trapmf}(${xStar.toFixed(1)};\\, 10, 10, ${coolC}, ${coolD}) = ${w1.toFixed(3)} \\\\
+              w_2 &= \\mu_{\\text{warm}}(${xStar.toFixed(1)}) = \\text{trimf}(${xStar.toFixed(1)};\\, ${warmA}, ${warmB}, ${warmC}) = ${w2.toFixed(3)} \\\\
+              w_3 &= \\mu_{\\text{hot}}(${xStar.toFixed(1)}) = \\text{trapmf}(${xStar.toFixed(1)};\\, ${hotA}, ${hotB}, 40, 40) = ${w3.toFixed(3)}
+            \\end{aligned}$$
+          </div>
+        </div>
+        <div class="refined-card p-5 space-y-2">
+          <div class="text-sm font-bold text-purple-300">2. 規則蘊含與 $\\max$ 聚合包絡線：</div>
+          <div class="formula-display-card">
+            $$\\mu_{\\tilde{B}_{\\text{agg}}}(y) = \\max_{l \\in \\{1, 2, 3\\}} \\Big[ ${implSymbol} \\Big]$$
+          </div>
+        </div>
+        <div class="refined-card p-5 space-y-2">
+          <div class="text-sm font-bold text-emerald-300">3. 重心法 (COG) 數值積分結果與最大平均法 (MOM) 對照：</div>
+          <div class="formula-display-card">
+            $$y^*_{\\text{COG}} = \\frac{\\sum_{k} y_k \\cdot \\mu_{\\tilde{B}_{\\text{agg}}}(y_k)}{\\sum_{k} \\mu_{\\tilde{B}_{\\text{agg}}}(y_k)} = \\frac{${numIntegral.toFixed(2)}}{${denIntegral.toFixed(2)}} = \\mathbf{${yCOG.toFixed(2)}\\%} \\qquad \\Big(\\text{對照 } y^*_{\\text{MOM}} = ${yMOM.toFixed(2)}\\%\\Big)$$
+          </div>
+        </div>
+      `;
+
+      if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([formulaBox]);
+      }
+    }
+
+    // =========================================================================
+    // 全平台 Fuzzy 互動實驗總樞紐 (Interactive Simulation Hub) 模組
+    // 管理 7 大篇章 21 座互動實驗室之切換、預覽與一鍵直達
+    // =========================================================================
+    let currentLabHubTab = 'flagship';
+
+    const LAB_CHAPTER_INFO = {
+      fuzzy_sets: {
+        number: '01',
+        title: 'Chapter 01 緒論與模糊集合基礎',
+        subtitle: '探索明確集合與模糊集合之平滑過渡、四大標準歸屬函數造型、排中律失效與 α-Cut 水平截集切線',
+        color: 'sky',
+        count: '3 座動態模擬器',
+        simulators: [
+          {
+            id: 'plot-ch1-history',
+            icon: '🏛️',
+            name: '歷史突破與里程碑年表 (Historical Milestones)',
+            desc: '全景展示 Zadeh 1965 模糊理論創立、Mamdani 1974 蒸汽機控制、仙台地鐵 1987 與日本家電黃金年代，點擊年表即時高亮關鍵論文。',
+            badge: '歷史全景'
+          },
+          {
+            id: 'plot-ch1-syllogism',
+            icon: '⚖️',
+            name: '廣義三段推論 vs. 二值邏輯 (Generalized Modus Ponens)',
+            desc: '動態調節前件命題真值，即時對比古典布林邏輯之斷崖判決與模糊邏輯平滑包絡線之彈性推理。',
+            badge: '邏輯對比'
+          },
+          {
+            id: 'plot-ch1-controller',
+            icon: '🎛️',
+            name: '模糊控制系統閉迴路三層拓撲 (Closed-Loop Topology)',
+            desc: '動態演示「模糊化器 (Fuzzifier) → 規則庫推論機 (Inference Engine) → 解模糊化器 (Defuzzifier)」三層訊號流即時傳遞過程。',
+            badge: '控制信號流'
+          }
+        ]
+      },
+      fuzzy_relations_inference: {
+        number: '02',
+        title: 'Chapter 02 模糊關係與模糊推論',
+        subtitle: '笛卡兒積空間關係矩陣、Max-Min 矩陣合成運算引擎、Mamdani 截頂與四大解模糊化策略對比',
+        color: 'indigo',
+        count: '3 座動態模擬器',
+        simulators: [
+          {
+            id: 'plot-ch2-cartesian',
+            icon: '📊',
+            name: '笛卡兒積二維關係熱點矩陣 (Cartesian Product)',
+            desc: '動態輸入集合 A 與 B 隸屬度，視覺化生成 R(x, y) = min(μ_A(x), μ_B(y)) 二維關聯熱點圖。',
+            badge: '二維熱圖'
+          },
+          {
+            id: 'plot-ch2-composition',
+            icon: '⚡',
+            name: 'Max-Min 模糊關係合成運算器 (Sup-Star Composition)',
+            desc: '輸入即時觀測向量，逐步拆解內積乘積與極大化挑選之計算引擎，附矩陣推導動態對照。',
+            badge: '矩陣運算'
+          },
+          {
+            id: 'plot-ch2-defuzz',
+            icon: '⚖️',
+            name: '四大解模糊化演算法實時比較 (Defuzzification Arena)',
+            desc: '在非對稱複合幾何形狀上，同時標出 COG (重心法)、MOM (最大平均法)、BOA (面積平分法) 與 LOM (最大最左法) 之輸出數值差異。',
+            badge: '演算法對決'
+          }
+        ]
+      },
+      fuzzy_control_applications: {
+        number: '03',
+        title: 'Chapter 03 模糊控制系統實務與三維控制曲面',
+        subtitle: '經典冷氣機 FAM 規則關聯記憶表、二維非線性 3D 控制曲面、Sugeno 仿射推論與重症醫療預警決策',
+        color: 'emerald',
+        count: '4 座動態模擬器',
+        simulators: [
+          {
+            id: 'plot-ch3-fam',
+            icon: '❄️',
+            name: '冷氣機 FAM 雙輸入模糊規則關聯記憶表',
+            desc: '拖曳誤差 e 與誤差變化率 Δe，即時高亮啟動之 FAM 單元格與前件活化強度。',
+            badge: '規則關聯'
+          },
+          {
+            id: 'plot-ch3-surface',
+            icon: '🌐',
+            name: '二維非線性 3D 控制曲面 (Control Surface 3D)',
+            desc: '透過 Plotly 3D 渲染從二維輸入空間到輸出控制量的平滑非線性流形，支援滑鼠 360° 自由旋轉與俯仰透視。',
+            badge: '3D 曲面'
+          },
+          {
+            id: 'plot-ch3-sugeno',
+            icon: '⚡',
+            name: 'Mamdani 截頂幾何 vs. Sugeno (TSK) 線性仿射推論',
+            desc: '直觀比較 Mamdani 之複雜包絡面積分與 Sugeno 零階/一階加權平均推論在運算複雜度與硬體實現上的顯著差異。',
+            badge: '架構對比'
+          },
+          {
+            id: 'plot-ch3-medical',
+            icon: '🩺',
+            name: '重症醫療多特徵預警決策模擬器 (ICU Early Warning)',
+            desc: '融合收縮壓、心率與血氧飽和度三項生理特徵，動態推論病患危機指數與自動觸發警報門檻。',
+            badge: '醫療決策'
+          }
+        ]
+      },
+      fuzzy_numbers_extension: {
+        number: '04',
+        title: 'Chapter 04 模糊數與擴展原理 (Extension Principle)',
+        subtitle: '連續函數模糊映射、非單射函數確界聚合 (Supremum) 與三角形模糊數四則運算 α-Cut 水平切割',
+        color: 'amber',
+        count: '2 座動態模擬器',
+        simulators: [
+          {
+            id: 'plot-ch4-mapping',
+            icon: '📈',
+            name: 'y = x² 擴展原理非單射映射模擬器',
+            desc: '拉動輸入模糊數寬度，觀察當多對一映射發生時，確界運算 sup_{x: f(x)=y} 如何平滑重塑輸出分佈。',
+            badge: '確界聚合'
+          },
+          {
+            id: 'plot-ch4-arithmetic',
+            icon: '🧮',
+            name: '三角形模糊數四則運算與 α-Cut 區間算術',
+            desc: '切換加法、減法、乘法，拉動 α 截集滑桿即時檢驗水平區間算術與 Nguyen 逆運算定理。',
+            badge: '區間算術'
+          }
+        ]
+      },
+      fuzzy_decision_evaluation: {
+        number: '05',
+        title: 'Chapter 05 模糊決策與多指標綜合評判',
+        subtitle: 'Bellman-Zadeh 目標與限制對稱交集模型、四大評判算子對比與階層評判評語向量分佈',
+        color: 'rose',
+        count: '2 座動態模擬器',
+        simulators: [
+          {
+            id: 'plot-ch5-decision',
+            icon: '🎯',
+            name: 'Bellman-Zadeh 最佳決策搜尋模擬器',
+            desc: '拉動目標效能曲線與預算門檻斜率，動態搜尋最優折衷決策點 x* = argmax min(μ_G(x), μ_C(x))。',
+            badge: '對稱決策'
+          },
+          {
+            id: 'plot-ch5-evaluation',
+            icon: '📊',
+            name: '多指標綜合評判四大算子實驗室 (Evaluation Operators)',
+            desc: '微調技術、成本與可靠度權重，即時比對主因素突出型、主因素強調型、取小和型與乘積和型長條分佈。',
+            badge: '四大算子'
+          }
+        ]
+      },
+      fuzzy_clustering_pattern: {
+        number: '06',
+        title: 'Chapter 06 模糊分群與模式識別',
+        subtitle: '等價關係傳遞閉包樹狀圖分群 (Dendrogram) 與 FCM 模糊 C-均值多中心迭代動態牽引收斂',
+        color: 'cyan',
+        count: '2 座動態模擬器',
+        simulators: [
+          {
+            id: 'plot-ch6-tree',
+            icon: '🌲',
+            name: '傳遞閉包樹狀圖分群模擬器 (Equivalence Dendrogram)',
+            desc: '拉動切集閾值 λ 滑桿，動態切割樣本相似度矩陣，即時重繪聚類合併樹狀圖。',
+            badge: '動態樹狀圖'
+          },
+          {
+            id: 'plot-ch6-fcm',
+            icon: '🔬',
+            name: 'FCM 模糊 C-均值多中心迭代動態收斂散佈圖',
+            desc: '拉動迭代步數 Iterations，動態觀察 3 個聚類中心在 2D 樣本分佈中的質心牽引與目標函數 J_m 最小化。',
+            badge: 'FCM 迭代'
+          }
+        ]
+      },
+      advanced_fuzzy_neuro: {
+        number: '07',
+        title: 'Chapter 07 類神經模糊 (ANFIS) 與自適應控制',
+        subtitle: 'ANFIS 五層拓撲架構、混合學習演算法 (前向 LSE + 反向 BP)、萬能非線性逼近與自適應 PID 步階響應',
+        color: 'violet',
+        count: '2 座動態模擬器',
+        simulators: [
+          {
+            id: 'plot-ch7-anfis',
+            icon: '🧠',
+            name: 'ANFIS 五層拓撲自我學習擬合模擬器',
+            desc: '拉動學習週期 Epochs，觀察高斯前件與線性後件參數如何協同逼近目標非線性 Sinc 曲線，並顯示 RMSE 收斂曲線。',
+            badge: 'ANFIS 學習'
+          },
+          {
+            id: 'plot-ch7-pid',
+            icon: '🎛️',
+            name: '自適應模糊 vs. 固定 PID 步階響應動態對抗',
+            desc: '施加負載擾動與工況突變，動態對抗自適應在線調整 Kp, Ki, Kd 之快速抗擾穩定性與傳統 PID 之超調震盪。',
+            badge: '控制對抗'
+          }
+        ]
+      }
+    };
+
+    function switchLabHubTab(tabKey) {
+      currentLabHubTab = tabKey;
+      const allTabs = ['flagship', 'fuzzy_sets', 'fuzzy_relations_inference', 'fuzzy_control_applications', 'fuzzy_numbers_extension', 'fuzzy_decision_evaluation', 'fuzzy_clustering_pattern', 'advanced_fuzzy_neuro'];
+
+      allTabs.forEach(k => {
+        const btn = document.getElementById(`lab-tab-btn-${k}`);
+        if (!btn) return;
+        if (k === tabKey) {
+          btn.className = 'px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/25';
+        } else {
+          btn.className = 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800';
+        }
+      });
+
+      const flagshipContainer = document.getElementById('lab-flagship-container');
+      const chapterContainer = document.getElementById('lab-chapter-container');
+
+      if (tabKey === 'flagship') {
+        if (flagshipContainer) flagshipContainer.classList.remove('hidden');
+        if (chapterContainer) chapterContainer.classList.add('hidden');
+        setTimeout(() => {
+          try {
+            updateLabSimulation();
+            if (window.Plotly && window.Plotly.Plots) {
+              window.Plotly.Plots.resize('plot-input-mf');
+              window.Plotly.Plots.resize('plot-output-defuzz');
+            }
+          } catch(e) {}
+        }, 50);
+      } else {
+        if (flagshipContainer) flagshipContainer.classList.add('hidden');
+        if (chapterContainer) {
+          chapterContainer.classList.remove('hidden');
+          renderLabChapterView(tabKey);
+        }
+      }
+    }
+
+    function renderLabChapterView(chapterId) {
+      const container = document.getElementById('lab-chapter-container');
+      if (!container) return;
+
+      const info = LAB_CHAPTER_INFO[chapterId];
+      if (!info) return;
+
+      const col = info.color;
+      const simCardsHtml = info.simulators.map((s, idx) => `
+        <div class="refined-card p-6 border-l-4 border-l-${col}-400 space-y-4 hover:border-${col}-400/80 transition">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl">${s.icon}</span>
+              <span class="px-2.5 py-1 rounded-lg bg-${col}-500/15 border border-${col}-500/30 text-${col}-300 text-xs font-mono font-bold">
+                ${s.badge}
+              </span>
+            </div>
+            <span class="text-xs text-slate-400 font-mono">Simulator 0${idx + 1}</span>
+          </div>
+          <h4 class="text-lg sm:text-xl font-bold text-white">${s.name}</h4>
+          <p class="text-sm sm:text-base text-slate-300 leading-relaxed">${s.desc}</p>
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-${col}-500/30 space-y-7">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-${col}-400">
+                <span>📍 專屬章節實驗室</span>
+                <span>•</span>
+                <span>Chapter ${info.number}</span>
+                <span>•</span>
+                <span class="text-emerald-400">${info.count}</span>
+              </div>
+              <h3 class="text-2xl sm:text-3xl font-extrabold text-white">${info.title}</h3>
+              <p class="text-slate-300 text-sm sm:text-base max-w-2xl">${info.subtitle}</p>
+            </div>
+            <button onclick="jumpToChapterLab('${chapterId}')"
+              class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-${col}-500 to-${col === 'amber' ? 'orange' : col === 'sky' ? 'indigo' : col === 'rose' ? 'pink' : col === 'cyan' ? 'blue' : 'purple'}-600 hover:opacity-95 text-white font-bold text-base shadow-xl shadow-${col}-500/25 transition flex items-center justify-center gap-2.5 shrink-0">
+              <span>🚀 立即進入本章【模組 3】實機操作 →</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 ${info.simulators.length > 2 ? 'md:grid-cols-2' : 'md:grid-cols-2'} gap-6">
+            ${simCardsHtml}
+          </div>
+
+          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
+            <div class="text-sm text-slate-300 flex items-center gap-2">
+              <span>💡</span>
+              <span>所有模擬器均已掛載於該章節之【模組 3：多維度模擬圖專區】，支援滑桿互動、動態重繪與逐步數學公式即時反饋！</span>
+            </div>
+            <button onclick="jumpToChapterLab('${chapterId}')"
+              class="text-xs sm:text-sm px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-${col}-300 border border-${col}-500/30 font-semibold transition">
+              前往本章模組 3 操作 →
+            </button>
+          </div>
+        </div>
+      `;
+
+      safeTypesetMath([container]);
+    }
+
+    function jumpToChapterLab(chapterId) {
+      switchTab('theory');
+      selectChapter(chapterId);
+
+      const modStateMap = {
+        fuzzy_sets: 'switchCh1Module',
+        fuzzy_relations_inference: 'switchCh2Module',
+        fuzzy_control_applications: 'switchCh3Module',
+        fuzzy_numbers_extension: 'switchCh4Module',
+        fuzzy_decision_evaluation: 'switchCh5Module',
+        fuzzy_clustering_pattern: 'switchCh6Module',
+        advanced_fuzzy_neuro: 'switchCh7Module'
+      };
+
+      const fnName = modStateMap[chapterId];
+      if (window.FuzzyWidgets && typeof window.FuzzyWidgets[fnName] === 'function') {
+        setTimeout(() => {
+          window.FuzzyWidgets[fnName]('m3', true);
+          const targetSecId = chapterId === 'fuzzy_sets' ? 'ch1-module-sec-m3' :
+            chapterId === 'fuzzy_relations_inference' ? 'ch2-module-sec-m3' :
+            chapterId === 'fuzzy_control_applications' ? 'ch3-module-sec-m3' :
+            chapterId === 'fuzzy_numbers_extension' ? 'ch4-module-sec-m3' :
+            chapterId === 'fuzzy_decision_evaluation' ? 'ch5-module-sec-m3' :
+            chapterId === 'fuzzy_clustering_pattern' ? 'ch6-module-sec-m3' :
+            'ch7-module-sec-m3';
+
+          const modEl = document.getElementById(targetSecId);
+          if (modEl) {
+            modEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            modEl.classList.remove('pulse-focus');
+            void modEl.offsetWidth;
+            modEl.classList.add('pulse-focus');
+          }
+        }, 120);
+      }
+    }
+
+    // 將導覽與按鈕事件處理器顯式掛載至 window 全域物件，徹底杜絕 ReferenceError
+    window.switchTab = switchTab;
+    window.switchLabHubTab = switchLabHubTab;
+    window.renderLabChapterView = renderLabChapterView;
+    window.jumpToChapterLab = jumpToChapterLab;
+        window.renderChapter4BookPagesSection = renderChapter4BookPagesSection;
+    window.renderChapter5BookPagesSection = renderChapter5BookPagesSection;
+    window.renderChapter6BookPagesSection = renderChapter6BookPagesSection;
+    window.renderChapter7BookPagesSection = renderChapter7BookPagesSection;
+    window.refreshParentBookGallery = refreshParentBookGallery;
+        window.zoomInModal = zoomInModal;
+    window.zoomOutModal = zoomOutModal;
+    window.resetModalZoom = resetModalZoom;
+    window.setModalZoom = setModalZoom;
+    window.setupModalZoomEvents = setupModalZoomEvents;
+    window.selectChapter = selectChapter;
+    window.navigateToRoadmapNode = navigateToRoadmapNode;
+    window.continueCurrentStage = continueCurrentStage;
+    window.unlockAllRoadmapNodes = unlockAllRoadmapNodes;
+    window.resetRoadmapProgress = resetRoadmapProgress;
+    window.toggleNodeComplete = toggleNodeComplete;
+    window.toggleCurrentNodeComplete = toggleCurrentNodeComplete;
+    window.openBookPhotoModal = openBookPhotoModal;
+    window.prevBookPhotoModal = prevBookPhotoModal;
+    window.nextBookPhotoModal = nextBookPhotoModal;
+    window.closeBookPhotoModal = closeBookPhotoModal;
+    window.setModalViewMode = setModalViewMode;
+    window.copyModalPageText = copyModalPageText;
+    window.switchBookSubChapter = switchBookSubChapter;
+    window.filterBookSubPage = filterBookSubPage;
+    window.filterChapter2Page = filterChapter2Page;
+    window.filterChapter34Page = filterChapter34Page;
+    window.filterChapter56Page = filterChapter56Page;
+    window.handleManualPhotoUpload = handleManualPhotoUpload;
+    window.renderChapterNav = renderChapterNav;
+    window.renderChapterContent = renderChapterContent;
+    window.initApp = initApp;
+    window.answerQuiz = answerQuiz;
+    window.resetQuiz = resetQuiz;
+    window.applyScenario = applyScenario;
+    window.resetLabDefaults = resetLabDefaults;
+    window.updateLabSimulation = updateLabSimulation;
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
