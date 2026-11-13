@@ -1,0 +1,7 @@
+{
+  "name": "fuzzy-learning-lab",
+  "compatibility_date": "2026-11-14",
+  "assets": {
+    "directory": "./public"
+  }
+}
