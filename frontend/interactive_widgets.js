@@ -8562,8 +8562,6 @@ window.FuzzyWidgets = (function () {
       console.warn('initIntroPlots warning:', e);
     }
   }
-, 60);
-  }
 
   return {
     getChapterInteractiveHtml: getChapterInteractiveHtml,

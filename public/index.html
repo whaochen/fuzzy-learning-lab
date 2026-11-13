@@ -30147,8 +30147,6 @@ window.FuzzyWidgets = (function () {
       console.warn('initIntroPlots warning:', e);
     }
   }
-, 60);
-  }
 
   return {
     getChapterInteractiveHtml: getChapterInteractiveHtml,
@@ -34559,6 +34557,19 @@ window.WebFISStudio = (function () {
     let completedNodes = [];
     let currentActiveNodeId = 's1_n1';
 
+    function normalizeChapterId(id) {
+      const legacyMap = {
+        fuzzy_sets: 'ch2_fuzzy_sets',
+        fuzzy_relations_inference: 'ch4_fuzzy_relations',
+        fuzzy_control_applications: 'ch6_fuzzy_control',
+        fuzzy_numbers_extension: 'ch3_operations_extension',
+        fuzzy_decision_evaluation: 'ch5_logic_inference',
+        fuzzy_clustering_pattern: 'ch6_fuzzy_control',
+        advanced_fuzzy_neuro: 'ch7_advanced_applications'
+      };
+      return legacyMap[id] || id || 'ch1_intro';
+    }
+
     // 載入與儲存學習地圖進度 (localStorage)
     function loadRoadmapProgress() {
       try {
@@ -35056,16 +35067,6 @@ window.WebFISStudio = (function () {
       advanced_fuzzy_neuro: 'all'
     };
 
-    let currentBookPageFilter = {
-      fuzzy_sets: 'all',
-      fuzzy_relations_inference: 'all',
-      fuzzy_control_applications: 'all',
-      fuzzy_numbers_extension: 'all',
-      fuzzy_decision_evaluation: 'all',
-      fuzzy_clustering_pattern: 'all',
-      advanced_fuzzy_neuro: 'all'
-    };
-
         function getBookPagesList() {
       if (window.BOOK_PHOTOS_ALL && Array.isArray(window.BOOK_PHOTOS_ALL) && window.BOOK_PHOTOS_ALL.length > 0) {
         return window.BOOK_PHOTOS_ALL;
@@ -35121,6 +35122,9 @@ window.WebFISStudio = (function () {
     function zoomInModal() {}
     function zoomOutModal() {}
     function resetModalZoom() {}
+    function setModalZoom() {}
+    function setupModalZoomEvents() {}
+    function handleManualPhotoUpload() {}
 
         function refreshParentBookGallery(parentChapterId) {
       if (parentChapterId === 'fuzzy_sets') {
@@ -35474,11 +35478,30 @@ window.WebFISStudio = (function () {
       renderParentBookGallery('advanced_fuzzy_neuro', 'chapter7-book-gallery-body', 'violet');
     }
 
-    // =========================================================================
-    /* // 《認識 Fuzzy》第 3、4 章（頁 3-1 ～ 4-6）
-    // 逐頁精讀渲染與原書照片全螢幕燈箱連動
-    // =========================================================================
-    // 舊有未使用的 Legacy 函數已安全清理;
+    function renderChapterNav() {
+      const navList = document.getElementById('chapter-nav-list');
+      if (!navList || !courseData || !Array.isArray(courseData.chapters)) return;
+
+      const getMod = (fnName) => (window.FuzzyWidgets && typeof window.FuzzyWidgets[fnName] === 'function')
+        ? window.FuzzyWidgets[fnName]()
+        : 'all';
+
+      const modStateMap = {
+        ch1_intro: { chNum: 1, mod: getMod('getActiveCh1Module'), switchFn: 'switchCh1Module', color: 'sky' },
+        ch2_fuzzy_sets: { chNum: 2, mod: getMod('getActiveCh2Module'), switchFn: 'switchCh2Module', color: 'sky' },
+        ch3_operations_extension: { chNum: 3, mod: getMod('getActiveCh3Module'), switchFn: 'switchCh3Module', color: 'amber' },
+        ch4_fuzzy_relations: { chNum: 4, mod: getMod('getActiveCh4Module'), switchFn: 'switchCh4Module', color: 'sky' },
+        ch5_logic_inference: { chNum: 5, mod: getMod('getActiveCh5Module'), switchFn: 'switchCh5Module', color: 'rose' },
+        ch6_fuzzy_control: { chNum: 6, mod: getMod('getActiveCh6Module'), switchFn: 'switchCh6Module', color: 'cyan' },
+        ch7_advanced_applications: { chNum: 7, mod: getMod('getActiveCh7Module'), switchFn: 'switchCh7Module', color: 'violet' },
+        fuzzy_sets: { chNum: 1, mod: getMod('getActiveCh1Module'), switchFn: 'switchCh1Module', color: 'sky' },
+        fuzzy_relations_inference: { chNum: 2, mod: getMod('getActiveCh2Module'), switchFn: 'switchCh2Module', color: 'sky' },
+        fuzzy_control_applications: { chNum: 3, mod: getMod('getActiveCh3Module'), switchFn: 'switchCh3Module', color: 'amber' },
+        fuzzy_numbers_extension: { chNum: 4, mod: getMod('getActiveCh4Module'), switchFn: 'switchCh4Module', color: 'amber' },
+        fuzzy_decision_evaluation: { chNum: 5, mod: getMod('getActiveCh5Module'), switchFn: 'switchCh5Module', color: 'rose' },
+        fuzzy_clustering_pattern: { chNum: 6, mod: getMod('getActiveCh6Module'), switchFn: 'switchCh6Module', color: 'cyan' },
+        advanced_fuzzy_neuro: { chNum: 7, mod: getMod('getActiveCh7Module'), switchFn: 'switchCh7Module', color: 'violet' }
+      };
 
       navList.innerHTML = courseData.chapters.map(ch => {
         const isActive = ch.id === activeChapterId;
@@ -35645,110 +35668,6 @@ window.WebFISStudio = (function () {
       if (window.FuzzyWidgets && typeof FuzzyWidgets.initChapterWidgets === 'function') {
         setTimeout(() => FuzzyWidgets.initChapterWidgets(normId), 60);
       }
-      safeTypesetMath([container]);
-    }
-
-      const conceptsHtml = ch.key_concepts.map((c, idx) => `
-        <article class="refined-card p-6 sm:p-7 space-y-4">
-          <div class="flex items-center gap-3.5">
-            <span class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-300 text-sm font-bold flex items-center justify-center border border-sky-500/35 shrink-0">${idx + 1}</span>
-            <h4 class="text-lg sm:text-xl font-bold text-white leading-snug">${c.term}</h4>
-          </div>
-          <div class="prose-reading pl-1">
-            ${formatRichText(c.explanation)}
-          </div>
-          <div class="formula-display-card">
-            ${c.formula}
-          </div>
-        </article>
-      `).join('');
-
-      const tableHeaders = ch.comparison_table.headers.map(h =>
-        `<th class="px-5 py-4 text-left text-xs sm:text-sm font-bold uppercase tracking-wider text-sky-300 border-b border-slate-700/80 bg-slate-900/95">${h}</th>`
-      ).join('');
-
-      const tableRows = ch.comparison_table.rows.map(row => `
-        <tr class="border-b border-slate-800/70 hover:bg-slate-800/40 transition">
-          ${row.map((cell, i) => `<td class="px-5 py-4 text-base leading-relaxed ${i === 0 ? 'font-bold text-white whitespace-nowrap' : 'text-slate-200'}">${cell}</td>`).join('')}
-        </tr>
-      `).join('');
-
-      container.innerHTML = `
-        ${headerCardHtml}
-
-        <!-- 視覺化互動圖表實驗室 -->
-        ${window.FuzzyWidgets ? FuzzyWidgets.getChapterInteractiveHtml(chapterId) : ''}
-
-        <!-- 核心理論與數學公式 -->
-        <div class="glass-panel rounded-3xl p-7 sm:p-9 space-y-6">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-            <h3 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
-              <span class="text-sky-400">📐</span> 核心定義與數學公式推導
-            </h3>
-            <span class="text-xs text-slate-400 hidden sm:inline">行內變數防斷行・長公式置中展開</span>
-          </div>
-          <div class="space-y-6">
-            ${conceptsHtml}
-          </div>
-        </div>
-
-        <!-- 觀念對照表 -->
-        <div class="glass-panel rounded-3xl p-7 sm:p-9 space-y-5">
-          <h3 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-3">
-            <span class="text-indigo-400">📊</span> 教材結構化觀念對照表
-          </h3>
-          <div class="overflow-x-auto rounded-2xl border border-slate-800 shadow-inner">
-            <table class="w-full border-collapse">
-              <thead><tr>${tableHeaders}</tr></thead>
-              <tbody>${tableRows}</tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- 書本與跨校講義實務範例對照 (精緻雙層卡片設計) -->
-        <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-emerald-500/30 space-y-6">
-          <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
-            <h3 class="text-xl sm:text-2xl font-bold text-emerald-300 flex items-center gap-2.5">
-              <span>✍️</span> ${ch.worked_example.title}
-            </h3>
-            <button onclick="jumpToChapterLab('${ch.id}')" class="text-sm px-4 py-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/35 transition font-bold flex items-center gap-1.5 shadow-sm hover:shadow-emerald-500/20">
-              🎛️ 在本章【模組 3：互動實驗室】驗證 →
-            </button>
-          </div>
-
-          <!-- 題目敘述精緻卡片 -->
-          <div class="refined-card p-6 sm:p-7 border-l-4 border-l-sky-400 space-y-3">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-xs font-bold uppercase tracking-wider text-sky-300">
-              <span>📌 題目敘述 (Problem Statement)</span>
-            </div>
-            <div class="prose-reading text-slate-100">
-              ${formatRichText(ch.worked_example.problem)}
-            </div>
-          </div>
-
-          <!-- 逐步推導詳解精緻卡片 -->
-          <div class="refined-card p-6 sm:p-7 border-l-4 border-l-emerald-400 space-y-3">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-xs font-bold uppercase tracking-wider text-emerald-300">
-              <span>🧮 逐步推導詳解 (Step-by-Step Derivation)</span>
-            </div>
-            <div class="prose-reading text-slate-100">
-              ${formatRichText(ch.worked_example.solution)}
-            </div>
-          </div>
-
-          <!-- 跨校講義補充卡片 -->
-          <div class="bg-indigo-950/45 rounded-2xl p-6 border border-indigo-500/35 prose-reading text-indigo-100">
-            ${formatRichText(ch.worked_example.slide_tip)}
-          </div>
-        </div>
-
-        ${footerNavHtml}
-      `;
-
-      if (window.FuzzyWidgets && typeof FuzzyWidgets.initChapterWidgets === 'function') {
-        setTimeout(() => FuzzyWidgets.initChapterWidgets(chapterId), 60);
-      }
-
       safeTypesetMath([container]);
     }
 
