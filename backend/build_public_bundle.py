@@ -25,6 +25,7 @@ INDEX_OUT = os.path.join(PUBLIC_DIR, 'index.html')
 
 LOCAL_SCRIPTS = [
     'course_data.js',
+    'chapters_19_data.js',
     'book_pages.js',
     'interactive_widgets.js',
     'fis_studio.js'

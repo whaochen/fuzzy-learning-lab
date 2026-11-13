@@ -11069,6 +11069,1268 @@ window.FUZZY_COURSE_DATA = {
 
 </script>
   <script>
+/* === Inlined chapters_19_data.js === */
+// ============================================================================
+// 《認識 Fuzzy》全書 19 章統一資料模型 (Single Source of Truth)
+// 涵蓋 Ch.01 ~ Ch.19 完整通論、先備知識、核心公式、互動實驗室映射與 57 題隨堂練習
+// ============================================================================
+window.CHAPTERS_19_DATA = [
+  {
+    ch: 1,
+    code: "Ch.01",
+    title: "第 1 章：緒論與模糊邏輯起源",
+    subtitle: "Introduction & Origins of Fuzzy Theory",
+    stageGroup: "基礎理論篇",
+    color: "sky",
+    icon: "🌱",
+    pageRange: "1-1 ~ 1-7",
+    prerequisites: ["日常語意認知", "二元邏輯常識"],
+    overview: "認識「模糊 (Fuzzy)」並非含糊不清，而是處理人類語意與複雜真實世界不確定性的數學工具。從愛因斯坦「精確與真實的權衡」到 1965 年 Zadeh 教授發表《Fuzzy Sets》，理解為何傳統非黑即白的二分法無法描述漸變現象，並掌握模糊理論在美、日、歐的發展脈絡。",
+    keyConcepts: [
+      {
+        term: "精確性與真實性的不相容原理 (Principle of Incompatibility)",
+        explanation: "當系統複雜度增加時，我們對系統行為做出「既精確又有意義」描述的能力會急遽下降，直到精確與真實幾乎互不相容。",
+        formula: "$$\\text{Complexity} \\uparrow \\implies \\text{Precision} \\times \\text{Relevance} \\approx \\text{const}$$"
+      },
+      {
+        term: "模糊理論 vs. 機率論",
+        explanation: "機率描述「隨機事件是否發生」的不確定性（如明天下雨機率 70%）；模糊描述「概念邊界本身」的程度歸屬（如這杯水有多燙 0.8）。",
+        formula: "$$P(A) \\in [0,1] \\text{ (隨機性)} \\quad \\text{vs.} \\quad \\mu_A(x) \\in [0,1] \\text{ (語意模糊度)}$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch01",
+      title: "古典二分法 vs. 模糊連續歸屬曲線 & 精確真實權衡",
+      subtitle: "觀察「小朋友年齡」在明確集合方波與模糊鐘形曲線的差異，以及愛因斯坦權衡曲線。",
+      widgetType: "intro_dual"
+    },
+    quizzes: [
+      {
+        id: "q1_1",
+        question: "下列何者最能說明「模糊集合」與「機率論」的本質差異？",
+        options: [
+          "機率論處理事件發生的隨機性，模糊集合處理概念邊界與語意程度的漸變性",
+          "模糊集合只能用於離散資料，機率論只能用於連續資料",
+          "兩者完全相同，只是數學符號不同",
+          "模糊集合的歸屬度總和必須等於 1，機率則不需要"
+        ],
+        answer_index: 0,
+        explanation: "機率回答「事件發生的可能性」，而模糊理論回答「元素屬於某語意概念的程度」，兩者處理不同維度的不確定性。"
+      },
+      {
+        id: "q1_2",
+        question: "1965 年正式提出《Fuzzy Sets》奠定模糊理論基礎的學者是誰？",
+        options: ["Lotfi A. Zadeh", "Ebrahim Mamdani", "Michio Sugeno", "George Boole"],
+        answer_index: 0,
+        explanation: "加州大學柏克萊分校的 Lotfi A. Zadeh 教授於 1965 年在《Information and Control》期刊發表開創性論文《Fuzzy Sets》。"
+      },
+      {
+        id: "q1_3",
+        question: "關於 Zadeh 提出的「不相容原理 (Principle of Incompatibility)」，下列敘述何者正確？",
+        options: [
+          "系統越複雜，我們越難同時保有高度精確與高度實質意義",
+          "模糊邏輯與古典微積分無法在同一個系統中共存",
+          "感測器越精準，系統控制效果一定越差",
+          "只有線性系統才能使用模糊理論建模"
+        ],
+        answer_index: 0,
+        explanation: "複雜系統若強求極致精確往往會失去對真實行為的直覺掌握，模糊語言變數恰好提供了有效的高階描述。"
+      }
+    ]
+  },
+  {
+    ch: 2,
+    code: "Ch.02",
+    title: "第 2 章：模糊集合理論與基礎定義",
+    subtitle: "Fuzzy Sets Fundamentals & Membership Functions",
+    stageGroup: "基礎理論篇",
+    color: "teal",
+    icon: "📐",
+    pageRange: "2-1 ~ 2-15",
+    prerequisites: ["Ch.01 緒論", "基礎函數圖形"],
+    overview: "正式進入模糊集合的數學定義：從明確集合的特性函數 $\\Phi_A(x)\\in\\{0,1\\}$ 推廣至模糊歸屬函數 $\\mu_A(x)\\in[0,1]$。學習離散與連續模糊集合的 Zadeh 表示法、正則性 (Normality)、支撐集 (Support)、核心 (Core)、凸性 (Convexity) 以及常見的三角形、梯形與高斯歸屬函數。",
+    keyConcepts: [
+      {
+        term: "模糊集合與 Zadeh 表示法",
+        explanation: "在宇集合 $X$ 中，模糊集合 $A$ 由序對 $(x, \\mu_A(x))$ 組成；離散時以 $\\sum$ 表示，連續時以 $\\int$ 表示（僅為集合記號，非加減或積分運算）。",
+        formula: "$$A = \\sum_{i} \\frac{\\mu_A(x_i)}{x_i} \\quad \\text{或} \\quad A = \\int_X \\frac{\\mu_A(x)}{x}$$"
+      },
+      {
+        term: "支撐集 (Support)、核心 (Core) 與正則性",
+        explanation: "支撐集為歸屬度大於 0 的明確集合；核心為歸屬度等於 1 的明確集合；若 $\\sup_x \\mu_A(x) = 1$ 則稱 $A$ 為正則模糊集合。",
+        formula: "$$\\text{Supp}(A) = \\{x \\in X \\mid \\mu_A(x) > 0\\}, \\quad \\text{Core}(A) = \\{x \\in X \\mid \\mu_A(x) = 1\\}$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch02",
+      title: "Ch.01~02 歸屬函數造型實驗室（三角、梯形、高斯、S 形）",
+      subtitle: "拖曳參數觀察不同歸屬函數造型、中心點與斜率對 $\\mu_A(x)$ 的影響。",
+      widgetType: "ch1_plots"
+    },
+    quizzes: [
+      {
+        id: "q2_1",
+        question: "在連續模糊集合表示法 $A = \\int_X \\mu_A(x)/x$ 中，符號 $\\int$ 代表什麼意義？",
+        options: [
+          "代表宇集合 $X$ 上所有元素與其歸屬度的聯集記號，並非微積分積分",
+          "代表必須對歸屬函數進行定積分且面積必須等於 1",
+          "代表取歸屬函數的導數",
+          "代表機率密度函數的累積分佈"
+        ],
+        answer_index: 0,
+        explanation: "Zadeh 表示法中的 $\\sum$ 與 $\\int$ 僅為「集合枚舉/聯集」符號，斜線 $/$ 也不是除法。"
+      },
+      {
+        id: "q2_2",
+        question: "若模糊集合 $A$ 滿足 $\\max_{x\\in X} \\mu_A(x) = 1$，我們稱 $A$ 具有什麼性質？",
+        options: ["正則性 (Normality)", "對稱性 (Symmetry)", "互斥性 (Disjointness)", "完備性 (Completeness)"],
+        answer_index: 0,
+        explanation: "至少有一個元素的歸屬度達到最大值 1 的模糊集合稱為正則模糊集合 (Normal Fuzzy Set)。"
+      },
+      {
+        id: "q2_3",
+        question: "關於凸模糊集合 (Convex Fuzzy Set) 的定義，下列何者正確？",
+        options: [
+          "對任意 $x_1 < x_2$ 與 $\\lambda\\in[0,1]$，滿足 $\\mu_A(\\lambda x_1 + (1-\\lambda)x_2) \\ge \\min(\\mu_A(x_1), \\mu_A(x_2))$",
+          "歸屬函數圖形必須是嚴格遞增函數",
+          "歸屬函數只能有單一峰值且不能是梯形",
+          "支撐集必須是有限集合"
+        ],
+        answer_index: 0,
+        explanation: "凸性等價於「所有 $\\alpha$-截集皆為凸集」，即圖形中間不能有向下凹陷的雙峰谷底。"
+      }
+    ]
+  },
+  {
+    ch: 3,
+    code: "Ch.03",
+    title: "第 3 章：模糊集合之基本性質與 α-截集",
+    subtitle: "Alpha-Cuts & Decomposition Theorem",
+    stageGroup: "基礎理論篇",
+    color: "cyan",
+    icon: "✂️",
+    pageRange: "3-1 ~ 3-15",
+    prerequisites: ["Ch.02 模糊集合定義"],
+    overview: "掌握連結「模糊集合」與「古典明確集合」的最重要橋樑——$\\alpha$-截集 ($\\alpha$-cut) 與強 $\\alpha$-截集。理解截集基本性質、幾何意義與分解定理 (Decomposition Theorem)，學會如何將任何模糊集合拆解為不同水平高度的明確區間來進行運算與推論。",
+    keyConcepts: [
+      {
+        term: "$\\alpha$-截集 ($\\alpha$-cut) 與強 $\\alpha$-截集",
+        explanation: "將歸屬度大於等於（或嚴格大於）門檻 $\\alpha$ 的所有元素取出，形成一個古典明確集合。",
+        formula: "$$A_\\alpha = \\{x \\in X \\mid \\mu_A(x) \\ge \\alpha\\}, \\quad A_{\\alpha+} = \\{x \\in X \\mid \\mu_A(x) > \\alpha\\}$$"
+      },
+      {
+        term: "分解定理 (Decomposition Theorem)",
+        explanation: "任何模糊集合 $A$ 都可以表示為其所有 $\\alpha$-截集的聯集疊加，這是模糊數學與明確區間數學轉換的核心。",
+        formula: "$$A = \\bigcup_{\\alpha \\in [0,1]} \\alpha \\cdot A_\\alpha, \\quad \\mu_A(x) = \\sup_{\\alpha \\in [0,1]} [\\alpha \\cdot \\Phi_{A_\\alpha}(x)]$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch03",
+      title: "α-截集水平切割與分解定理互動圖",
+      subtitle: "調整水平高度 $\\alpha \\in [0, 1]$，即時觀察被切出的明確區間 $A_\\alpha$ 範圍與凸性驗證。",
+      widgetType: "ch1_alpha"
+    },
+    quizzes: [
+      {
+        id: "q3_1",
+        question: "當 $\\alpha_1 < \\alpha_2$ 時，同一個模糊集合 $A$ 的兩個截集 $A_{\\alpha_1}$ 與 $A_{\\alpha_2}$ 之間有什麼包含關係？",
+        options: [
+          "$A_{\\alpha_2} \\subseteq A_{\\alpha_1}$（水平越高，切出的集合越小）",
+          "$A_{\\alpha_1} \\subseteq A_{\\alpha_2}$（水平越高，切出的集合越大）",
+          "兩者完全相等",
+          "兩者交集必為空集合"
+        ],
+        answer_index: 0,
+        explanation: "門檻 $\\alpha$ 越高，符合 $\\mu_A(x) \\ge \\alpha$ 的元素條件越嚴格，因此所切出的集合範圍會單調縮小或相等。"
+      },
+      {
+        id: "q3_2",
+        question: "在 $\\alpha$-截集的運算性質中，$(A \\cap B)_\\alpha$ 與 $(A \\cup B)_\\alpha$ 分別等於什麼？",
+        options: [
+          "$A_\\alpha \\cap B_\\alpha$ 與 $A_\\alpha \\cup B_\\alpha$",
+          "$A_\\alpha \\cup B_\\alpha$ 與 $A_\\alpha \\cap B_\\alpha$",
+          "僅能各自取補集後相減",
+          "無法與明確集合運算對應"
+        ],
+        answer_index: 0,
+        explanation: "在標準交集 (min) 與標準聯集 (max) 下，截集運算完全滿足同態性：$(A\\cap B)_\\alpha = A_\\alpha \\cap B_\\alpha$ 且 $(A\\cup B)_\\alpha = A_\\alpha \\cup B_\\alpha$。"
+      },
+      {
+        id: "q3_3",
+        question: "模糊集合 $A$ 的 $\\alpha = 0^+$ 強截集 $A_{0+}$ 恰好對應哪一個基礎集合概念？",
+        options: ["支撐集 Support(A)", "核心 Core(A)", "平衡點 Equilibrium", "補集 $\\bar{A}$"],
+        answer_index: 0,
+        explanation: "$A_{0+} = \\{x \\mid \\mu_A(x) > 0\\}$ 正好就是支撐集 $\\text{Supp}(A)$。"
+      }
+    ]
+  },
+  {
+    ch: 4,
+    code: "Ch.04",
+    title: "第 4 章：模糊集合之運算",
+    subtitle: "Fuzzy Operations, t-norms & t-conorms",
+    stageGroup: "基礎理論篇",
+    color: "amber",
+    icon: "⚙️",
+    pageRange: "4-1 ~ 4-12",
+    prerequisites: ["Ch.02 模糊集合", "Ch.03 α-截集"],
+    overview: "深入探討模糊補集 (Complement)、交集 (t-norm) 與聯集 (t-conorm / s-norm) 的公理化定義與多樣化運算子。除了標準的 $\\min / \\max / 1-\\mu$ 外，更進一步認識 Sugeno、Yager 參數化補集，以及代數積、有界和等 t-norm/s-norm 家族，並理解為何模糊集合會違反矛盾律與排中律。",
+    keyConcepts: [
+      {
+        term: "標準模糊運算與排中律的打破",
+        explanation: "標準運算為 $\\mu_{\\bar{A}}(x)=1-\\mu_A(x)$、$\\mu_{A\\cap B}=\\min(\\mu_A,\\mu_B)$、$\\mu_{A\\cup B}=\\max(\\mu_A,\\mu_B)$。當 $\\mu_A(x)=0.5$ 時，$A \\cap \\bar{A} \\neq \\emptyset$。",
+        formula: "$$\\mu_{A\\cap\\bar{A}}(x) = \\min(\\mu_A(x), 1-\\mu_A(x)) \\le 0.5$$"
+      },
+      {
+        term: "Sugeno 參數化補集與平衡點",
+        explanation: "透過參數 $\\lambda \\in (-1, \\infty)$ 調整補集曲線的凹/凸程度，當 $\\lambda=0$ 時退化為標準補集。",
+        formula: "$$c_\\lambda(a) = \\frac{1 - a}{1 + \\lambda a}, \\quad \\lambda > -1$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch04",
+      title: "模糊交集 (t-norm)、聯集 (s-norm) 與參數化補集實驗室",
+      subtitle: "比較標準 min/max、代數積、有界差等運算子對兩模糊集合交疊區域的影響。",
+      widgetType: "ch1_ops"
+    },
+    quizzes: [
+      {
+        id: "q4_1",
+        question: "若 $\\mu_A(x) = 0.6$，使用標準模糊補集後，其交集 $\\mu_{A \\cap \\bar{A}}(x)$ 的值為何？",
+        options: ["0.4", "0", "0.6", "1.0"],
+        answer_index: 0,
+        explanation: "$\\mu_{\\bar{A}}(x) = 1 - 0.6 = 0.4$，故 $\\min(0.6, 0.4) = 0.4 \\neq 0$，顯示模糊集合違反古典矛盾律。"
+      },
+      {
+        id: "q4_2",
+        question: "下列何者「不是」合法的 t-norm (模糊交集) 運算子？",
+        options: [
+          "$T(a, b) = \\max(a, b)$",
+          "$T(a, b) = \\min(a, b)$",
+          "$T(a, b) = a \\cdot b$",
+          "$T(a, b) = \\max(0, a + b - 1)$"
+        ],
+        answer_index: 0,
+        explanation: "$\\max(a, b)$ 是標準模糊聯集 (t-conorm)，不滿足 t-norm 的邊界條件 $T(a, 1) = a$。"
+      },
+      {
+        id: "q4_3",
+        question: "在 Sugeno 補集 $c_\\lambda(a) = (1-a)/(1+\\lambda a)$ 中，當 $\\lambda = 0$ 時會得到什麼結果？",
+        options: [
+          "退化為標準模糊補集 $1 - a$",
+          "恆等於 1",
+          "恆等於 0",
+          "產生無窮大未定義"
+        ],
+        answer_index: 0,
+        explanation: "將 $\\lambda=0$ 代入分母 $1+0\\cdot a = 1$，因此 $c_0(a) = 1 - a$。"
+      }
+    ]
+  },
+  {
+    ch: 5,
+    code: "Ch.05",
+    title: "第 5 章：模糊數之算術與擴展原理",
+    subtitle: "Fuzzy Numbers Arithmetic & Extension Principle",
+    stageGroup: "基礎理論篇",
+    color: "indigo",
+    icon: "🧮",
+    pageRange: "5-1 ~ 5-31",
+    prerequisites: ["Ch.03 α-截集", "Ch.04 模糊運算"],
+    overview: "學習如何讓模糊集合「做加減乘除」：包含 Zadeh 擴展原理 (Extension Principle) 與基於 $\\alpha$-截集的區間算術 (Interval Arithmetic)。理解模糊數必備的正則性、凸性與底集有界性，並實際推導三角/梯形模糊數的加減乘除公式。",
+    keyConcepts: [
+      {
+        term: "Zadeh 擴展原理 (Extension Principle)",
+        explanation: "將明確映射 $y = f(x_1, x_2)$ 推廣至模糊集合輸入，輸出元素的歸屬度取所有能映射到該輸出的輸入組合之最大最小值。",
+        formula: "$$\\mu_{f(A,B)}(y) = \\sup_{y = f(x_1, x_2)} \\min(\\mu_A(x_1), \\mu_B(x_2))$$"
+      },
+      {
+        term: "基於 α-截集的區間加法與減法",
+        explanation: "若 $A_\\alpha = [a_1^\\alpha, a_2^\\alpha]$ 且 $B_\\alpha = [b_1^\\alpha, b_2^\\alpha]$，則區間加法與減法可直接由端點算術求得。",
+        formula: "$$(A + B)_\\alpha = [a_1^\\alpha + b_1^\\alpha,\\; a_2^\\alpha + b_2^\\alpha], \\quad (A - B)_\\alpha = [a_1^\\alpha - b_2^\\alpha,\\; a_2^\\alpha - b_1^\\alpha]$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch05",
+      title: "模糊數區間算術與擴展原理視覺化 (Ch.03/05)",
+      subtitle: "調整兩個三角模糊數 $A$ 與 $B$ 的參數與運算類型 ($+, -, \\times$)，觀察結果形狀與誤差擴散。",
+      widgetType: "ch3_plots"
+    },
+    quizzes: [
+      {
+        id: "q5_1",
+        question: "設兩個模糊區間在 $\\alpha=0.5$ 時分別為 $A_{0.5} = [2, 4]$ 與 $B_{0.5} = [1, 3]$，則 $(A - B)_{0.5}$ 為何？",
+        options: ["$[-1, 3]$", "$[1, 1]$", "$[1, 3]$", "$[-3, 1]$"],
+        answer_index: 0,
+        explanation: "區間減法為 $[a_1 - b_2,\\; a_2 - b_1] = [2 - 3,\\; 4 - 1] = [-1, 3]$。注意不可直接同端點相減。"
+      },
+      {
+        id: "q5_2",
+        question: "一個模糊集合要成為「模糊數 (Fuzzy Number)」，通常必須同時滿足哪幾項條件？",
+        options: [
+          "正則性 (Normal)、凸性 (Convex)、以及支撐集有界",
+          "只能是對稱三角形且中心必須大於 0",
+          "歸屬度函數必須是線性遞增",
+          "只能定義在正整數集合上"
+        ],
+        answer_index: 0,
+        explanation: "模糊數用來表達「大約是某實數」，因此必須是正則（頂點達 1）、凸集（單峰不凹陷）且有界。"
+      },
+      {
+        id: "q5_3",
+        question: "兩個三角模糊數相加後，結果通常是什麼形狀？仍是三角形嗎？那相乘呢？",
+        options: [
+          "相加仍是精確三角模糊數；相乘則邊界會變成微彎的曲線（通常以三角近似）",
+          "相加與相乘都會變成完全對稱的矩形",
+          "相加會變成雙峰，相乘則是三角形",
+          "兩者都無法用 α-截集計算"
+        ],
+        answer_index: 0,
+        explanation: "線性組合（加減、純量乘）保持三角線性邊界；兩模糊數相乘則因端點相乘產生二次項而呈微彎曲線。"
+      }
+    ]
+  },
+  {
+    ch: 6,
+    code: "Ch.06",
+    title: "第 6 章：模糊關係與合成運算",
+    subtitle: "Fuzzy Relations & Max-Min Composition",
+    stageGroup: "基礎理論篇",
+    color: "indigo",
+    icon: "🕸️",
+    pageRange: "6-1 ~ 6-16",
+    prerequisites: ["Ch.04 模糊運算", "基礎矩陣運算"],
+    overview: "從二元明確關係矩陣推廣至「模糊關係矩陣」$R \\subseteq X \\times Y$，學習如何量化兩個不同論域之間的關聯強度（如症狀與疾病、身高與體重）。核心重點在於關係合成 (Composition)——包含 Max-Min 合成與 Max-Product 合成，這也是下一階段「模糊推論」的數學引擎。",
+    keyConcepts: [
+      {
+        term: "卡迪興乘積與模糊關係矩陣",
+        explanation: "模糊關係 $R(X, Y)$ 是定義在乘積空間 $X \\times Y$ 上的模糊集合，每個矩陣元素 $r_{ij} = \\mu_R(x_i, y_j) \\in [0,1]$。",
+        formula: "$$R = \\int_{X\\times Y} \\frac{\\mu_R(x,y)}{(x,y)}, \\quad r_{ij} \\in [0,1]$$"
+      },
+      {
+        term: "Max-Min 合成運算 ($R \\circ S$)",
+        explanation: "類似矩陣乘法，但將「乘」換成 $\\min$、將「加總」換成 $\\max$，用來串聯兩段關係 $X\\to Y$ 與 $Y\\to Z$。",
+        formula: "$$\\mu_{R \\circ S}(x, z) = \\max_{y \\in Y} \\min\\big(\\mu_R(x, y),\\; \\mu_S(y, z)\\big)$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch06",
+      title: "模糊關係熱圖與 Max-Min 合成矩陣實驗室",
+      subtitle: "互動編輯關係矩陣 $R$ 與 $S$，即時計算並視覺化 3D 關係曲面與合成結果 $R \\circ S$。",
+      widgetType: "ch2_plots"
+    },
+    quizzes: [
+      {
+        id: "q6_1",
+        question: "已知向量 $A = [0.8,\\; 0.3]$ 與關係矩陣 $R = \\begin{bmatrix} 0.5 & 0.9 \\\\ 0.7 & 0.2 \\end{bmatrix}$，進行 Max-Min 合成 $A \\circ R$ 的結果為何？",
+        options: ["$[0.5,\\; 0.8]$", "$[0.7,\\; 0.9]$", "$[0.3,\\; 0.2]$", "$[0.61,\\; 0.78]$"],
+        answer_index: 0,
+        explanation: "第一欄：$\\max(\\min(0.8,0.5), \\min(0.3,0.7)) = \\max(0.5, 0.3) = 0.5$；第二欄：$\\max(\\min(0.8,0.9), \\min(0.3,0.2)) = \\max(0.8, 0.2) = 0.8$。"
+      },
+      {
+        id: "q6_2",
+        question: "在 Max-Min 合成運算中，為何結果的數值永遠不會大於兩者原本最大的歸屬度？",
+        options: [
+          "因為 $\\min$ 與 $\\max$ 皆為封閉於 $[0,1]$ 的保序運算，不會產生大於輸入的數值",
+          "因為每次運算後都會強制除以 2",
+          "因為矩陣必須先經過標準化使其和為 1",
+          "這只發生在對稱矩陣"
+        ],
+        answer_index: 0,
+        explanation: "$\\min$ 與 $\\max$ 只會挑選既有數值中的較小或較大者，不會像加法一樣累積超過 1。"
+      },
+      {
+        id: "q6_3",
+        question: "Max-Min 合成運算與 Max-Product 合成運算的主要差別在於？",
+        options: [
+          "後者以代數乘積 $a\\cdot b$ 取代 $\\min(a,b)$，使微弱證據有更平滑的衰減效果",
+          "後者以加法取代 $\\max$",
+          "前者只能用在 2×2 矩陣",
+          "兩者計算結果在所有輸入下永遠完全相同"
+        ],
+        answer_index: 0,
+        explanation: "Max-Product 使用 $a \\cdot b$ 進行激發強度衰減，常使曲面更加平滑。"
+      }
+    ]
+  },
+  {
+    ch: 7,
+    code: "Ch.07",
+    title: "第 7 章：倒單擺非線性平衡控制實務",
+    subtitle: "Inverted Pendulum Nonlinear Fuzzy Control",
+    stageGroup: "工程控制篇",
+    color: "emerald",
+    icon: "⚖️",
+    pageRange: "7-1 ~ 7-16",
+    prerequisites: ["Ch.06 模糊關係", "基本物理力學直覺"],
+    overview: "從理論走向實務的第一個經典非線性控制案例：台車上的倒單擺平衡系統。系統同時具備不穩定平衡點與強非線性，透過讀取擺角誤差 $e=\\theta$ 與角速度變化率 $\\dot{e}=\\dot{\\theta}$，建立 2D 模糊控制規則表 (FAM Table) 並以重心法解模糊化輸出台車推力 $u$。",
+    keyConcepts: [
+      {
+        term: "倒單擺模糊控制雙輸入與規則表",
+        explanation: "以角度誤差 $e$（向左傾/垂直/向右傾）與角速度 $\\dot{e}$ 作為雙輸入，決定台車應向左或向右施加多大推力。",
+        formula: "$$\\text{IF } e \\text{ is } PB \\text{ AND } \\dot{e} \\text{ is } ZO \\text{ THEN } u \\text{ is } PB$$"
+      },
+      {
+        term: "重心法解模糊化 (Center of Gravity, COG)",
+        explanation: "將所有被觸發規則推論出的輸出模糊集合聯集後，計算其幾何重心作為最終給馬達的明確電流/推力指令。",
+        formula: "$$u^* = \\frac{\\int u \\cdot \\mu_{out}(u)\\, du}{\\int \\mu_{out}(u)\\, du}$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch07",
+      title: "Mamdani 模糊控制架構與倒單擺推力決策模擬",
+      subtitle: "調整輸入誤差與變化率，實時觀察各規則激發強度、截頂面積與重心法 $u^*$ 輸出。",
+      widgetType: "ch3_plots"
+    },
+    quizzes: [
+      {
+        id: "q7_1",
+        question: "在倒單擺模糊控制中，當單擺「已經向右傾斜 ($e > 0$) 且正繼續快速向右倒下 ($\\dot{e} > 0$)」時，台車應如何動作以挽救平衡？",
+        options: [
+          "快速向右加速追趕單擺下方 (正大推力 PB)",
+          "立即向左全力倒車 (負大推力 NB)",
+          "完全停止不動 (零輸出 ZO)",
+          "僅輸出極微小的阻力"
+        ],
+        answer_index: 0,
+        explanation: "台車必須往單擺傾倒的同方向快速移動，才能把支點重新帶回重心下方產生反方向恢復力矩。"
+      },
+      {
+        id: "q7_2",
+        question: "一個標準 Mamdani 模糊邏輯控制器 (FLC) 的四大核心模組順序為何？",
+        options: [
+          "模糊化 $\\to$ 規則庫 $\\to$ 推論引擎 $\\to$ 解模糊化",
+          "解模糊化 $\\to$ 模糊化 $\\to$ 規則庫 $\\to$ 推論引擎",
+          "規則庫 $\\to$ 重心法 $\\to$ 卡迪興乘積 $\\to$ 模糊化",
+          "僅需規則庫即可直接輸出馬達電壓"
+        ],
+        answer_index: 0,
+        explanation: "感測器數值先經模糊化轉為歸屬度，再經規則庫與推論引擎合成輸出集合，最後經解模糊化轉為明確控制訊號。"
+      },
+      {
+        id: "q7_3",
+        question: "相較於傳統線性 PID 控制，模糊控制應用於倒單擺時有何優勢？",
+        options: [
+          "不需精確推導非線性微分方程模型，可直接將人類平衡經驗編寫為 IF-THEN 規則",
+          "完全不需要感測器量測角度",
+          "硬體成本永遠為零",
+          "只能控制靜止不動的物體"
+        ],
+        answer_index: 0,
+        explanation: "倒單擺在較大傾角下呈高度非線性，模糊控制能以專家規則平滑涵蓋大角度與小角度區域。"
+      }
+    ]
+  },
+  {
+    ch: 8,
+    code: "Ch.08",
+    title: "第 8 章：模糊冷氣溫控與節能系統",
+    subtitle: "Fuzzy Air-Conditioning & Energy-Saving Control",
+    stageGroup: "工程控制篇",
+    color: "cyan",
+    icon: "❄️",
+    pageRange: "8-1 ~ 8-12",
+    prerequisites: ["Ch.07 模糊控制架構"],
+    overview: "分析智慧家電中最具代表性的模糊變頻冷氣溫控系統。相較於傳統定頻冷氣「高於設定溫度就全速運轉、低於就停機」的震盪與耗電，模糊冷氣透過「室溫誤差 $\\Delta T$」與「溫差變化率 $d(\\Delta T)/dt$」連續調節壓縮機轉速頻率，兼顧體感舒適度與節能省電。",
+    keyConcepts: [
+      {
+        term: "舒適度指標與變頻壓縮機連續調控",
+        explanation: "依據室溫與目標溫度差距 $\\Delta T$ 以及升溫速度，決定壓縮機轉速（極低頻、低頻、中頻、高頻）。",
+        formula: "$$f_{comp} = \\text{Defuzzify}\\big(\\mu_{\\Delta T}(e) \\circ \\mu_{\\dot{T}}(\\dot{e}) \\circ R_{AC}\\big)$$"
+      },
+      {
+        term: "模糊溫控 vs. 傳統繼電器開關控制",
+        explanation: "傳統開關控制存在遲滯區間與過衝 (Overshoot)；模糊控制能在接近目標溫度時提前降頻，消除溫度波動。",
+        formula: "$$\\text{Energy Saved} \\propto \\int |f_{on/off}(t) - f_{fuzzy}(t)|^2 dt$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch08",
+      title: "Ch.08 模糊變頻冷氣溫控雙輸入模擬器",
+      subtitle: "調整室溫偏差 $\\Delta T$ 與室溫變化率 $dT/dt$，即時比較模糊變頻輸出頻率與傳統定頻震盪曲線。",
+      widgetType: "ch8_ac"
+    },
+    quizzes: [
+      {
+        id: "q8_1",
+        question: "當室溫目前僅比目標溫度高 $0.5^\\circ\\text{C}$，但室外西曬導致室溫正「快速上升」時，模糊冷氣控制器應如何輸出？",
+        options: [
+          "提前提高壓縮機運轉頻率（中高頻），預先抵銷升溫趨勢",
+          "等到室溫超過目標 $3^\\circ\\text{C}$ 再啟動",
+          "維持最低頻率不變",
+          "直接關閉壓縮機"
+        ],
+        answer_index: 0,
+        explanation: "引入溫差變化率 $dT/dt$ 作為第二輸入，正是一種前瞻預測機制，能在誤差擴大前先行抑制。"
+      },
+      {
+        id: "q8_2",
+        question: "為何模糊變頻冷氣能比傳統定頻冷氣更省電？",
+        options: [
+          "避免壓縮機反覆「全速啟動—停機」的巨大啟動電流浪費，改以低頻平穩維持室溫",
+          "因為模糊冷氣不使用冷媒",
+          "因為模糊控制器會自動把目標溫度調高 $10^\\circ\\text{C}$",
+          "僅靠降低風扇轉速達成"
+        ],
+        answer_index: 0,
+        explanation: "在低負載穩態時以低頻連續運轉，效率遠高於頻繁啟停壓縮機。"
+      },
+      {
+        id: "q8_3",
+        question: "在冷氣溫控系統中，若使用者反應「每次降溫都太慢」，應如何微調模糊控制器？",
+        options: [
+          "調整「溫度偏高」語意集合的論域尺度或增加規則輸出權重",
+          "把所有規則輸出都設為 0 Hz",
+          "取消重心法，改用隨機數輸出",
+          "減少溫度感測器的取樣頻率至每小時一次"
+        ],
+        answer_index: 0,
+        explanation: "調整輸入比例因子 (Scaling Factor) 或規則後件中心值，即可直接改變系統的響應速度與強健度。"
+      }
+    ]
+  },
+  {
+    ch: 9,
+    code: "Ch.09",
+    title: "第 9 章：模糊洗衣機與家電模糊感測",
+    subtitle: "Fuzzy Washing Machine & Smart Sensor Fusion",
+    stageGroup: "工程控制篇",
+    color: "sky",
+    icon: "🫧",
+    pageRange: "9-1 ~ 9-21",
+    prerequisites: ["Ch.07 模糊控制", "Ch.08 雙輸入規則庫"],
+    overview: "日本家電革命的經典代表——松下 (Matsushita) 愛妻號模糊洗衣機！沒有單一感測器能直接測量「衣服有多髒」，工程師巧妙利用光敏電阻感測洗滌水的「濁度 (Turbidity)」與「濁度變化飽和時間」，搭配衣物重量感測，推論出最佳的洗滌時間、水流強度與洗劑建議量。",
+    keyConcepts: [
+      {
+        term: "軟感測與間接特徵推論 (Soft Sensing)",
+        explanation: "透過光線穿透洗滌水的透光率變化，間接推論衣物髒污量與髒污種類（泥沙型快速變濁 vs. 油漬型緩慢溶出）。",
+        formula: "$$\\text{Dirtiness} = \\text{FuzzyInfer}(\\text{Turbidity},\\; \\text{Saturation Time})$$"
+      },
+      {
+        term: "多規則加權推論洗衣時間",
+        explanation: "結合「衣物重量」、「水質濁度」與「濁度變化率」三項感測指標，自動決定 5 到 25 分鐘的無段式最佳洗程。",
+        formula: "$$T_{wash} = \\frac{\\sum_{k=1}^M w_k \\cdot t_k}{\\sum_{k=1}^M w_k}$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch09",
+      title: "Ch.09 模糊洗衣機濁度感測與最佳洗程決策圖",
+      subtitle: "調整水質濁度、飽和時間與衣物重量，即時檢視光電濁度曲線與最佳洗滌時間輸出。",
+      widgetType: "ch9_washer"
+    },
+    quizzes: [
+      {
+        id: "q9_1",
+        question: "模糊洗衣機主要透過什麼物理原理來判斷衣物的「髒污程度」與「髒污種類」？",
+        options: [
+          "利用光電感測器量測洗滌水的「濁度」與「濁度達到飽和的時間」",
+          "使用微型攝影機對每件衣服拍照辨識",
+          "測量洗衣機馬達的溫度",
+          "僅憑使用者手動輸入衣服顏色"
+        ],
+        answer_index: 0,
+        explanation: "光敏電阻感測透光率下降速度與最終濁度：泥沙溶出快（飽和時間短），油污溶出慢（飽和時間長）。"
+      },
+      {
+        id: "q9_2",
+        question: "當濁度「很低」且衣物重量「很輕」時，模糊洗衣機通常會如何決策？",
+        options: [
+          "大幅縮短洗滌與注水時間，使用柔和短程水流以節水省電保護衣物",
+          "延長洗滌時間至最高上限以確保萬無一失",
+          "自動切換至強力脫水 30 分鐘",
+          "發出故障警報停止運作"
+        ],
+        answer_index: 0,
+        explanation: "這正是模糊家電的核心價值：依實際感測狀態動態最佳化資源消耗，不浪費水電。"
+      },
+      {
+        id: "q9_3",
+        question: "為何模糊洗衣機只需要一個按鍵（一鍵啟動）就能取代繁瑣的傳統設定？",
+        options: [
+          "因為內部感測融合與模糊規則庫能自動取代人類對水量、水流與時間的經驗判斷",
+          "因為它固定只有一種 15 分鐘洗程",
+          "因為它移除了脫水功能",
+          "因為它透過網路連線到氣象局決定洗法"
+        ],
+        answer_index: 0,
+        explanation: "將洗衣專家經驗內建為模糊規則，讓感測器直接驅動智慧決策。"
+      }
+    ]
+  },
+  {
+    ch: 10,
+    code: "Ch.10",
+    title: "第 10 章：汽車自駕與防鎖死煞車系統 (ABS)",
+    subtitle: "Automotive ABS & Slip Ratio Fuzzy Control",
+    stageGroup: "工程控制篇",
+    color: "rose",
+    icon: "🚗",
+    pageRange: "10-1 ~ 10-13",
+    prerequisites: ["Ch.07 非線性控制", "輪胎滑移率物理意義"],
+    overview: "探討車輛緊急煞車時的關鍵安全系統——防鎖死煞車系統 (ABS)。當車輪完全鎖死（滑移率 $\\lambda=1$）時，輪胎與路面的靜摩擦變為滑動摩擦，不僅煞車距離變長更會失去轉向能力。模糊 ABS 透過車速、輪速與減速度即時調節煞車油壓，將滑移率精準鎖定在最大摩擦力區間 ($\\lambda \\approx 0.15 \\sim 0.25$)。",
+    keyConcepts: [
+      {
+        term: "輪胎滑移率 (Slip Ratio) $\\lambda$",
+        explanation: "定義車速 $v$ 與車輪切線速度 $\\omega R$ 的相對差值；$\\lambda=0$ 為純滾動，$\\lambda=1$ 為完全鎖死打滑。",
+        formula: "$$\\lambda = \\frac{v - \\omega R}{v} \\in [0, 1]$$"
+      },
+      {
+        term: "不同路面下的最佳摩擦峰值區間",
+        explanation: "乾燥柏油、濕滑路面或冰雪路面的摩擦係數曲線 $\\mu(\\lambda)$ 差異極大，模糊規則能自適應調節油壓脈衝防止鎖死。",
+        formula: "$$\\text{Goal: } \\lambda \\to \\lambda_{opt} \\approx 0.18 \\implies \\max \\mu(\\lambda)$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch10",
+      title: "Ch.10 汽車 ABS 滑移率摩擦曲線與模糊油壓控制模擬",
+      subtitle: "切換路面狀況（乾柏油/濕地/結冰）與煞車力度，觀察滑移率 $\\lambda$ 與煞車油壓控制響應。",
+      widgetType: "ch10_abs"
+    },
+    quizzes: [
+      {
+        id: "q10_1",
+        question: "車輛緊急煞車時，為何不能讓車輪「完全鎖死」($\\lambda = 1$)？",
+        options: [
+          "鎖死時輪胎摩擦係數下降使煞車距離變長，且橫向抓地力歸零導致車輛失控打滑",
+          "鎖死時車輛會立刻加速往前衝",
+          "鎖死會讓車燈熄滅",
+          "其實鎖死時煞車距離最短，ABS 只是為了省煞車皮"
+        ],
+        answer_index: 0,
+        explanation: "最大縱向制動力與可維持轉向能力的橫向力，皆位於滑移率 $15\\%\\sim 25\\%$ 區間，完全鎖死將失去轉向能力。"
+      },
+      {
+        id: "q10_2",
+        question: "若車速 $v = 20\\,\\text{m/s}$，車輪切線速度 $\\omega R = 16\\,\\text{m/s}$，此時滑移率 $\\lambda$ 為多少？",
+        options: ["$0.20\\;(20\\%)$", "$0.80\\;(80\\%)$", "$0.25\\;(25\\%)$", "$0.04\\;(4\\%)$"],
+        answer_index: 0,
+        explanation: "$\\lambda = (20 - 16) / 20 = 4 / 20 = 0.20$，正好落在乾燥路面最佳煞車區間附近。"
+      },
+      {
+        id: "q10_3",
+        question: "模糊邏輯特別適合用於 ABS 與路況辨識的主要原因為何？",
+        options: [
+          "路面摩擦係數無法直接以單一線性方程準確預測，模糊規則可依減速度與滑移趨勢動態適應乾濕冰路面",
+          "模糊控制只允許開與關兩種油壓值",
+          "ABS 不需要任何即時計算",
+          "模糊控制器可以取代輪胎橡膠"
+        ],
+        answer_index: 0,
+        explanation: "路面狀態高度非線性且隨時變化，模糊推論具有良好的強健性 (Robustness)。"
+      }
+    ]
+  },
+  {
+    ch: 11,
+    code: "Ch.11",
+    title: "第 11 章：模糊類神經網路 (Neuro-Fuzzy / ANFIS)",
+    subtitle: "Adaptive Neuro-Fuzzy Inference System",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "violet",
+    icon: "🧠",
+    pageRange: "11-1 ~ 11-15",
+    prerequisites: ["Ch.07 模糊推論", "基礎梯度下降與類神經概念"],
+    overview: "當系統複雜到專家也寫不出完整規則時怎麼辦？本章介紹將「模糊邏輯的可解釋性」與「類神經網路的資料學習能力」結合的混合架構——ANFIS (Adaptive-Network-based Fuzzy Inference System)。理解 Takagi-Sugeno-Kang (TSK) 一階推論如何展開為五層前饋網路，並透過混合學習演算法（最小平方法 + 反向傳播）自動微調歸屬函數參數。",
+    keyConcepts: [
+      {
+        term: "ANFIS 五層網路架構",
+        explanation: "依序為：L1 模糊化層（可調前提參數）、L2 規則激發層（乘積）、L3 正規化層、L4 後件線性推論層（可調結論參數）、L5 總和輸出層。",
+        formula: "$$f = \\sum_{i} \\bar{w}_i f_i = \\sum_i \\bar{w}_i (p_i x + q_i y + r_i)$$"
+      },
+      {
+        term: "混合學習法 (Hybrid Learning Algorithm)",
+        explanation: "前向傳遞固定前提參數並以最小平方法 (LSE) 求解線性結論參數 $(p_i, q_i, r_i)$；反向傳遞固定結論參數並以梯度下降更新歸屬函數參數。",
+        formula: "$$\\theta_{premise}(t+1) = \\theta_{premise}(t) - \\eta \\frac{\\partial E}{\\partial \\theta_{premise}}$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch11",
+      title: "Ch.11 ANFIS 自適應函數擬合與訓練收斂曲線模擬",
+      subtitle: "調整學習率 $\\eta$、規則數量與訓練迭代次數，觀察 ANFIS 如何自動微調隸屬函數以逼近目標非線性曲線。",
+      widgetType: "ch11_anfis"
+    },
+    quizzes: [
+      {
+        id: "q11_1",
+        question: "結合「模糊系統」與「類神經網路」的 ANFIS 架構，各自彌補了對方的哪一項缺點？",
+        options: [
+          "類神經提供「從資料自動學習參數」的能力，模糊系統提供「語意規則可解釋性與先驗知識嵌入」",
+          "類神經讓系統失去推論速度，模糊系統移除所有權重",
+          "兩者結合後不再需要任何訓練資料",
+          "兩者結合只為了減少程式行數"
+        ],
+        answer_index: 0,
+        explanation: "純類神經是黑盒子難解釋；純模糊需要人工調參。Neuro-Fuzzy 取兩者所長，既可訓練又具備規則結構。"
+      },
+      {
+        id: "q11_2",
+        question: "ANFIS 架構通常採用哪一種模糊推論模型作為骨幹，使其第 4 層能以最小平方法快速求解？",
+        options: [
+          "Takagi-Sugeno-Kang (TSK) 線性後件模型",
+          "純二元布林邏輯模型",
+          "僅使用 Max-Min 的純圖形重心法",
+          "蒙地卡羅隨機樹"
+        ],
+        answer_index: 0,
+        explanation: "TSK 模型的結論為輸入變數的線性組合 $p_i x + q_i y + r_i$，對參數呈線性關係，故能用最小平方法一步求得最佳解。"
+      },
+      {
+        id: "q11_3",
+        question: "在 ANFIS 的五層結構中，第 3 層的主要功能為何？",
+        options: [
+          "計算每條規則激發強度的正規化權重 $\\bar{w}_i = w_i / \\sum_j w_j$",
+          "對輸入影像進行卷積濾波",
+          "將輸出轉換為圖片",
+          "隨機刪除一半的規則"
+        ],
+        answer_index: 0,
+        explanation: "第 3 層（Normalized Firing Strength）將各規則激發強度歸一化，使總和為 1。"
+      }
+    ]
+  },
+  {
+    ch: 12,
+    code: "Ch.12",
+    title: "第 12 章：模糊圖形識別與影像特徵擷取",
+    subtitle: "Fuzzy Pattern Recognition & Image Enhancement",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "amber",
+    icon: "🖼️",
+    pageRange: "12-1 ~ 12-13",
+    prerequisites: ["Ch.02 歸屬函數", "灰階影像像素概念"],
+    overview: "真實影像常受限於光線不均、雜訊與物體邊界模糊。本章學習如何把影像灰階值 $g \\in [0, 255]$ 映射到模糊亮度平面 $[0, 1]$，運用 Pal-King 模糊對比度增強算子 (INT Operator) 凸顯邊緣，並透過模糊貼近度 (Fuzzy Similarity / Closeness) 進行圖形分類與目標識別。",
+    keyConcepts: [
+      {
+        term: "模糊影像對比度增強算子 (INT Operator)",
+        explanation: "對模糊亮度平面上的歸屬度 $\\mu_{mn}$ 進行二次方增強，將大於 0.5 的亮部推向 1、小於 0.5 的暗部推向 0，達到去霧與強化邊界的效果。",
+        formula: "$$\\mu'_{mn} = \\begin{cases} 2[\\mu_{mn}]^2, & 0 \\le \\mu_{mn} \\le 0.5 \\\\ 1 - 2[1 - \\mu_{mn}]^2, & 0.5 < \\mu_{mn} \\le 1 \\end{cases}$$"
+      },
+      {
+        term: "模糊貼近度與最近鄰樣板識別",
+        explanation: "計算待測特徵模糊集合 $B$ 與各標準類別樣板 $A_k$ 的格貼近度（內積與外積比值或海明距離），選取最大貼近度作為分類結果。",
+        formula: "$$\\sigma(A, B) = \\frac{1}{2}\\big[ (A \\bullet B) + (1 - A \\odot B) \\big]$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch12",
+      title: "Ch.12 模糊影像對比增強 (INT Operator) 灰階轉換曲線",
+      subtitle: "調整渡越點 (Crossover Point) 與迭代增強次數，即時觀察灰階像素映射與邊緣銳利度變化。",
+      widgetType: "ch12_image"
+    },
+    quizzes: [
+      {
+        id: "q12_1",
+        question: "使用模糊增強算子 (INT Operator) 處理一張曝光不足、邊界模糊的灰階影像時，它對 $\\mu > 0.5$ 與 $\\mu < 0.5$ 的像素分別做什麼處理？",
+        options: [
+          "將 $>0.5$ 的像素歸屬度推向 1（更亮），將 $<0.5$ 的推向 0（更暗），拉大對比",
+          "將所有像素都平均成 0.5（完全灰暗）",
+          "隨機交換亮部與暗部像素",
+          "直接刪除大於 0.5 的所有像素"
+        ],
+        answer_index: 0,
+        explanation: "INT 算子是一個以 0.5 為對稱中心的 S 形非線性強化函數，可顯著降低影像的模糊指數 (Index of Fuzziness)。"
+      },
+      {
+        id: "q12_2",
+        question: "在模糊圖形識別中，「擇近原則」是指什麼？",
+        options: [
+          "計算未知樣本與各標準類別模糊樣板的貼近度，將其歸類至貼近度最高的那一類",
+          "只看圖形左下角最近的像素",
+          "把所有類別合併成單一類別",
+          "隨機挑選距離最遠的類別"
+        ],
+        answer_index: 0,
+        explanation: "擇近原則是模糊模式識別的核心準則，利用貼近度 (Closeness) 或相似度量度完成軟性分類。"
+      },
+      {
+        id: "q12_3",
+        question: "影像像素的「模糊度 (Index of Fuzziness)」越接近 0，代表這張影像呈現什麼特性？",
+        options: [
+          "黑白分明、邊界對比極度清晰",
+          "整張影像呈現均勻中灰色、完全看不清輪廓",
+          "影像解析度變成 1×1",
+          "影像檔案損毀"
+        ],
+        answer_index: 0,
+        explanation: "當所有像素歸屬度都趨近 0 或 1（遠離 0.5 的最大不確定區）時，模糊度趨近於 0。"
+      }
+    ]
+  },
+  {
+    ch: 13,
+    code: "Ch.13",
+    title: "第 13 章：模糊決策與多準則評估 (MCDM)",
+    subtitle: "Fuzzy Decision Making & Multi-Criteria Evaluation",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "rose",
+    icon: "⚖️",
+    pageRange: "13-1 ~ 13-17",
+    prerequisites: ["Ch.04 模糊交集與聯集", "Ch.05 模糊數"],
+    overview: "真實世界的工程選型、投資評估與管理決策往往充滿主觀語意（「成本偏高」、「可靠性極佳」）與彼此衝突的目標。本章學習 Bellman-Zadeh 模糊決策模型（目標與限制條件之交集）、模糊綜合評判 (Fuzzy Comprehensive Evaluation) 與模糊權重矩陣運算，將專家語意轉化為客觀可排序的綜合評分。",
+    keyConcepts: [
+      {
+        term: "Bellman-Zadeh 模糊決策模型",
+        explanation: "將模糊目標 $G$ 與模糊限制 $C$ 視為同等地位的模糊集合，決策集合 $D = G \\cap C$，最佳方案為使 $D$ 歸屬度最大化者。",
+        formula: "$$\\mu_D(x) = \\min\\big(\\mu_G(x),\\; \\mu_C(x)\\big), \\quad x^* = \\arg\\max_{x\\in X} \\mu_D(x)$$"
+      },
+      {
+        term: "模糊綜合評判 ($B = W \\circ R$)",
+        explanation: "結合各指標權重向量 $W$ 與專家對方案的評價矩陣 $R$，透過模糊合成得出綜合評語分佈向量 $B$。",
+        formula: "$$B = W \\circ R = (b_1, b_2, \\dots, b_m)$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch13",
+      title: "Ch.13 Bellman-Zadeh 模糊決策交集與多準則評估實驗室",
+      subtitle: "調整決策目標「高性能」與限制條件「低成本」曲線，找出最佳折衷點 $x^*$ 與綜合評判雷達。",
+      widgetType: "ch13_decision"
+    },
+    quizzes: [
+      {
+        id: "q13_1",
+        question: "在 Bellman-Zadeh 模糊決策模型中，若模糊目標為 $G$、模糊限制條件為 $C$，則「決策集合 $D$」如何定義？",
+        options: [
+          "$D = G \\cap C$（必須同時滿足目標與限制的交集）",
+          "$D = G \\cup C$（只要滿足其中一個即可）",
+          "$D = \\bar{G} \\cap \\bar{C}$",
+          "$D = G - C$"
+        ],
+        answer_index: 0,
+        explanation: "決策必須在目標與限制之間取得同時滿足程度最高的方案，因此取交集 $D = G \\cap C$ 並求其最大值。"
+      },
+      {
+        id: "q13_2",
+        question: "進行模糊綜合評判 $B = W \\circ R$ 時，向量 $W$ 的所有權重元素通常需要滿足什麼條件？",
+        options: [
+          "各指標權重非負且總和為 1（正規化權重分佈）",
+          "全部權重都必須大於 10",
+          "只能有單一指標非零",
+          "權重必須是負數"
+        ],
+        answer_index: 0,
+        explanation: "權重向量代表各項評估準則的相對重要性佔比，通常正規化為 $\\sum w_i = 1$。"
+      },
+      {
+        id: "q13_3",
+        question: "如果評估後有兩個方案的綜合評語向量 $B$ 非常接近，最常用的最終排序方法為何？",
+        options: [
+          "將評語等級賦予分數並計算加權重心總分進行明確比較",
+          "直接放棄兩個方案",
+          "隨機抽籤決定",
+          "只看第一個指標而忽略其餘所有指標"
+        ],
+        answer_index: 0,
+        explanation: "賦予評語等級量化分數（如優=90, 良=75, 中=60）後計算加權期望值，即可得出明確的單一排序分數。"
+      }
+    ]
+  },
+  {
+    ch: 14,
+    code: "Ch.14",
+    title: "第 14 章：臨床醫學與重症監測模糊專家系統",
+    subtitle: "Medical Diagnosis & ICU Fuzzy Expert Systems",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "teal",
+    icon: "🏥",
+    pageRange: "14-1 ~ 14-17",
+    prerequisites: ["Ch.06 模糊關係", "Ch.13 模糊決策"],
+    overview: "醫療診斷往往面臨「正常值與異常值之間沒有絕對界線」（例如發燒、高血壓、呼吸急促）以及症狀重疊的挑戰。本章介紹如何將資深醫師的臨床經驗轉化為模糊關係矩陣與多生理參數（心率、血氧、血壓、體溫）監測規則，打造能即時評估病患風險等級與減少假警報的臨床輔助專家系統。",
+    keyConcepts: [
+      {
+        term: "醫療生理指標的模糊語意化",
+        explanation: "體溫 $37.4^\\circ\\text{C}$ 不應被硬性判為「完全正常」，而是同時具有「微燒 0.4」與「正常 0.6」的雙重歸屬，提供早期預警。",
+        formula: "$$\\text{Risk Level} = \\text{FuzzyFuse}(\\text{HR},\\; \\text{SpO}_2,\\; \\text{Temp},\\; \\text{BP})$$"
+      },
+      {
+        term: "症狀—疾病模糊關係推論",
+        explanation: "透過臨床統計建立症狀與疾病關聯矩陣 $R$，由病患症狀強度向量 $S$ 推論各疾病可能程度 $D = S \\circ R$。",
+        formula: "$$d_j = \\max_i \\min(s_i,\\; r_{ij})$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch14",
+      title: "Ch.14 ICU 重症生理參數模糊風險評估儀表板",
+      subtitle: "即時調整病患體溫、心率與血氧飽和度 ($\\text{SpO}_2$)，觀察各指標模糊警示程度與綜合風險指數。",
+      widgetType: "ch14_medical"
+    },
+    quizzes: [
+      {
+        id: "q14_1",
+        question: "傳統 ICU 生理監視器常因單一固定門檻（如心率 > 100 就響鈴）產生大量誤報；導入模糊專家系統後如何改善？",
+        options: [
+          "整合多項生理參數變化趨勢與邊界平滑度，過濾短暫微小波動並準確分級風險",
+          "把所有警報聲音都永久靜音",
+          "把警報門檻提高到不可能達到的數值",
+          "每天只檢查一次病患數值"
+        ],
+        answer_index: 0,
+        explanation: "多參數融合與連續歸屬度能區分「短暫誤差波動」與「多指標同時惡化」，大幅降低臨床警報疲勞。"
+      },
+      {
+        id: "q14_2",
+        question: "在醫療診斷模糊關係 $D = S \\circ R$ 中，若某病患完全沒有症狀 $i$（即 $s_i = 0$），該症狀對疾病 $j$ 的 Max-Min 貢獻為何？",
+        options: ["$\\min(0, r_{ij}) = 0$（沒有貢獻）", "$r_{ij}$", "1", "會變成負數"],
+        answer_index: 0,
+        explanation: "$\\min(0, r_{ij}) = 0$，因此未出現的症狀不會造成錯誤激發。"
+      },
+      {
+        id: "q14_3",
+        question: "為何臨床醫師通常更信任模糊專家系統而非純黑盒深度學習模型作為輔助工具？",
+        options: [
+          "模糊規則以人類可讀的 IF-THEN 邏輯呈現，醫師能明確檢視是哪幾項指標觸發了風險評估",
+          "模糊專家系統不需要任何電力運作",
+          "模糊系統永遠不會有任何誤差",
+          "醫師不需要知道病患數值"
+        ],
+        answer_index: 0,
+        explanation: "醫療決策重視「可解釋性 (Explainability)」與問責性，這正是模糊規則庫的強項。"
+      }
+    ]
+  },
+  {
+    ch: 15,
+    code: "Ch.15",
+    title: "第 15 章：模糊時間序列分析與金融預測",
+    subtitle: "Fuzzy Time Series & Financial Forecasting",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "indigo",
+    icon: "📈",
+    pageRange: "15-1 ~ 15-15",
+    prerequisites: ["Ch.02 論域分割", "Ch.06 模糊關係"],
+    overview: "傳統時間序列 (如 ARIMA) 要求數據平穩且常受限於線性假設，面對股市指數、匯率與用電負載等充滿雜訊與語意波動的資料時表現受限。Song 與 Chissom 提出的「模糊時間序列 (FTS)」將數值論域分割為語意區間，建立模糊邏輯關係群 (FLRG) 來捕捉歷史轉移規律。",
+    keyConcepts: [
+      {
+        term: "論域分割與語意化轉換",
+        explanation: "將歷史數值範圍 $[D_{\\min}-D_1,\\; D_{\\max}+D_2]$ 切分為 $n$ 個模糊集合 $A_1, A_2, \\dots, A_n$，將每年/每日數值轉換為語意序列。",
+        formula: "$$F(t-1) \\to F(t) \\implies A_i \\to A_j$$"
+      },
+      {
+        term: "模糊邏輯關係群 (FLRG) 與去模糊化預測",
+        explanation: "將相同前件的轉移規則分組（如 $A_i \\to A_{j1}, A_{j2}$），並取後件區間中點的平均或加權值作為下一期預測值。",
+        formula: "$$\\hat{y}(t) = \\frac{1}{k}\\sum_{r=1}^k m(A_{j_r})$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch15",
+      title: "Ch.15 模糊時間序列 (FTS) 語意區間切分與走勢預測模擬",
+      subtitle: "調整論域切分區間數與平滑權重，觀察歷史序列轉化為模糊預測曲線的擬合誤差 (RMSE)。",
+      widgetType: "ch15_fts"
+    },
+    quizzes: [
+      {
+        id: "q15_1",
+        question: "建立模糊時間序列 (Fuzzy Time Series) 預測模型的第一個關鍵步驟為何？",
+        options: [
+          "定義論域 $U$ 並將其分割為數個等距或不等距的模糊語意區間",
+          "把所有歷史數據全部刪除只留最後一筆",
+          "計算數據的標準差並全部乘以 0",
+          "將數據轉換成二進位圖片"
+        ],
+        answer_index: 0,
+        explanation: "只有先完成論域分割與定義模糊集合 $A_1 \\dots A_n$，才能將數值時間序列模糊化並歸納出轉移規則。"
+      },
+      {
+        id: "q15_2",
+        question: "在模糊邏輯關係群 (FLRG) 中，若歷史上曾出現 $A_2 \\to A_3$ 與 $A_2 \\to A_5$ 兩種轉移，當目前狀態落在 $A_2$ 時，標準 Chen 方法如何計算預測值？",
+        options: [
+          "取 $A_3$ 與 $A_5$ 兩個區間中點 (Midpoint) 的算術平均作為預測輸出",
+          "只採用 $A_3$ 而忽略 $A_5$",
+          "預測下一期為 0",
+          "無法進行預測必須報錯"
+        ],
+        answer_index: 0,
+        explanation: "Chen 的經典方法透過取所有可能後件區間中點的平均值（或加權平均）來計算預測數值。"
+      },
+      {
+        id: "q15_3",
+        question: "相較於傳統統計時間序列，模糊時間序列特別適合處理什麼情境？",
+        options: [
+          "資料筆數有限、具非線性波動且需要直覺語意規則描述的預測問題",
+          "資料完全是嚴格週期性正弦波的情況",
+          "樣本數必須超過十億筆的情況",
+          "只能用於純文字分類的情況"
+        ],
+        answer_index: 0,
+        explanation: "FTS 不需要嚴格的機率分佈與平穩性假設，在小樣本與高雜訊數據中常展現優異的強健性。"
+      }
+    ]
+  },
+  {
+    ch: 16,
+    code: "Ch.16",
+    title: "第 16 章：模糊 C-均值分群演算法 (FCM)",
+    subtitle: "Fuzzy C-Means Clustering Algorithm",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "cyan",
+    icon: "🫧",
+    pageRange: "16-1 ~ 16-11",
+    prerequisites: ["Ch.02 歸屬度", "歐幾里得距離與向量平均"],
+    overview: "傳統 K-Means 屬於「硬分群 (Hard Clustering)」，每個資料點只能非黑即白地歸屬於單一中心；然而在邊界交疊的資料集中，這種強制指派往往不合理。本章學習 Bezdek 提出的模糊 C-均值分群 (FCM)，允許每個資料點以不同歸屬度 $u_{ij} \\in [0,1]$ 同時屬於多個群組（且 $\\sum_i u_{ij} = 1$），並推導目標函數最佳化之交替迭代公式。",
+    keyConcepts: [
+      {
+        term: "FCM 目標函數與模糊度指數 $m$",
+        explanation: "最小化加權平方距離和；其中模糊度指數 $m > 1$（常取 $m=2$）控制分群結果的模糊程度，$m\\to 1$ 時退化為 K-Means。",
+        formula: "$$J_m(U, V) = \\sum_{i=1}^c \\sum_{j=1}^n u_{ij}^m \\|x_j - v_i\\|^2, \\quad \\sum_{i=1}^c u_{ij} = 1$$"
+      },
+      {
+        term: "群中心 $v_i$ 與歸屬矩陣 $u_{ij}$ 迭代更新式",
+        explanation: "透過 Lagrange 乘數法求極值，交替更新各群中心位置與各資料點對群中心的歸屬度直到收斂。",
+        formula: "$$v_i = \\frac{\\sum_{j=1}^n u_{ij}^m x_j}{\\sum_{j=1}^n u_{ij}^m}, \\quad u_{ij} = \\left[\\sum_{k=1}^c \\left(\\frac{\\|x_j - v_i\\|}{\\|x_j - v_k\\|}\\right)^{\\frac{2}{m-1}}\\right]^{-1}$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch16",
+      title: "Ch.16 模糊 C-均值分群 (FCM) 2D 散佈圖與歸屬度模擬",
+      subtitle: "調整群數 $c$ 與模糊度指數 $m$，即時觀察資料點分群邊界、群中心移動與目標函數 $J_m$ 收斂。",
+      widgetType: "ch16_fcm"
+    },
+    quizzes: [
+      {
+        id: "q16_1",
+        question: "在模糊 C-均值分群 (FCM) 中，單一資料點 $x_j$ 對所有 $c$ 個群組的歸屬度 $u_{ij}$ 必須滿足什麼條件？",
+        options: [
+          "$\\sum_{i=1}^c u_{ij} = 1$ 且 $u_{ij} \\in [0, 1]$",
+          "$\\sum_{i=1}^c u_{ij} = c$",
+          "每個 $u_{ij}$ 只能是 0 或 1",
+          "歸屬度可以是任意負數"
+        ],
+        answer_index: 0,
+        explanation: "FCM 屬於機率型模糊分割 (Probabilistic Fuzzy Partition)，同一個點對所有群的歸屬度加總恆等於 1。"
+      },
+      {
+        id: "q16_2",
+        question: "當模糊度指數 $m$ 越來越接近 $1^+$ 時，FCM 演算法的行為會趨近於什麼？",
+        options: [
+          "退化為傳統的硬式 K-Means 分群（歸屬度趨近 0 或 1）",
+          "所有群中心全部重疊在原點",
+          "歸屬度全部變成 $1/c$",
+          "演算法將無法計算距離"
+        ],
+        answer_index: 0,
+        explanation: "指數 $2/(m-1)$ 在 $m\\to 1^+$ 時趨近無窮大，使最近群的歸屬度趨近 1、其餘趨近 0；反之 $m\\to\\infty$ 則趨近均等 $1/c$。"
+      },
+      {
+        id: "q16_3",
+        question: "若一個資料點恰好位於兩個相同大小群組的正中間，FCM 會給予該點什麼樣的歸屬度？",
+        options: [
+          "對兩個群組各約 $0.5$ 的歸屬度，精準反映其「位於交界處」的模糊性",
+          "隨機指派為 1 與 0",
+          "將該資料點從資料集中刪除",
+          "回傳 NaN 錯誤"
+        ],
+        answer_index: 0,
+        explanation: "當兩距離相等時，比值為 1，依公式 $u_{1j} = u_{2j} = 1/2 = 0.5$，這正是軟分群優於硬分群之處。"
+      }
+    ]
+  },
+  {
+    ch: 17,
+    code: "Ch.17",
+    title: "第 17 章：模糊遺傳演算法 (Genetic Fuzzy Systems)",
+    subtitle: "Evolutionary Optimization of Fuzzy Rule Bases",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "emerald",
+    icon: "🧬",
+    pageRange: "17-1 ~ 17-15",
+    prerequisites: ["Ch.07 規則庫設計", "Ch.11 ANFIS 概念"],
+    overview: "當目標函數不可微分（例如不連續控制誤差、實機硬體評分）時，依賴梯度的 ANFIS 便難以發揮。本章介紹如何結合達爾文演化理論與遺傳演算法 (GA)，將模糊規則庫與歸屬函數參數編碼為「染色體 (Chromosome)」，透過選擇、交配 (Crossover) 與突變 (Mutation) 進行全域最佳化搜尋。",
+    keyConcepts: [
+      {
+        term: "模糊參數的染色體編碼 (Pittsburgh vs. Michigan)",
+        explanation: "將各輸入/輸出三角形的頂點座標 $(a_i, b_i, c_i)$ 與規則後件索引串接成實數或二進位基因向量，讓整個模糊系統一起演化。",
+        formula: "$$\\text{Chromosome} = [a_1, b_1, c_1, \\dots, \\text{rule}_1, \\text{rule}_2, \\dots]$$"
+      },
+      {
+        term: "適應度函數 (Fitness Function) 與全域搜尋",
+        explanation: "以控制誤差積分（如 ITAE）或分類準確率的倒數作為適應度，不需計算梯度即可跳脫區域最佳解。",
+        formula: "$$\\text{Fitness} = \\frac{1}{1 + \\text{ITAE}}, \\quad \\text{ITAE} = \\int_0^T t \\cdot |e(t)|\\, dt$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch17",
+      title: "Ch.17 遺傳演算法 (GA) 最佳化模糊系統適應度演化模擬",
+      subtitle: "設定族群大小、突變率與演化世代數，觀察最佳適應度曲線收斂與參數搜尋過程。",
+      widgetType: "ch17_ga"
+    },
+    quizzes: [
+      {
+        id: "q17_1",
+        question: "相較於基於梯度下降的類神經調參法，使用遺傳演算法 (GA) 調校模糊系統最大的優勢為何？",
+        options: [
+          "不要求目標函數可微分，且透過多點平行搜尋較不易陷入區域最佳解 (Local Minimum)",
+          "只需 1 次運算就能保證找到宇宙終極解",
+          "不需要定義任何適應度評估指標",
+          "只能在離線單變數線性函數上運作"
+        ],
+        answer_index: 0,
+        explanation: "GA 僅需評估每個個體的 Fitness 分數即可演化，非常適合非線性、不連續或多目標最佳化問題。"
+      },
+      {
+        id: "q17_2",
+        question: "在遺傳演算法的三個主要算子「選擇、交配、突變」中，「突變 (Mutation)」扮演什麼關鍵角色？",
+        options: [
+          "引入基因多樣性，幫助族群跳脫過早收斂的區域最佳解",
+          "複製完全一模一樣的最佳染色體",
+          "直接把族群數量減少為 1",
+          "將適應度函數清零"
+        ],
+        answer_index: 0,
+        explanation: "適度的突變率能探索尚未覆蓋的搜尋空間，維持族群演化活力。"
+      },
+      {
+        id: "q17_3",
+        question: "若在編碼三角形歸屬函數 $(a, b, c)$ 時沒有加入排序限制，演化後可能會發生什麼問題？",
+        options: [
+          "出現 $a > b$ 或 $b > c$ 的無效三角形，因此在解碼或編碼階段常使用「遞增間距編碼」確保有序性",
+          "三角形會自動變成圓形",
+          "計算速度會變快十倍",
+          "不會有任何影響"
+        ],
+        answer_index: 0,
+        explanation: "採用基準點加正向偏移量 $(a, \\delta_1, \\delta_2)$ 編碼可天然保證 $a \\le b \\le c$ 的幾何合法性。"
+      }
+    ]
+  },
+  {
+    ch: 18,
+    code: "Ch.18",
+    title: "第 18 章：自適應模糊控制與強健系統",
+    subtitle: "Adaptive Fuzzy Control & Robust Systems",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "violet",
+    icon: "🛡️",
+    pageRange: "18-1 ~ 18-15",
+    prerequisites: ["Ch.07 模糊控制", "Ch.11 逼近理論"],
+    overview: "當受控體的物理參數隨時間漂移（如機器手臂負載改變、飛行器燃料消耗）或遭遇外部未知干擾時，固定規則的模糊控制器可能效能下降。本章介紹直接/間接自適應模糊控制，結合李亞普諾夫 (Lyapunov) 穩定性理論即時在線更新後件參數向量 $\\theta$，從數學上嚴格保證閉迴路系統的漸近穩定與強健性。",
+    keyConcepts: [
+      {
+        term: "通用函數逼近特性 (Universal Approximator)",
+        explanation: "根據 Wang-Mendel 定理，具備高斯歸屬函數、乘積推論與中心平均解模糊化的模糊系統，能以任意精確度逼近緊集上的任何連續非線性函數。",
+        formula: "$$|\\hat{f}(x \\mid \\theta) - f(x)| < \\varepsilon, \\quad \\forall x \\in U$$"
+      },
+      {
+        term: "基於 Lyapunov 穩定性的線上參數適應律",
+        explanation: "選取 Lyapunov 函數 $V(e, \\tilde{\\theta})$ 並推導使 $\\dot{V} \\le 0$ 的參數更新律，確保追蹤誤差收斂且所有信號有界。",
+        formula: "$$\\dot{\\theta} = \\gamma \\cdot e^T P b \\cdot \\xi(x)$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch18",
+      title: "Ch.18 自適應模糊控制對比固定控制抗干擾響應模擬",
+      subtitle: "設定系統負載突變干擾強度與適應增益 $\\gamma$，比較固定控制器與自適應模糊控制的追蹤誤差收斂。",
+      widgetType: "ch18_adaptive"
+    },
+    quizzes: [
+      {
+        id: "q18_1",
+        question: "相較於傳統固定規則庫的模糊控制器，「自適應模糊控制器 (Adaptive Fuzzy Controller)」的核心特色為何？",
+        options: [
+          "能在系統運行期間依追蹤誤差線上即時調整規則參數，以抵抗負載變化或未知干擾",
+          "控制器出廠後參數永久鎖死不可改變",
+          "只能用於開迴路系統不需要回授",
+          "必須人工每天重新輸入表格"
+        ],
+        answer_index: 0,
+        explanation: "自適應律會根據實際誤差動態更新權重 $\\theta$，補償系統未建模動態與外部擾動。"
+      },
+      {
+        id: "q18_2",
+        question: "在自適應模糊控制設計中，引入 Lyapunov 穩定性分析的主要目的為何？",
+        options: [
+          "從數學上嚴格證明閉迴路系統誤差收斂且控制信號不會發散",
+          "用來美化使用者介面",
+          "用來取代感測器接線",
+          "用來把非線性系統強制變成零"
+        ],
+        answer_index: 0,
+        explanation: "Lyapunov 直接法是檢驗非線性控制與適應律是否穩定的黃金標準。"
+      },
+      {
+        id: "q18_3",
+        question: "模糊系統之所以能擔任「未知非線性函數逼近器」，是依據哪一項重要性質？",
+        options: [
+          "通用函數逼近定理 (Universal Approximation Theorem)",
+          "畢氏定理",
+          "熱力學第二定律",
+          "大數法則"
+        ],
+        answer_index: 0,
+        explanation: "只要規則足夠且基底覆蓋論域，模糊系統能逼近任意連續非線性函數。"
+      }
+    ]
+  },
+  {
+    ch: 19,
+    code: "Ch.19",
+    title: "第 19 章：模糊理論未來發展與專書總結",
+    subtitle: "Future Trends, Type-2 Fuzzy & Explainable AI",
+    stageGroup: "智慧演算法與進階應用篇",
+    color: "sky",
+    icon: "🚀",
+    pageRange: "19-1 ~ 19-6",
+    prerequisites: ["Ch.01 ~ Ch.18 全書知識"],
+    overview: "回顧從 1965 年 Zadeh 提出第一型模糊集合 (Type-1 Fuzzy) 到今日的完整演進藍圖：進一步展望能處理「歸屬度本身也有不確定性」的第二型模糊集合 (Interval Type-2 Fuzzy)、模糊大數據與可解釋人工智慧 (XAI) 的深度融合，總結學完《認識 Fuzzy》後的實務工程設計心法。",
+    keyConcepts: [
+      {
+        term: "Type-1 vs. Interval Type-2 Fuzzy Sets",
+        explanation: "當多位專家對同一個語意詞的歸屬曲線意見不一致時，Type-2 模糊集合以「不確定足跡 (FOU)」取代單一曲線，大幅提升高雜訊環境下的強健性。",
+        formula: "$$\\tilde{A} = \\int_{x\\in X} \\int_{u \\in J_x \\subseteq [0,1]} \\frac{1}{(x, u)}, \\quad \\text{FOU}(\\tilde{A}) = \\bigcup_{x\\in X} J_x$$"
+      },
+      {
+        term: "軟計算 (Soft Computing) 三大支柱融合",
+        explanation: "結合模糊邏輯（語意推論）、類神經網路（資料學習）與演化演算法（全域尋優），構成現代智慧系統的基石。",
+        formula: "$$\\text{Computational Intelligence} = \\text{Fuzzy} + \\text{Neural} + \\text{Evolutionary}$$"
+      }
+    ],
+    labConfig: {
+      id: "lab-ch19",
+      title: "Ch.19 Type-2 模糊不確定足跡 (FOU) 與全書技術能力雷達",
+      subtitle: "調整不確定帶寬度 (FOU Width)，觀察 Type-2 上下歸屬函數包絡線與全書各領域應用強項雷達圖。",
+      widgetType: "ch19_future"
+    },
+    quizzes: [
+      {
+        id: "q19_1",
+        question: "相較於第一型模糊集合 (Type-1)，第二型模糊集合 (Type-2 Fuzzy) 最大的突破在於？",
+        options: [
+          "歸屬度本身不再是單一確定數值，而是一個模糊區間 (FOU)，能處理語意定義本身的不確定性",
+          "計算量永遠只需要一次加法",
+          "取消了宇集合的概念",
+          "只能使用 0 和 1 兩個值"
+        ],
+        answer_index: 0,
+        explanation: "Type-2 模糊集合透過 Footprint of Uncertainty (FOU) 容納多個專家或高雜訊感測器的分歧。"
+      },
+      {
+        id: "q19_2",
+        question: "Zadeh 所倡導的「軟計算 (Soft Computing)」三大核心成員通常包含哪些技術？",
+        options: [
+          "模糊邏輯 (Fuzzy Logic)、類神經網路 (Neural Networks) 與演化計算/遺傳演算法 (Evolutionary Computing)",
+          "僅有二元邏輯與組合語言",
+          "只有資料庫 SQL 與網頁 HTML",
+          "僅限於量子力學"
+        ],
+        answer_index: 0,
+        explanation: "軟計算強調「容許不精確與不確定性，以換取低成本、高強健性與貼近人類思維的智慧解決方案」。"
+      },
+      {
+        id: "q19_3",
+        question: "在當代可解釋人工智慧 (XAI) 趨勢下，模糊邏輯扮演什麼重要角色？",
+        options: [
+          "提供人類可直接閱讀與稽核的語意規則結構，打破深度學習黑盒子",
+          "將模型的權重加密使任何人都看不懂",
+          "全面取代資料蒐集與感測器",
+          "只用於產生隨機藝術圖像"
+        ],
+        answer_index: 0,
+        explanation: "透明可追溯的 IF-THEN 規則與語意歸屬度，使模糊系統成為高風險決策領域（醫療、自駕、工業控制）的重要可解釋工具。"
+      }
+    ]
+  }
+];
+
+</script>
+  <script>
 /* === Inlined book_pages.js === */
 /**
  * 《認識 Fuzzy》全書 19 大章節完整教學重點導讀與實體書頁碼對照資料庫 (純文字與公式版，零版權圖檔)
@@ -30228,8 +31490,577 @@ window.FuzzyWidgets = (function () {
     renderCh7PracticeList: renderCh7PracticeList,
     // 其他實驗室
     updateFig27Widget: updateFig27Widget,
-    updateOpsWidget: updateOpsWidget
+    updateOpsWidget: updateOpsWidget,
+    // 全書 19 章統一互動視覺化實驗室
+    renderChapter19Lab: renderChapter19Lab,
+    updateChapter19Lab: updateChapter19Lab
   };
+
+  // =========================================================================
+  // 全書 19 章統一互動視覺化模擬器 (Ch.01 ~ Ch.19)
+  // =========================================================================
+  function renderChapter19Lab(chNum, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    const plotId = `ch19-lab-plot-${chNum}`;
+    const readoutId = `ch19-lab-readout-${chNum}`;
+
+    const controlsByCh = {
+      1: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">模糊曲線寬度 σ: <span id="ch19-val-1a" class="text-sky-300 font-bold">2.0</span>
+            <input id="ch19-in-1a" type="range" min="0.8" max="4.0" step="0.2" value="2.0" oninput="FuzzyWidgets.updateChapter19Lab(1)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">中心年齡 (歲): <span id="ch19-val-1b" class="text-sky-300 font-bold">6</span>
+            <input id="ch19-in-1b" type="range" min="3" max="10" step="0.5" value="6" oninput="FuzzyWidgets.updateChapter19Lab(1)" class="w-full accent-sky-400 mt-1">
+          </label>
+        </div>`,
+      2: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">造型選擇:
+            <select id="ch19-in-2a" onchange="FuzzyWidgets.updateChapter19Lab(2)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="tri">三角形 (Triangular)</option>
+              <option value="trap">梯形 (Trapezoidal)</option>
+              <option value="gauss" selected>高斯鐘形 (Gaussian)</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">中心點 c: <span id="ch19-val-2b" class="text-teal-300 font-bold">5.0</span>
+            <input id="ch19-in-2b" type="range" min="2" max="8" step="0.5" value="5" oninput="FuzzyWidgets.updateChapter19Lab(2)" class="w-full accent-teal-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">寬度參數 w: <span id="ch19-val-2c" class="text-teal-300 font-bold">2.0</span>
+            <input id="ch19-in-2c" type="range" min="0.5" max="4.0" step="0.25" value="2.0" oninput="FuzzyWidgets.updateChapter19Lab(2)" class="w-full accent-teal-400 mt-1">
+          </label>
+        </div>`,
+      3: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">α-截集水平門檻 α: <span id="ch19-val-3a" class="text-cyan-300 font-bold">0.50</span>
+            <input id="ch19-in-3a" type="range" min="0.05" max="0.95" step="0.05" value="0.50" oninput="FuzzyWidgets.updateChapter19Lab(3)" class="w-full accent-cyan-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">集合寬度 σ: <span id="ch19-val-3b" class="text-cyan-300 font-bold">2.2</span>
+            <input id="ch19-in-3b" type="range" min="1.0" max="4.0" step="0.2" value="2.2" oninput="FuzzyWidgets.updateChapter19Lab(3)" class="w-full accent-cyan-400 mt-1">
+          </label>
+        </div>`,
+      4: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">運算子類型:
+            <select id="ch19-in-4a" onchange="FuzzyWidgets.updateChapter19Lab(4)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="minmax" selected>標準交集/聯集 (min / max)</option>
+              <option value="prod">代數積 / 機率和 (a·b / a+b-ab)</option>
+              <option value="bounded">有界積 / 有界和</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">集合 B 右移距離: <span id="ch19-val-4b" class="text-amber-300 font-bold">3.0</span>
+            <input id="ch19-in-4b" type="range" min="0" max="6" step="0.5" value="3.0" oninput="FuzzyWidgets.updateChapter19Lab(4)" class="w-full accent-amber-400 mt-1">
+          </label>
+        </div>`,
+      5: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">模糊數運算:
+            <select id="ch19-in-5a" onchange="FuzzyWidgets.updateChapter19Lab(5)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="add" selected>模糊加法 (A + B)</option>
+              <option value="sub">模糊減法 (A - B)</option>
+              <option value="mul">模糊乘法 (A × B)</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">模糊數 B 中心點: <span id="ch19-val-5b" class="text-indigo-300 font-bold">3.0</span>
+            <input id="ch19-in-5b" type="range" min="1" max="6" step="0.5" value="3.0" oninput="FuzzyWidgets.updateChapter19Lab(5)" class="w-full accent-indigo-400 mt-1">
+          </label>
+        </div>`,
+      6: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">合成運算模式:
+            <select id="ch19-in-6a" onchange="FuzzyWidgets.updateChapter19Lab(6)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="maxmin" selected>Max-Min 合成</option>
+              <option value="maxprod">Max-Product 合成</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">關係耦合強度 k: <span id="ch19-val-6b" class="text-indigo-300 font-bold">0.80</span>
+            <input id="ch19-in-6b" type="range" min="0.2" max="1.0" step="0.1" value="0.8" oninput="FuzzyWidgets.updateChapter19Lab(6)" class="w-full accent-indigo-400 mt-1">
+          </label>
+        </div>`,
+      7: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">初始擺角誤差 θ₀ (deg): <span id="ch19-val-7a" class="text-emerald-300 font-bold">15</span>
+            <input id="ch19-in-7a" type="range" min="5" max="30" step="1" value="15" oninput="FuzzyWidgets.updateChapter19Lab(7)" class="w-full accent-emerald-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">模糊推力增益 K_u: <span id="ch19-val-7b" class="text-emerald-300 font-bold">1.2</span>
+            <input id="ch19-in-7b" type="range" min="0.5" max="2.0" step="0.1" value="1.2" oninput="FuzzyWidgets.updateChapter19Lab(7)" class="w-full accent-emerald-400 mt-1">
+          </label>
+        </div>`,
+      8: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">初始室溫偏差 ΔT (°C): <span id="ch19-val-8a" class="text-cyan-300 font-bold">6.0</span>
+            <input id="ch19-in-8a" type="range" min="2" max="10" step="0.5" value="6.0" oninput="FuzzyWidgets.updateChapter19Lab(8)" class="w-full accent-cyan-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">模糊變頻響應增益: <span id="ch19-val-8b" class="text-cyan-300 font-bold">1.0</span>
+            <input id="ch19-in-8b" type="range" min="0.5" max="1.8" step="0.1" value="1.0" oninput="FuzzyWidgets.updateChapter19Lab(8)" class="w-full accent-cyan-400 mt-1">
+          </label>
+        </div>`,
+      9: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">水質濁度 (%): <span id="ch19-val-9a" class="text-sky-300 font-bold">65</span>
+            <input id="ch19-in-9a" type="range" min="10" max="100" step="5" value="65" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">濁度飽和時間 (分): <span id="ch19-val-9b" class="text-sky-300 font-bold">4.0</span>
+            <input id="ch19-in-9b" type="range" min="1" max="8" step="0.5" value="4.0" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">衣物重量 (kg): <span id="ch19-val-9c" class="text-sky-300 font-bold">5.0</span>
+            <input id="ch19-in-9c" type="range" min="1" max="10" step="0.5" value="5.0" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-sky-400 mt-1">
+          </label>
+        </div>`,
+      10: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">路面狀態:
+            <select id="ch19-in-10a" onchange="FuzzyWidgets.updateChapter19Lab(10)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="dry" selected>乾燥柏油 (Dry Asphalt)</option>
+              <option value="wet">濕滑路面 (Wet Road)</option>
+              <option value="ice">結冰路面 (Icy Road)</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">目標滑移率 λ: <span id="ch19-val-10b" class="text-rose-300 font-bold">0.18</span>
+            <input id="ch19-in-10b" type="range" min="0.02" max="0.95" step="0.02" value="0.18" oninput="FuzzyWidgets.updateChapter19Lab(10)" class="w-full accent-rose-400 mt-1">
+          </label>
+        </div>`,
+      11: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">學習率 η: <span id="ch19-val-11a" class="text-violet-300 font-bold">0.15</span>
+            <input id="ch19-in-11a" type="range" min="0.05" max="0.40" step="0.05" value="0.15" oninput="FuzzyWidgets.updateChapter19Lab(11)" class="w-full accent-violet-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">訓練 Epoch 數: <span id="ch19-val-11b" class="text-violet-300 font-bold">30</span>
+            <input id="ch19-in-11b" type="range" min="5" max="60" step="5" value="30" oninput="FuzzyWidgets.updateChapter19Lab(11)" class="w-full accent-violet-400 mt-1">
+          </label>
+        </div>`,
+      12: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">INT 迭代增強次數: <span id="ch19-val-12a" class="text-amber-300 font-bold">2</span>
+            <input id="ch19-in-12a" type="range" min="1" max="5" step="1" value="2" oninput="FuzzyWidgets.updateChapter19Lab(12)" class="w-full accent-amber-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">渡越點門檻: <span id="ch19-val-12b" class="text-amber-300 font-bold">0.50</span>
+            <input id="ch19-in-12b" type="range" min="0.3" max="0.7" step="0.05" value="0.50" oninput="FuzzyWidgets.updateChapter19Lab(12)" class="w-full accent-amber-400 mt-1">
+          </label>
+        </div>`,
+      13: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">目標「高性能」要求中心: <span id="ch19-val-13a" class="text-rose-300 font-bold">7.5</span>
+            <input id="ch19-in-13a" type="range" min="5" max="9.5" step="0.5" value="7.5" oninput="FuzzyWidgets.updateChapter19Lab(13)" class="w-full accent-rose-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">限制「低成本」預算上限: <span id="ch19-val-13b" class="text-rose-300 font-bold">5.5</span>
+            <input id="ch19-in-13b" type="range" min="3" max="8" step="0.5" value="5.5" oninput="FuzzyWidgets.updateChapter19Lab(13)" class="w-full accent-rose-400 mt-1">
+          </label>
+        </div>`,
+      14: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">體溫 (°C): <span id="ch19-val-14a" class="text-teal-300 font-bold">37.8</span>
+            <input id="ch19-in-14a" type="range" min="36.0" max="40.5" step="0.1" value="37.8" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-teal-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">心率 (bpm): <span id="ch19-val-14b" class="text-teal-300 font-bold">105</span>
+            <input id="ch19-in-14b" type="range" min="55" max="150" step="5" value="105" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-teal-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">血氧 SpO₂ (%): <span id="ch19-val-14c" class="text-teal-300 font-bold">94</span>
+            <input id="ch19-in-14c" type="range" min="82" max="100" step="1" value="94" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-teal-400 mt-1">
+          </label>
+        </div>`,
+      15: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">論域語意區間數 n: <span id="ch19-val-15a" class="text-indigo-300 font-bold">7</span>
+            <input id="ch19-in-15a" type="range" min="3" max="12" step="1" value="7" oninput="FuzzyWidgets.updateChapter19Lab(15)" class="w-full accent-indigo-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">二階趨勢平滑權重: <span id="ch19-val-15b" class="text-indigo-300 font-bold">0.6</span>
+            <input id="ch19-in-15b" type="range" min="0.1" max="0.9" step="0.1" value="0.6" oninput="FuzzyWidgets.updateChapter19Lab(15)" class="w-full accent-indigo-400 mt-1">
+          </label>
+        </div>`,
+      16: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">模糊度指數 m: <span id="ch19-val-16a" class="text-cyan-300 font-bold">2.0</span>
+            <input id="ch19-in-16a" type="range" min="1.1" max="4.0" step="0.1" value="2.0" oninput="FuzzyWidgets.updateChapter19Lab(16)" class="w-full accent-cyan-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">兩群中心距離: <span id="ch19-val-16b" class="text-cyan-300 font-bold">4.0</span>
+            <input id="ch19-in-16b" type="range" min="1.5" max="6.0" step="0.5" value="4.0" oninput="FuzzyWidgets.updateChapter19Lab(16)" class="w-full accent-cyan-400 mt-1">
+          </label>
+        </div>`,
+      17: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">突變率 (Mutation Rate): <span id="ch19-val-17a" class="text-emerald-300 font-bold">0.08</span>
+            <input id="ch19-in-17a" type="range" min="0.01" max="0.30" step="0.01" value="0.08" oninput="FuzzyWidgets.updateChapter19Lab(17)" class="w-full accent-emerald-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">族群規模 (Population): <span id="ch19-val-17b" class="text-emerald-300 font-bold">40</span>
+            <input id="ch19-in-17b" type="range" min="10" max="100" step="10" value="40" oninput="FuzzyWidgets.updateChapter19Lab(17)" class="w-full accent-emerald-400 mt-1">
+          </label>
+        </div>`,
+      18: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">適應增益 γ: <span id="ch19-val-18a" class="text-violet-300 font-bold">1.2</span>
+            <input id="ch19-in-18a" type="range" min="0.2" max="2.5" step="0.1" value="1.2" oninput="FuzzyWidgets.updateChapter19Lab(18)" class="w-full accent-violet-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">外部負載干擾強度: <span id="ch19-val-18b" class="text-violet-300 font-bold">1.5</span>
+            <input id="ch19-in-18b" type="range" min="0.5" max="3.0" step="0.25" value="1.5" oninput="FuzzyWidgets.updateChapter19Lab(18)" class="w-full accent-violet-400 mt-1">
+          </label>
+        </div>`,
+      19: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">Type-2 不確定足跡寬度 (FOU): <span id="ch19-val-19a" class="text-sky-300 font-bold">0.25</span>
+            <input id="ch19-in-19a" type="range" min="0.05" max="0.45" step="0.05" value="0.25" oninput="FuzzyWidgets.updateChapter19Lab(19)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">專家意見分歧度: <span id="ch19-val-19b" class="text-sky-300 font-bold">0.8</span>
+            <input id="ch19-in-19b" type="range" min="0.2" max="1.8" step="0.2" value="0.8" oninput="FuzzyWidgets.updateChapter19Lab(19)" class="w-full accent-sky-400 mt-1">
+          </label>
+        </div>`
+    };
+
+    el.innerHTML = `
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+        ${controlsByCh[chNum] || ''}
+        <div id="${plotId}" class="w-full h-72 sm:h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+        <div id="${readoutId}" class="text-xs sm:text-sm text-slate-300 bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 leading-relaxed"></div>
+      </div>
+    `;
+
+    updateChapter19Lab(chNum);
+  }
+
+  function updateChapter19Lab(chNum) {
+    if (!window.Plotly) return;
+    const plotEl = document.getElementById(`ch19-lab-plot-${chNum}`);
+    const readoutEl = document.getElementById(`ch19-lab-readout-${chNum}`);
+    if (!plotEl) return;
+
+    const baseLayout = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(15, 23, 42, 0.75)',
+      font: { color: '#e2e8f0', size: 11 },
+      margin: { t: 28, r: 18, b: 40, l: 48 },
+      legend: { orientation: 'h', y: 1.15, x: 0 }
+    };
+    const cfg = { responsive: true, displayModeBar: false };
+    const getVal = (id, def) => {
+      const node = document.getElementById(id);
+      return node ? node.value : def;
+    };
+    const setTxt = (id, v) => {
+      const node = document.getElementById(id);
+      if (node) node.textContent = v;
+    };
+
+    if (chNum === 1) {
+      const sig = parseFloat(getVal('ch19-in-1a', 2.0));
+      const c = parseFloat(getVal('ch19-in-1b', 6.0));
+      setTxt('ch19-val-1a', sig.toFixed(1));
+      setTxt('ch19-val-1b', c.toFixed(1));
+      const xs = [], crisp = [], fuzzy = [];
+      for (let x = 0; x <= 14; x += 0.25) {
+        xs.push(x);
+        crisp.push(x >= 3 && x <= 9 ? 1 : 0);
+        fuzzy.push(Math.exp(-Math.pow(x - c, 2) / (2 * sig * sig)));
+      }
+      Plotly.react(plotEl, [
+        { x: xs, y: crisp, name: '古典二分方波 (3~9歲)', line: { color: '#f43f5e', width: 2.5, dash: 'dash' } },
+        { x: xs, y: fuzzy, name: '模糊連續歸屬度', line: { color: '#38bdf8', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '年齡 (歲)' }, yaxis: { title: '歸屬度 μ(x)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `中心年齡 <b>${c} 歲</b>、寬度 <b>σ = ${sig}</b>：模糊集合以平滑曲線消除 2.9 歲與 3.0 歲之間的突變斷層。`;
+    } else if (chNum === 2) {
+      const shape = getVal('ch19-in-2a', 'gauss');
+      const c = parseFloat(getVal('ch19-in-2b', 5.0));
+      const w = parseFloat(getVal('ch19-in-2c', 2.0));
+      setTxt('ch19-val-2b', c.toFixed(1));
+      setTxt('ch19-val-2c', w.toFixed(2));
+      const xs = [], ys = [];
+      for (let x = 0; x <= 10; x += 0.1) {
+        xs.push(Number(x.toFixed(1)));
+        if (shape === 'tri') ys.push(Math.max(0, 1 - Math.abs(x - c) / w));
+        else if (shape === 'trap') ys.push(Math.max(0, Math.min(1, (w * 1.4 - Math.abs(x - c)) / (w * 0.7))));
+        else ys.push(Math.exp(-Math.pow(x - c, 2) / (2 * (w * 0.6) * (w * 0.6))));
+      }
+      Plotly.react(plotEl, [{ x: xs, y: ys, name: `歸屬函數 (${shape})`, fill: 'tozeroy', line: { color: '#2dd4bf', width: 3 } }],
+        { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'μ(x)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `Core 核心頂點位於 <b>x ≈ ${c}</b>；調整寬度 w 可控制支撐集 Support(A) 的涵蓋範圍。`;
+    } else if (chNum === 3) {
+      const alpha = parseFloat(getVal('ch19-in-3a', 0.5));
+      const sig = parseFloat(getVal('ch19-in-3b', 2.2));
+      setTxt('ch19-val-3a', alpha.toFixed(2));
+      setTxt('ch19-val-3b', sig.toFixed(1));
+      const xs = [], ys = [], cutY = [];
+      const halfW = sig * Math.sqrt(-2 * Math.log(alpha));
+      for (let x = 0; x <= 10; x += 0.1) {
+        xs.push(Number(x.toFixed(1)));
+        const y = Math.exp(-Math.pow(x - 5, 2) / (2 * sig * sig));
+        ys.push(y);
+        cutY.push(y >= alpha ? alpha : 0);
+      }
+      Plotly.react(plotEl, [
+        { x: xs, y: ys, name: '原模糊集合 A', line: { color: '#38bdf8', width: 3 } },
+        { x: xs, y: cutY, name: `α=${alpha.toFixed(2)} 截集區間`, fill: 'tozeroy', line: { color: '#22d3ee', width: 2, dash: 'dot' } },
+        { x: [0, 10], y: [alpha, alpha], name: '水平切線 α', line: { color: '#f59e0b', width: 2, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'μ(x)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `當 α = <b>${alpha.toFixed(2)}</b> 時，截出的明確區間為 <b>[${Math.max(0, 5 - halfW).toFixed(2)}, ${Math.min(10, 5 + halfW).toFixed(2)}]</b>。`;
+    } else if (chNum === 4) {
+      const mode = getVal('ch19-in-4a', 'minmax');
+      const shift = parseFloat(getVal('ch19-in-4b', 3.0));
+      setTxt('ch19-val-4b', shift.toFixed(1));
+      const xs = [], yA = [], yB = [], yInt = [], yUni = [];
+      for (let x = 0; x <= 10; x += 0.15) {
+        xs.push(Number(x.toFixed(2)));
+        const a = Math.exp(-Math.pow(x - 3.5, 2) / 3.2);
+        const b = Math.exp(-Math.pow(x - (3.5 + shift), 2) / 3.2);
+        yA.push(a); yB.push(b);
+        if (mode === 'minmax') { yInt.push(Math.min(a, b)); yUni.push(Math.max(a, b)); }
+        else if (mode === 'prod') { yInt.push(a * b); yUni.push(a + b - a * b); }
+        else { yInt.push(Math.max(0, a + b - 1)); yUni.push(Math.min(1, a + b)); }
+      }
+      Plotly.react(plotEl, [
+        { x: xs, y: yA, name: '集合 A', line: { color: '#38bdf8', width: 2, dash: 'dot' } },
+        { x: xs, y: yB, name: '集合 B', line: { color: '#a855f7', width: 2, dash: 'dot' } },
+        { x: xs, y: yInt, name: '模糊交集 A ∩ B', fill: 'tozeroy', line: { color: '#f59e0b', width: 3 } },
+        { x: xs, y: yUni, name: '模糊聯集 A ∪ B', line: { color: '#10b981', width: 2.5 } }
+      ], { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'μ(x)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `模式 <b>${mode}</b>：可觀察代數積與有界積的交集面積會比標準 min 更嚴格收斂。`;
+    } else if (chNum === 5) {
+      const op = getVal('ch19-in-5a', 'add');
+      const bCenter = parseFloat(getVal('ch19-in-5b', 3.0));
+      setTxt('ch19-val-5b', bCenter.toFixed(1));
+      const alphas = [0, 0.2, 0.4, 0.6, 0.8, 1.0];
+      const triPts = (c, w) => ({ x: [c - w, c, c + w], y: [0, 1, 0] });
+      const A = triPts(4, 1.5), B = triPts(bCenter, 1.0);
+      const resX = [], resY = [];
+      alphas.forEach(al => {
+        const aL = 4 - 1.5 * (1 - al), aR = 4 + 1.5 * (1 - al);
+        const bL = bCenter - 1.0 * (1 - al), bR = bCenter + 1.0 * (1 - al);
+        if (op === 'add') { resX.unshift(aL + bL); resY.unshift(al); resX.push(aR + bR); resY.push(al); }
+        else if (op === 'sub') { resX.unshift(aL - bR); resY.unshift(al); resX.push(aR - bL); resY.push(al); }
+        else { resX.unshift(aL * bL); resY.unshift(al); resX.push(aR * bR); resY.push(al); }
+      });
+      Plotly.react(plotEl, [
+        { x: A.x, y: A.y, name: 'A ≈ 4 (±1.5)', line: { color: '#38bdf8', width: 2, dash: 'dash' } },
+        { x: B.x, y: B.y, name: `B ≈ ${bCenter} (±1.0)`, line: { color: '#a855f7', width: 2, dash: 'dash' } },
+        { x: resX, y: resY, name: `運算結果 (${op})`, fill: 'tozeroy', line: { color: '#10b981', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '數值' }, yaxis: { title: 'α 水平', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `注意無論加法或減法，模糊不確定性寬度都會疊加擴散（如 $|A| + |B|$）。`;
+    } else if (chNum === 6) {
+      const mode = getVal('ch19-in-6a', 'maxmin');
+      const k = parseFloat(getVal('ch19-in-6b', 0.8));
+      setTxt('ch19-val-6b', k.toFixed(2));
+      const R = [[0.9 * k, 0.4, 0.2], [0.5, 0.8 * k, 0.6], [0.2, 0.5, 0.95 * k]];
+      const S = [[0.8, 0.3, 0.1], [0.4, 0.9 * k, 0.5], [0.1, 0.4, 0.85]];
+      const T = [0, 1, 2].map(i => [0, 1, 2].map(j => {
+        const vals = [0, 1, 2].map(m => mode === 'maxmin' ? Math.min(R[i][m], S[m][j]) : R[i][m] * S[m][j]);
+        return Number(Math.max(...vals).toFixed(2));
+      }));
+      Plotly.react(plotEl, [{
+        z: T, x: ['z1', 'z2', 'z3'], y: ['x1', 'x2', 'x3'], type: 'heatmap',
+        colorscale: 'Viridis', zmin: 0, zmax: 1
+      }], { ...baseLayout, title: `合成結果 R ∘ S (${mode})` }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `合成矩陣對角線強度：<b>[${T[0][0]}, ${T[1][1]}, ${T[2][2]}]</b>。Max-Min 保留瓶頸最大值，Max-Product 使弱鏈結衰減更明顯。`;
+    } else if (chNum === 7) {
+      const th0 = parseFloat(getVal('ch19-in-7a', 15));
+      const ku = parseFloat(getVal('ch19-in-7b', 1.2));
+      setTxt('ch19-val-7a', th0); setTxt('ch19-val-7b', ku.toFixed(1));
+      const ts = [], thF = [], thP = [];
+      for (let t = 0; t <= 5; t += 0.1) {
+        ts.push(Number(t.toFixed(1)));
+        thF.push(th0 * Math.exp(-ku * 1.1 * t) * Math.cos(2.4 * t));
+        thP.push(th0 * Math.exp(-0.55 * t) * Math.cos(3.8 * t));
+      }
+      Plotly.react(plotEl, [
+        { x: ts, y: thF, name: '模糊控制器擺角響應', line: { color: '#10b981', width: 3.5 } },
+        { x: ts, y: thP, name: '傳統線性控制器響應', line: { color: '#f43f5e', width: 2, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '時間 (秒)' }, yaxis: { title: '擺角 θ (deg)' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `初始傾角 <b>${th0}°</b>、推力增益 <b>${ku}</b>：模糊控制能快速消除過衝並穩定收斂至垂直平衡點 0°。`;
+    } else if (chNum === 8) {
+      const dT = parseFloat(getVal('ch19-in-8a', 6.0));
+      const gain = parseFloat(getVal('ch19-in-8b', 1.0));
+      setTxt('ch19-val-8a', dT.toFixed(1)); setTxt('ch19-val-8b', gain.toFixed(1));
+      const ts = [], fuzzyT = [], onoffT = [];
+      for (let t = 0; t <= 30; t += 0.5) {
+        ts.push(t);
+        fuzzyT.push(25 + dT * Math.exp(-0.18 * gain * t));
+        onoffT.push(25 + dT * Math.exp(-0.12 * t) + (t > 10 ? 0.9 * Math.sin(0.8 * t) : 0));
+      }
+      Plotly.react(plotEl, [
+        { x: ts, y: fuzzyT, name: '模糊變頻溫控 (平穩節能)', line: { color: '#22d3ee', width: 3.5 } },
+        { x: ts, y: onoffT, name: '傳統定頻開關控制 (震盪)', line: { color: '#f43f5e', width: 2, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '時間 (分)' }, yaxis: { title: '室內溫度 (°C)' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `設定目標 <b>25°C</b>（初始室溫 ${(25 + dT).toFixed(1)}°C）：模糊變頻在逼近目標時自動降頻，消除定頻冷氣反覆啟停的 ±1°C 震盪。`;
+    } else if (chNum === 9) {
+      const turb = parseFloat(getVal('ch19-in-9a', 65));
+      const satT = parseFloat(getVal('ch19-in-9b', 4.0));
+      const wt = parseFloat(getVal('ch19-in-9c', 5.0));
+      setTxt('ch19-val-9a', turb); setTxt('ch19-val-9b', satT.toFixed(1)); setTxt('ch19-val-9c', wt.toFixed(1));
+      const ts = [], curve = [];
+      for (let t = 0; t <= 10; t += 0.5) {
+        ts.push(t);
+        curve.push(100 - turb * (1 - Math.exp(-t / (satT * 0.45))));
+      }
+      const washTime = (6 + (turb / 100) * 10 + (satT / 8) * 5 + (wt / 10) * 4).toFixed(1);
+      Plotly.react(plotEl, [{ x: ts, y: curve, name: '洗滌水透光率變化 (%)', fill: 'tozeroy', line: { color: '#38bdf8', width: 3 } }],
+        { ...baseLayout, xaxis: { title: '感測時間 (分)' }, yaxis: { title: '透光率 (%)', range: [0, 105] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `推論建議最佳洗滌時間：<b>${washTime} 分鐘</b>（依據濁度 ${turb}%、飽和時間 ${satT}分、衣重 ${wt}kg）。`;
+    } else if (chNum === 10) {
+      const road = getVal('ch19-in-10a', 'dry');
+      const lam = parseFloat(getVal('ch19-in-10b', 0.18));
+      setTxt('ch19-val-10b', lam.toFixed(2));
+      const peak = road === 'dry' ? 0.92 : road === 'wet' ? 0.55 : 0.22;
+      const optL = road === 'dry' ? 0.18 : road === 'wet' ? 0.14 : 0.10;
+      const f = (l) => peak * (2 * (l / optL) / (1 + Math.pow(l / optL, 2))) * (l > optL ? Math.max(0.45, 1 - 0.35 * (l - optL)) : 1);
+      const ls = [], mus = [];
+      for (let l = 0; l <= 1.0; l += 0.02) { ls.push(Number(l.toFixed(2))); mus.push(f(l)); }
+      Plotly.react(plotEl, [
+        { x: ls, y: mus, name: '路面摩擦係數 μ(λ)', line: { color: '#fb7185', width: 3 } },
+        { x: [lam], y: [f(lam)], name: '目前工作點', mode: 'markers', marker: { color: '#38bdf8', size: 12 } }
+      ], { ...baseLayout, xaxis: { title: '滑移率 λ' }, yaxis: { title: '附著摩擦係數 μ', range: [0, 1.05] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `當前滑移率 <b>λ = ${lam.toFixed(2)}</b>，對應摩擦係數 <b>μ ≈ ${f(lam).toFixed(2)}</b>（該路面最佳峰值約於 λ = ${optL}）。`;
+    } else if (chNum === 11) {
+      const eta = parseFloat(getVal('ch19-in-11a', 0.15));
+      const ep = parseInt(getVal('ch19-in-11b', 30), 10);
+      setTxt('ch19-val-11a', eta.toFixed(2)); setTxt('ch19-val-11b', ep);
+      const xs = [], targetY = [], anfisY = [];
+      const errFactor = Math.exp(-eta * ep * 0.45);
+      for (let x = -3; x <= 3; x += 0.15) {
+        xs.push(Number(x.toFixed(2)));
+        const y = Math.sin(x) + 0.3 * Math.cos(2 * x);
+        targetY.push(y);
+        anfisY.push(y * (1 - 0.55 * errFactor) + 0.2 * errFactor * x * 0.3);
+      }
+      Plotly.react(plotEl, [
+        { x: xs, y: targetY, name: '目標非線性函數', line: { color: '#38bdf8', width: 2.5, dash: 'dash' } },
+        { x: xs, y: anfisY, name: `ANFIS 擬合曲線 (Epoch ${ep})`, line: { color: '#a855f7', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '輸入 x' }, yaxis: { title: '輸出 y' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `混合學習法經 <b>${ep} Epochs</b>（學習率 η = ${eta}），逼近誤差殘差比例已收斂至 <b>${(errFactor * 100).toFixed(1)}%</b>。`;
+    } else if (chNum === 12) {
+      const iters = parseInt(getVal('ch19-in-12a', 2), 10);
+      const cross = parseFloat(getVal('ch19-in-12b', 0.5));
+      setTxt('ch19-val-12a', iters); setTxt('ch19-val-12b', cross.toFixed(2));
+      const xs = [], ys = [];
+      for (let g = 0; g <= 1; g += 0.02) {
+        xs.push(Number(g.toFixed(2)));
+        let u = g;
+        for (let k = 0; k < iters; k++) {
+          u = u <= cross ? Math.pow(u / cross, 2) * cross : 1 - Math.pow((1 - u) / (1 - cross), 2) * (1 - cross);
+        }
+        ys.push(u);
+      }
+      Plotly.react(plotEl, [
+        { x: [0, 1], y: [0, 1], name: '原始線性映射', line: { color: '#64748b', width: 2, dash: 'dot' } },
+        { x: xs, y: ys, name: `INT 增強 (${iters} 次)`, line: { color: '#f59e0b', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '原始正規化灰階' }, yaxis: { title: '增強後灰階 μ\'' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `經過 <b>${iters} 次</b>模糊 INT 強化，低於 ${cross} 的暗部更暗、高於 ${cross} 的亮部更亮，邊界對比大幅提升。`;
+    } else if (chNum === 13) {
+      const gC = parseFloat(getVal('ch19-in-13a', 7.5));
+      const cC = parseFloat(getVal('ch19-in-13b', 5.5));
+      setTxt('ch19-val-13a', gC.toFixed(1)); setTxt('ch19-val-13b', cC.toFixed(1));
+      const xs = [], gY = [], cY = [], dY = [];
+      let bestX = 0, bestV = -1;
+      for (let x = 1; x <= 10; x += 0.15) {
+        xs.push(Number(x.toFixed(2)));
+        const g = 1 / (1 + Math.exp(-1.5 * (x - (gC - 1.5))));
+        const c = 1 / (1 + Math.exp(1.5 * (x - cC)));
+        const d = Math.min(g, c);
+        gY.push(g); cY.push(c); dY.push(d);
+        if (d > bestV) { bestV = d; bestX = x; }
+      }
+      Plotly.react(plotEl, [
+        { x: xs, y: gY, name: '模糊目標 G (高性能)', line: { color: '#38bdf8', width: 2.5 } },
+        { x: xs, y: cY, name: '模糊限制 C (低成本)', line: { color: '#f43f5e', width: 2.5 } },
+        { x: xs, y: dY, name: '決策交集 D = G ∩ C', fill: 'tozeroy', line: { color: '#10b981', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '方案等級 x' }, yaxis: { title: '滿足度 μ(x)', range: [0, 1.08] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `Bellman-Zadeh 最佳折衷方案：<b>x* ≈ ${bestX.toFixed(2)}</b>，最大綜合滿足度 <b>μ_D(x*) = ${bestV.toFixed(2)}</b>。`;
+    } else if (chNum === 14) {
+      const temp = parseFloat(getVal('ch19-in-14a', 37.8));
+      const hr = parseFloat(getVal('ch19-in-14b', 105));
+      const spo2 = parseFloat(getVal('ch19-in-14c', 94));
+      setTxt('ch19-val-14a', temp.toFixed(1)); setTxt('ch19-val-14b', hr); setTxt('ch19-val-14c', spo2);
+      const rTemp = Math.min(1, Math.max(0, (temp - 37.2) / 2.2));
+      const rHr = Math.min(1, Math.max(0, (hr - 90) / 45));
+      const rSpo2 = Math.min(1, Math.max(0, (97 - spo2) / 10));
+      const total = Math.min(100, Math.round((0.35 * rTemp + 0.3 * rHr + 0.35 * rSpo2) * 100));
+      Plotly.react(plotEl, [{
+        x: ['體溫異常度', '心率異常度', '低血氧異常度'],
+        y: [rTemp * 100, rHr * 100, rSpo2 * 100],
+        type: 'bar',
+        marker: { color: ['#f59e0b', '#fb7185', '#38bdf8'] }
+      }], { ...baseLayout, yaxis: { title: '模糊警示強度 (%)', range: [0, 105] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `ICU 綜合模糊風險指數：<b>${total} / 100</b>（${total >= 60 ? '⚠️ 高風險需立即處置' : total >= 30 ? '⚡ 中度風險持續監測' : '✅ 生理狀態平穩'}）。`;
+    } else if (chNum === 15) {
+      const n = parseInt(getVal('ch19-in-15a', 7), 10);
+      const w = parseFloat(getVal('ch19-in-15b', 0.6));
+      setTxt('ch19-val-15a', n); setTxt('ch19-val-15b', w.toFixed(1));
+      const ts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const real = [120, 134, 128, 145, 160, 152, 168, 174, 165, 182];
+      const step = 70 / n;
+      const pred = real.map((v, idx) => idx === 0 ? v : Number((w * real[idx - 1] + (1 - w) * (Math.round(v / step) * step)).toFixed(1)));
+      Plotly.react(plotEl, [
+        { x: ts, y: real, name: '實際觀測序列', line: { color: '#38bdf8', width: 3 } },
+        { x: ts, y: pred, name: `FTS 預測 (${n} 語意區間)`, line: { color: '#818cf8', width: 3, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '期數 t' }, yaxis: { title: '指數數值' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `將論域切分為 <b>${n} 個語意區間</b>（每區間寬約 ${step.toFixed(1)}），區間數越多解析度越高但規則數也隨之增加。`;
+    } else if (chNum === 16) {
+      const m = parseFloat(getVal('ch19-in-16a', 2.0));
+      const dist = parseFloat(getVal('ch19-in-16b', 4.0));
+      setTxt('ch19-val-16a', m.toFixed(1)); setTxt('ch19-val-16b', dist.toFixed(1));
+      const xs = [], u1 = [], u2 = [];
+      const c1 = -dist / 2, c2 = dist / 2;
+      const p = 2 / (m - 1);
+      for (let x = -5; x <= 5; x += 0.15) {
+        xs.push(Number(x.toFixed(2)));
+        const d1 = Math.max(0.05, Math.abs(x - c1)), d2 = Math.max(0.05, Math.abs(x - c2));
+        const val1 = 1 / (1 + Math.pow(d1 / d2, p));
+        u1.push(val1); u2.push(1 - val1);
+      }
+      Plotly.react(plotEl, [
+        { x: xs, y: u1, name: `群組 1 歸屬度 (中心 ${c1.toFixed(1)})`, line: { color: '#22d3ee', width: 3 } },
+        { x: xs, y: u2, name: `群組 2 歸屬度 (中心 ${c2.toFixed(1)})`, line: { color: '#f43f5e', width: 3 } }
+      ], { ...baseLayout, xaxis: { title: '特徵軸 x' }, yaxis: { title: 'FCM 歸屬度 u_ij', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `模糊指數 <b>m = ${m.toFixed(1)}</b>：越接近 1.1 邊界越陡峭（似 K-Means）；越大則交界過渡帶越平緩。`;
+    } else if (chNum === 17) {
+      const mut = parseFloat(getVal('ch19-in-17a', 0.08));
+      const pop = parseInt(getVal('ch19-in-17b', 40), 10);
+      setTxt('ch19-val-17a', mut.toFixed(2)); setTxt('ch19-val-17b', pop);
+      const gens = [], bestFit = [], avgFit = [];
+      const speed = 0.06 + (pop / 100) * 0.05 - mut * 0.08;
+      for (let g = 1; g <= 40; g++) {
+        gens.push(g);
+        const b = 98 - 55 * Math.exp(-Math.max(0.03, speed) * g);
+        bestFit.push(Number(b.toFixed(1)));
+        avgFit.push(Number((b - 12 * Math.exp(-0.04 * g) - mut * 15).toFixed(1)));
+      }
+      Plotly.react(plotEl, [
+        { x: gens, y: bestFit, name: '最佳染色體適應度', line: { color: '#10b981', width: 3.5 } },
+        { x: gens, y: avgFit, name: '族群平均適應度', line: { color: '#64748b', width: 2, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '演化世代 (Generation)' }, yaxis: { title: '適應度 (Fitness)', range: [20, 102] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `族群規模 <b>${pop}</b>、突變率 <b>${mut}</b>：第 40 代最佳適應度達到 <b>${bestFit[39]}</b>。`;
+    } else if (chNum === 18) {
+      const gamma = parseFloat(getVal('ch19-in-18a', 1.2));
+      const dist = parseFloat(getVal('ch19-in-18b', 1.5));
+      setTxt('ch19-val-18a', gamma.toFixed(1)); setTxt('ch19-val-18b', dist.toFixed(2));
+      const ts = [], errAdapt = [], errFixed = [];
+      for (let t = 0; t <= 10; t += 0.2) {
+        ts.push(Number(t.toFixed(1)));
+        const shock = t >= 3 ? dist * Math.exp(-1.1 * gamma * (t - 3)) : 0;
+        errAdapt.push(Number((0.8 * Math.exp(-0.9 * t) + shock).toFixed(3)));
+        errFixed.push(Number((0.8 * Math.exp(-0.9 * t) + (t >= 3 ? dist * 0.65 : 0)).toFixed(3)));
+      }
+      Plotly.react(plotEl, [
+        { x: ts, y: errAdapt, name: '自適應模糊控制追蹤誤差', line: { color: '#a855f7', width: 3.5 } },
+        { x: ts, y: errFixed, name: '固定參數模糊控制誤差', line: { color: '#f43f5e', width: 2.5, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '時間 (秒，t=3s 負載突變)' }, yaxis: { title: '追蹤誤差 |e(t)|' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `在 <b>t = 3s</b> 發生負載干擾後，自適應律 (γ=${gamma}) 依 Lyapunov 穩定性快速調整權重使誤差重新歸零。`;
+    } else if (chNum === 19) {
+      const fou = parseFloat(getVal('ch19-in-19a', 0.25));
+      const div = parseFloat(getVal('ch19-in-19b', 0.8));
+      setTxt('ch19-val-19a', fou.toFixed(2)); setTxt('ch19-val-19b', div.toFixed(1));
+      const xs = [], upper = [], lower = [];
+      for (let x = 0; x <= 10; x += 0.2) {
+        xs.push(Number(x.toFixed(1)));
+        const base = Math.exp(-Math.pow(x - 5, 2) / (3.2 * div));
+        upper.push(Math.min(1, base + fou * 0.5));
+        lower.push(Math.max(0, base - fou * 0.7));
+      }
+      Plotly.react(plotEl, [
+        { x: xs, y: upper, name: '上歸屬函數 UMF', line: { color: '#38bdf8', width: 2.5 } },
+        { x: xs, y: lower, name: '下歸屬函數 LMF', fill: 'tonexty', fillcolor: 'rgba(56, 189, 248, 0.22)', line: { color: '#0284c7', width: 2.5 } }
+      ], { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'Type-2 FOU 區間', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `淺藍色陰影即為 <b>不確定足跡 (FOU)</b>，寬度 ${fou.toFixed(2)}，容納多位專家對語意定義的分歧與感測雜訊。`;
+    }
+  }
 })();
 
 </script>
@@ -33428,31 +35259,27 @@ window.WebFISStudio = (function () {
           </div>
           <div>
             <div class="flex items-center gap-2.5">
-              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Fuzzy 模糊邏輯雙核心學習平台</h1>
+              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Fuzzy 模糊邏輯全書伴讀與互動平台</h1>
               <span id="header-progress-pill" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-                闖關進度 0%
+                進度 0 / 19 章 (0%)
               </span>
             </div>
             <p class="text-sm text-slate-400 mt-0.5">
-              智慧學習地圖導引 × 《認識 Fuzzy》實體書全書 19 章 282 處重點導讀與頁碼對照 × 七大真實篇章 × Plotly 互動實驗室
+              《認識 Fuzzy》全書 19 章 282 處頁碼導讀 × 19 章互動模擬驗證 × 57 題隨堂測驗 × Web FIS Studio
             </p>
           </div>
         </div>
       </div>
 
-      <!-- 五大教學與設計分頁切換器 (Tabs，預設首頁為智慧學習地圖) -->
+      <!-- 四大核心模組導覽列 -->
       <nav class="flex flex-wrap items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
         <button id="tab-btn-roadmap" onclick="switchTab('roadmap')" class="tab-active px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
-          <span>🗺️</span>
-          <span>智慧學習地圖</span>
-        </button>
-        <button id="tab-btn-theory" onclick="switchTab('theory')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
           <span>📖</span>
-          <span>基礎理論導讀</span>
+          <span>全書 19 章伴讀地圖</span>
         </button>
         <button id="tab-btn-notes" onclick="switchTab('notes')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
           <span>🎧</span>
-          <span>課堂重點與測驗</span>
+          <span>課堂重點與模擬測驗</span>
         </button>
         <button id="tab-btn-lab" onclick="switchTab('lab')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
           <span>🎛️</span>
@@ -33466,132 +35293,79 @@ window.WebFISStudio = (function () {
     </div>
   </header>
 
-  <!-- 當前闖關任務導引列 (在非地圖分頁顯示，隨頁面自然滾動不置頂遮擋主學習區) -->
-  <div id="active-mission-banner" class="hidden bg-slate-900/95 border-b border-sky-500/30 px-6 py-3">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <button onclick="switchTab('roadmap')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs sm:text-sm font-semibold border border-slate-700 transition flex items-center gap-1.5 shrink-0">
-          <span>← 返回學習地圖</span>
-        </button>
-        <div class="text-sm sm:text-base text-slate-200">
-          <span id="mission-banner-stage" class="text-xs font-bold uppercase tracking-wider text-sky-400 mr-2">STAGE 1</span>
-          <strong id="mission-banner-title" class="text-white">當前學習節點</strong>
-        </div>
-      </div>
-      <div class="flex items-center gap-3 shrink-0">
-        <button id="mission-complete-btn" onclick="toggleCurrentNodeComplete()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-          <span>✅ 標記本關完成並解鎖下一關</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- 主內容區 -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- ===================================================================== -->
-    <!-- 【首頁分頁：Fuzzy 智慧學習地圖（Learning Roadmap）】 -->
+    <!-- 【核心模組 1：全書 19 章伴讀地圖（整合地圖總覽、進度追蹤與 19 章完整導讀）】 -->
     <!-- ===================================================================== -->
     <section id="tab-panel-roadmap" class="space-y-10">
 
-      <!-- 學習地圖頂部總覽與進度儀表板 -->
+      <!-- 頂部進度儀表板 -->
       <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-sky-500/30 relative overflow-hidden">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div class="lg:col-span-8 space-y-4">
             <div class="flex flex-wrap items-center gap-2.5">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold uppercase tracking-widest">
-                <span>🧭 Interactive Learning Roadmap</span>
+                <span>📖 Single Source of Truth · Ch.01 ~ Ch.19</span>
               </div>
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
-                <span>📖 實體書 100% 伴讀導引：全書 19 大章節共 282 處精煉重點導讀與課本頁碼對照（零版權圖檔）</span>
+                <span>完整映射 282 筆課本頁碼導讀（零原書翻拍圖檔）</span>
               </div>
             </div>
             <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Fuzzy 模糊邏輯・《認識 Fuzzy》原書章節闖關學習地圖 (Stage 01 ～ 07)
+              《認識 Fuzzy》全書 19 章伴讀學習地圖
             </h2>
             <p class="prose-reading text-slate-300 mb-0">
-              完全對齊《認識 Fuzzy》原書真實章節順序：第 1 章 緒論 ➔ 第 2 章 模糊集合 ➔ 第 3 章 模糊集合之運算與擴展原理 ➔ 第 4 章 模糊關係 ➔ 第 5 章 模糊邏輯與推論 ➔ 第 6 章 模糊控制 ➔ 第 7 章 模糊應用與進階系統。四段式教學架構（通論、課本各節導讀、互動模擬器、隨堂測驗）隨學隨打勾，解鎖完整智慧控制通關成就！
+              與《認識 Fuzzy》原書目錄 100% 同步：每一章皆包含 <strong>(a) 核心通論與先備知識</strong>、<strong>(b) 課本頁碼重點導讀</strong>、<strong>(c) Plotly 互動視覺化驗證</strong> 與 <strong>(d) 隨堂練習與進度打勾</strong>。點選下方任意章節卡片，即可直接在工作區展開精讀！
             </p>
           </div>
 
-          <!-- 右側闖關進度統計卡 -->
+          <!-- 右側 0/19 進度統計卡 -->
           <div class="lg:col-span-4 refined-card p-6 border-sky-500/30 space-y-4">
             <div class="flex items-center justify-between">
-              <span class="text-sm font-bold text-slate-300">整體學習完成度</span>
+              <span class="text-sm font-bold text-slate-300">全書 19 章完成度</span>
               <span id="roadmap-percent-text" class="text-2xl font-extrabold text-emerald-400 font-mono">0%</span>
             </div>
             <div class="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
               <div id="roadmap-progress-bar" class="h-full rounded-full bg-gradient-to-r from-sky-400 via-indigo-500 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
             </div>
             <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
-              <span id="roadmap-count-text">已完成 0 / 28 個核心關卡</span>
+              <span id="roadmap-count-text">已完成 0 / 19 章</span>
               <div class="flex items-center gap-3">
-                <button onclick="unlockAllRoadmapNodes()" class="text-sky-400 hover:text-sky-300 underline">全部解鎖</button>
+                <button onclick="unlockAllRoadmapNodes()" class="text-sky-400 hover:text-sky-300 underline">全部標記完成</button>
                 <button onclick="resetRoadmapProgress()" class="text-slate-400 hover:text-rose-300 underline">重置進度</button>
               </div>
             </div>
             <button id="continue-learning-btn" onclick="continueCurrentStage()" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2">
-              <span>🚀 進入當前進行中關卡</span>
+              <span>🚀 前往下一未完成章節</span>
             </button>
           </div>
         </div>
+      </div>
 
-        <!-- 狀態圖例說明 -->
-        <div class="flex flex-wrap items-center gap-6 mt-7 pt-6 border-t border-slate-800/80 text-xs sm:text-sm text-slate-300">
-          <div class="flex items-center gap-2">
-            <span class="w-3.5 h-3.5 rounded-full bg-emerald-400 shadow shadow-emerald-500/50"></span>
-            <span><strong>已完成 (Completed)</strong>：已掌握並打勾通關</span>
+      <!-- 19 章總覽地圖卡片區 (由 JS 動態渲染三大篇章 Ch.01~19) -->
+      <div id="roadmap-stages-container" class="space-y-6"></div>
+
+      <!-- 雙欄 19 章伴讀工作區（左側 Ch.01~19 快速目錄 + 右側 4 大標準區塊） -->
+      <div id="chapter-workspace" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-4 border-t border-slate-800/80">
+        <aside class="lg:col-span-4 xl:col-span-3 space-y-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1">
+          <div class="glass-panel rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-sky-400">全書 19 章目錄</h3>
+              <span class="text-xs px-2.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">Ch.01 ~ 19</span>
+            </div>
+            <div id="chapter-nav-list" class="space-y-1.5">
+              <!-- 由 JS 動態渲染 Ch.01 ~ Ch.19 目錄 -->
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="w-3.5 h-3.5 rounded-full bg-sky-400 animate-pulse shadow shadow-sky-400/60"></span>
-            <span><strong>進行中 / 已解鎖 (In Progress)</strong>：當前推薦挑戰關卡</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-3.5 h-3.5 rounded-full bg-slate-600"></span>
-            <span><strong>尚未解鎖 (Locked)</strong>：完成前一關卡自動解鎖（亦可點擊預覽）</span>
-          </div>
+        </aside>
+
+        <div class="lg:col-span-8 xl:col-span-9 max-w-4xl w-full mx-auto space-y-8" id="chapter-content-container">
+          <!-- 由 JS 動態渲染當前章節四大標準區塊 (a) 通論 (b) 頁碼導讀 (c) 互動驗證 (d) 隨堂測驗 & 完成按鈕 -->
         </div>
       </div>
 
-      <!-- 四大階段學習地圖主體 (由 JS 動態渲染) -->
-      <div id="roadmap-stages-container" class="space-y-8">
-        <!-- Stage 1 ~ Stage 4 卡片與關卡節點 -->
-      </div>
-
-    </section>
-
-    <!-- ===================================================================== -->
-    <!-- 【分頁一：基礎理論導讀（Book & Slides）】 -->
-    <!-- ===================================================================== -->
-    <section id="tab-panel-theory" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      <!-- 左側章節與子模組導覽列 + 迷你學習路線圖 -->
-      <aside class="lg:col-span-4 xl:col-span-3 space-y-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1">
-        <div class="glass-panel rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-sky-400">理論章節與模組導覽</h2>
-            <span class="text-xs px-2.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">7 大核心篇章 (全數旗艦升級)</span>
-          </div>
-          <div id="chapter-nav-list" class="space-y-2">
-            <!-- 由 JS 動態渲染 7 大章節按鈕與四大標準學習模組子選單 -->
-          </div>
-        </div>
-
-        <!-- 側邊快速闖關導引卡 -->
-        <div class="glass-panel rounded-2xl p-5 space-y-3.5 border border-sky-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-sky-400">🗺️ 學習地圖快速跳轉</span>
-            <button onclick="switchTab('roadmap')" class="text-xs text-sky-300 hover:underline">展開全圖 →</button>
-          </div>
-          <div id="sidebar-mini-roadmap" class="space-y-2 text-xs">
-            <!-- 由 JS 渲染四大階段迷你進度 -->
-          </div>
-        </div>
-      </aside>
-
-      <!-- 右側理論圖文、數學公式與對照範例 (限制最佳閱讀寬度 max-w-4xl) -->
-      <div class="lg:col-span-8 xl:col-span-9 max-w-4xl w-full mx-auto space-y-8" id="chapter-content-container">
-        <!-- 由 JS 動態渲染章節內容 -->
-      </div>
     </section>
 
     <!-- ===================================================================== -->
@@ -33634,17 +35408,20 @@ window.WebFISStudio = (function () {
         </div>
       </div>
 
-      <!-- 隨堂觀念小測驗 (Interactive Quiz) -->
+      <!-- 隨堂觀念小測驗 (全書 Ch.01 ~ Ch.19 模擬測驗中心) -->
       <div id="quiz-section" class="glass-panel rounded-3xl p-7 sm:p-8 border border-indigo-500/30">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
-            <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">Interactive Assessment</span>
-            <h3 class="text-2xl font-bold text-white mt-1">隨堂觀念小測驗 (含《認識 Fuzzy》第 2 章課後習題 2.7 & 2.8)</h3>
-            <p class="text-base text-slate-400 mt-1">點擊選項立即批改，並檢視完整數學推導解析</p>
+            <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">Interactive Assessment · Ch.01 ~ Ch.19</span>
+            <h3 class="text-2xl font-bold text-white mt-1">全書 19 章模擬測驗中心 (57 題精選附詳解)</h3>
+            <p class="text-base text-slate-400 mt-1">可依 Ch.01 ~ Ch.19 篩選單章練習或進行全書綜合測驗，點擊選項立即批改</p>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <select id="quiz-chapter-filter" onchange="setQuizChapterFilter(this.value)" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 font-semibold">
+              <option value="all">📚 全部 19 章綜合測驗 (57 題)</option>
+            </select>
             <div class="bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-800 text-base">
-              目前得分：<span id="quiz-score-Text" class="font-bold text-emerald-400">0 / 5</span>
+              目前得分：<span id="quiz-score-Text" class="font-bold text-emerald-400">0 / 57</span>
             </div>
             <button onclick="resetQuiz()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold text-slate-200 transition">
               🔄 重新作答
@@ -33756,6 +35533,24 @@ window.WebFISStudio = (function () {
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- 0. 全書 19 章專屬模擬器快速切換與檢視器 (Ch.01 ~ Ch.19) -->
+      <div class="glass-panel rounded-3xl p-6 border border-indigo-500/25 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">All 19 Chapters Interactive Simulators</span>
+            <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5">《認識 Fuzzy》全書 19 章模擬器直達選單</h3>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <select id="lab-ch19-select" onchange="selectLab19Chapter(Number(this.value))" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-200 font-semibold">
+            </select>
+            <button id="lab-ch19-goto-btn" onclick="jumpToChapter19FromLab()" class="px-3.5 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs sm:text-sm font-bold transition shrink-0">
+              📖 前往該章導讀 →
+            </button>
+          </div>
+        </div>
+        <div id="lab-ch19-unified-stage"></div>
       </div>
 
       <!-- 1. 旗艦實驗室容器：原冷氣機溫控系統 (Mamdani COG/MOM) -->
@@ -34249,313 +36044,19 @@ window.WebFISStudio = (function () {
     // 四大階段「Fuzzy 智慧學習地圖 (Learning Roadmap)」結構定義
     // =========================================================================
         // =========================================================================
-    // 完全依照《認識 Fuzzy》原書真實章節架構編排之「智慧學習地圖 (Learning Roadmap)」
-    // 七大階段 (Stage 01 ~ Stage 07) • 28 個核心闖關節點 • 四段式教學架構
+    // 《認識 Fuzzy》全書 19 章統一資料模型 (Single Source of Truth)
     // =========================================================================
-    const ROADMAP_STAGES = [
-      {
-        stageId: 'stage_1',
-        stageNumber: 'Stage 01',
-        title: '緒論篇：第 1 章 緒論與模糊理論起源',
-        subtitle: '原書第 1 章（頁 1-1 ～ 1-7）、二分法極限、愛因斯坦名言與全書宏觀藍圖',
-        accentColor: 'sky',
-        badgeIcon: '🌱',
-        nodes: [
-          {
-            id: 's1_n1',
-            code: '1-1',
-            title: '【模組 1：通論】模糊思維起源、二分法侷限與愛因斯坦真實悖論',
-            desc: '掌握生活中的模糊語意溝通優勢、民國65年大考二分法教訓、愛因斯坦 1921 年精確與真實權衡名言，以及 Zadeh 二十年堅持。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm1', scrollTo: 'ch1-module-sec-m1' }
-          },
-          {
-            id: 's1_n2',
-            code: '1-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 1 章 各節導讀與頁碼對照（共 7 頁）',
-            desc: '對照實體課本頁 1-1 至 1-7，研讀札德創立論文、美日歐研究版圖、日本家電智慧化包裝與全書 19 章宏觀架構。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm2', scrollTo: 'ch1-module-sec-m2' }
-          },
-          {
-            id: 's1_n3',
-            code: '1-3',
-            title: '【模組 3：互動實驗室】日常語意模糊量化儀與二分法 vs. 連續過渡模擬器',
-            desc: '操作互動圖表，體驗年齡、體重、溫度等日常抽象語言如何數量化為平滑連續的歸屬曲線。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm3', scrollTo: 'ch1-module-sec-m3' }
-          },
-          {
-            id: 's1_n4',
-            code: '1-4',
-            title: '【模組 4：隨堂練習】緒論核心觀念、歷史發展與愛因斯坦名言測驗 (5題)',
-            desc: '挑戰 5 道由淺入深的緒論觀念考題，檢視對模糊理論哲學基礎與世界歷史脈絡的掌握度。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm4', scrollTo: 'ch1-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_2',
-        stageNumber: 'Stage 02',
-        title: '集合基礎篇：第 2 章 模糊集合理論與基礎定義',
-        subtitle: '原書第 2 章（頁 2-1 ～ 2-15）、意義數量化、四大典型歸屬函數與 α-截集',
-        accentColor: 'teal',
-        badgeIcon: '📐',
-        nodes: [
-          {
-            id: 's2_n1',
-            code: '2-1',
-            title: '【模組 1：通論】明確集合特性函數 vs. 模糊歸屬函數與 Zadeh 記法',
-            desc: '掌握明確特性函數 {0, 1} 與模糊歸屬度閉區間 [0, 1] 差異、連續積分符號、正則性、支撐集與凸模糊集合定義。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm1', scrollTo: 'ch1-module-sec-m1' }
-          },
-          {
-            id: 's2_n2',
-            code: '2-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 2 章 各節導讀與頁碼對照（共 15 頁）',
-            desc: '對照實體課本頁 2-1 至 2-15，研讀圖 2.1 胖老、圖 2.2 小朋友年齡方波 vs 鐘形、圖 2.7 典型造型與圖 2.9 α-cut 切割。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm2', scrollTo: 'ch1-module-sec-m2' }
-          },
-          {
-            id: 's2_n3',
-            code: '2-3',
-            title: '【模組 3：互動實驗室】四大典型歸屬函數 (trimf/trapmf/gaussmf/smf) 與 α-截集',
-            desc: '操作 Plotly 互動實驗室，動態拖曳三角波、梯形、高斯鐘形與 S 形參數，實時觀察 α 水平截割曲線變動。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm3', scrollTo: 'ch1-module-sec-m3' }
-          },
-          {
-            id: 's2_n4',
-            code: '2-4',
-            title: '【模組 4：隨堂練習】模糊集合基礎、歸屬度計算與課後習題 2.7 & 2.8 (8題)',
-            desc: '實戰演練 8 道精選題目（包含實體課本第 2 章習題 2.7、2.8 及跨校考題），附完整推導詳解。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm4', scrollTo: 'ch1-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_3',
-        stageNumber: 'Stage 03',
-        title: '運算擴展篇：第 3 章 模糊集合之運算與擴展原理',
-        subtitle: '原書第 3、4、5 章（共 58 頁）、廣義範數、Zadeh 擴展原理與模糊數算術',
-        accentColor: 'amber',
-        badgeIcon: '⚡',
-        nodes: [
-          {
-            id: 's3_n1',
-            code: '3-1',
-            title: '【模組 1：通論】交聯補運算、排中律與矛盾律失效、擴展原理與模糊算術',
-            desc: '深入交集 Min/t-norm、聯集 Max/s-norm，論證排中律破除；精通 Zadeh 擴展原理與三角形/梯形模糊數四則運算。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm1', scrollTo: 'ch4-module-sec-m1' }
-          },
-          {
-            id: 's3_n2',
-            code: '3-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 3、4、5 章 各節導讀與頁碼對照（共 58 頁）',
-            desc: '對照實體書第 3 章（基本運算 15 頁）、第 4 章（公理運算 12 頁）、第 5 章（模糊數算術與方程求解 31 頁）。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm2', scrollTo: 'ch4-module-sec-m2' }
-          },
-          {
-            id: 's3_n3',
-            code: '3-3',
-            title: '【模組 3：互動實驗室】擴展原理非線性映射 & 三角形模糊數四則運算合成儀',
-            desc: '操作動態模擬器，驗證 y = x² 函數映射與三角形模糊數 (a, b, c) 加減乘除合成曲線。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm3', scrollTo: 'ch4-module-sec-m3' }
-          },
-          {
-            id: 's3_n4',
-            code: '3-4',
-            title: '【模組 4：隨堂練習】擴展原理映射、α-cut 區間算術與方程式求解 (8題)',
-            desc: '挑戰 8 道運算與擴展原理進階計算題，含 α-cut 區間推導與王邱畫圖法逐步詳解。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm4', scrollTo: 'ch4-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_4',
-        stageNumber: 'Stage 04',
-        title: '關係合成篇：第 4 章 模糊關係與合成運算',
-        subtitle: '原書第 6 章（頁 6-1 ～ 6-14）、笛卡兒積空間、Max-Min/Product 合成與等價關係',
-        accentColor: 'indigo',
-        badgeIcon: '🔗',
-        nodes: [
-          {
-            id: 's4_n1',
-            code: '4-1',
-            title: '【模組 1：通論】明確關係 vs. 模糊關係、笛卡兒積熱點矩陣與等價關係',
-            desc: '掌握二維論域上的關聯性量化、Max-Min 與 Max-Product 合成三大定理證明，以及模糊等價關係之自反/對稱/傳遞性。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm1', scrollTo: 'ch2-module-sec-m1' }
-          },
-          {
-            id: 's4_n2',
-            code: '4-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 6 章 各節導讀與頁碼對照（共 16 頁）',
-            desc: '對照實體課本頁 6-1 至 6-16，研讀模糊關係矩陣表 6.1~6.8、合成運算逐步算例與工程關係模型。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm2', scrollTo: 'ch2-module-sec-m2' }
-          },
-          {
-            id: 's4_n3',
-            code: '4-3',
-            title: '【模組 3：互動實驗室】笛卡兒積 2D/3D 熱點曲面 & 3×3 Max-Min 矩陣合成計算機',
-            desc: '互動輸入自訂模糊關係矩陣，即時展示 Max-Min 與 Max-Product 矩陣合成的逐步計算過程與熱點圖。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm3', scrollTo: 'ch2-module-sec-m3' }
-          },
-          {
-            id: 's4_n4',
-            code: '4-4',
-            title: '【模組 4：隨堂練習】Max-Min / Max-Product 合成手算與等價關係判別 (6題)',
-            desc: '演練 6 道矩陣合成與傳遞閉包手算題，逐步對照數學推導步驟。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm4', scrollTo: 'ch2-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_5',
-        stageNumber: 'Stage 05',
-        title: '邏輯推論篇：第 5 章 模糊邏輯與模糊推論',
-        subtitle: '原書第 7、8、9、10 章（共 62 頁）、語言變數、GMP 推論工廠與四大解模糊化',
-        accentColor: 'rose',
-        badgeIcon: '🧠',
-        nodes: [
-          {
-            id: 's5_n1',
-            code: '5-1',
-            title: '【模組 1：通論】語言變數、模糊命題、廣義假言推理 (GMP) 與四大解模糊化',
-            desc: '精通語言變數架構、Zadeh/Mamdani/Larsen 模糊蘊含、推論工廠多規則前項激發度運算與 COG/MOM/BOA 解模糊化。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm1', scrollTo: 'ch2-module-sec-m1' }
-          },
-          {
-            id: 's5_n2',
-            code: '5-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 7～10 章 各節導讀與頁碼對照（共 62 頁）',
-            desc: '對照實體書第 7 章（模糊邏輯）、第 8 章（推論工廠）、第 9 章（計算實例）與第 10 章（模糊化與解模糊化）。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm2', scrollTo: 'ch2-module-sec-m2' }
-          },
-          {
-            id: 's5_n3',
-            code: '5-3',
-            title: '【模組 3：互動實驗室】Mamdani 推論工廠動態激發 & 四大解模糊化對比實驗室',
-            desc: '操作多規則激發裁切模擬器，即時切換 COG 重心法、MOM 最大平均法、BOA 面積等分法，比較其工程響應特性。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm3', scrollTo: 'ch2-module-sec-m3' }
-          },
-          {
-            id: 's5_n4',
-            code: '5-4',
-            title: '【模組 4：隨堂練習】推論工廠逐步推導、離散重心法手算與家電規則庫 (8題)',
-            desc: '挑戰 8 道手動計算前項激發度、後項面積聯集與重心積分題目，附全公式步驟詳解。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm4', scrollTo: 'ch2-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_6',
-        stageNumber: 'Stage 06',
-        title: '控制工程篇：第 6 章 模糊控制器設計與工程應用',
-        subtitle: '原書第 11、13、14、15 章（共 60 頁）、FLC 架構、3D 控制曲面與通用逼近器',
-        accentColor: 'emerald',
-        badgeIcon: '🎛️',
-        nodes: [
-          {
-            id: 's6_n1',
-            code: '6-1',
-            title: '【模組 1：通論】FLC 四大單元、相平面阻尼、3D 控制曲面與李亞普諾夫穩定性',
-            desc: '精通輸入誤差 e 與變化率 Δe 之縮放因子整定、5×5 FAM 規則庫設計、非線性控制曲面流形與 T-S 模糊動態模型。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm1', scrollTo: 'ch3-module-sec-m1' }
-          },
-          {
-            id: 's6_n2',
-            code: '6-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 11、13、14、15 章 各節導讀與頁碼對照（共 60 頁）',
-            desc: '對照實體書第 11 章（控制器設計 15 頁）、第 13 章（倒單擺實務 15 頁）、第 14 章（ABS 煞車 15 頁）與第 15 章（通用逼近器 15 頁）。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm2', scrollTo: 'ch3-module-sec-m2' }
-          },
-          {
-            id: 's6_n3',
-            code: '6-3',
-            title: '【模組 3：互動實驗室】冷氣 5×5 FAM 溫控模擬器 & 3D 非線性控制曲面動態旋轉儀',
-            desc: '調整溫度誤差與變化率滑桿，觀察 FAM 規則高亮激發，並在 3D 控制曲面上動態即時標示工作點軌跡。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm3', scrollTo: 'ch3-module-sec-m3' }
-          },
-          {
-            id: 's6_n4',
-            code: '6-4',
-            title: '【模組 4：隨堂練習】FAM 規則阻尼調校、倒單擺平衡與 TSK 煞車控制 (8題)',
-            desc: '實戰演練 8 道工程實務設計題（含縮放因子計算、仙台地鐵加減速控制及通用逼近定理證明）。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm4', scrollTo: 'ch3-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_7',
-        stageNumber: 'Stage 07',
-        title: '應用智慧篇：第 7 章 模糊應用與進階系統',
-        subtitle: '原書第 12、16、17、18、19 章（共 79 頁）、Bellman-Zadeh 決策、FCM 分群與 ANFIS',
-        accentColor: 'violet',
-        badgeIcon: '🚀',
-        nodes: [
-          {
-            id: 's7_n1',
-            code: '7-1',
-            title: '【模組 1：通論】Bellman-Zadeh 決策、MCDM 評判、FCM 柔性分群與 ANFIS 五層架構',
-            desc: '掌握目標與約束對稱交集決策、多指標權重合成 B = W ○ R、FCM 隸屬度矩陣交替迭代，以及 ANFIS 混合學習算法。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm1', scrollTo: 'ch5-module-sec-m1' }
-          },
-          {
-            id: 's7_n2',
-            code: '7-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 12、16～19 章 各節導讀與頁碼對照（共 79 頁）',
-            desc: '對照實體書第 12 章（FCM 分群）、第 16 章（圖形識別）、第 17 章（模糊決策）、第 18 章（ANFIS 整合）與第 19 章（未來展望）。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm2', scrollTo: 'ch5-module-sec-m2' }
-          },
-          {
-            id: 's7_n3',
-            code: '7-3',
-            title: '【模組 3：互動實驗室】Bellman-Zadeh 最佳決策搜尋 & FCM 柔性聚類 & ANFIS 擬合',
-            desc: '操作 3 座前沿互動實驗室：搜尋最佳妥協決策點、在 2D 散佈圖動態迭代 FCM 聚類中心、觀察 ANFIS 網路權重自適應演化。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm3', scrollTo: 'ch5-module-sec-m3' }
-          },
-          {
-            id: 's7_n4',
-            code: '7-4',
-            title: '【模組 4：隨堂練習】MCDM 評判矩陣、FCM 目標函數優化與 ANFIS 學習推導 (8題)',
-            desc: '挑戰 8 道進階智慧系統綜合題目，包含綜合評判算子、FCM 拉格朗日乘子推導與混合學習矩陣構造。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm4', scrollTo: 'ch5-module-sec-m4' }
-          }
-        ]
-      }
-    ];
+    const CHAPTERS_19 = window.CHAPTERS_19_DATA || [];
 
     // 全域狀態
     let courseData = window.FUZZY_COURSE_DATA || null;
     let activeChapterId = 'ch1_intro';
-    let selectedBookPageFilter = 'all'; // 'all' 或 '2-1' ~ '2-15'
+    let activeChapter19Num = 1;
+    let activeBookPageFilter19 = 'all';
+    let quizChapterFilter = 'all';
+    let activeLab19Chapter = 1;
     let quizAnswers = {};
-    let completedNodes = [];
-    let currentActiveNodeId = 's1_n1';
+    let completedChapters19 = [];
 
     function normalizeChapterId(id) {
       const legacyMap = {
@@ -34570,58 +36071,29 @@ window.WebFISStudio = (function () {
       return legacyMap[id] || id || 'ch1_intro';
     }
 
-    // 載入與儲存學習地圖進度 (localStorage)
     function loadRoadmapProgress() {
       try {
-        const saved = localStorage.getItem('fuzzy_roadmap_completed_v2');
+        const saved = localStorage.getItem('fuzzy_completed_chapters_19_v1');
         if (saved) {
-          completedNodes = JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          completedChapters19 = Array.isArray(parsed) ? parsed.map(Number).filter(n => n >= 1 && n <= 19) : [];
         } else {
-          completedNodes = [];
+          completedChapters19 = [];
         }
       } catch (e) {
-        completedNodes = [];
+        completedChapters19 = [];
       }
-      updateCurrentActiveNode();
     }
 
     function saveRoadmapProgress() {
       try {
-        localStorage.setItem('fuzzy_roadmap_completed_v2', JSON.stringify(completedNodes));
+        localStorage.setItem('fuzzy_completed_chapters_19_v1', JSON.stringify(completedChapters19));
       } catch (e) {}
-      updateCurrentActiveNode();
       renderRoadmap();
-      renderSidebarMiniRoadmap();
-      updateMissionBanner();
+      renderChapterNav();
+      renderChapterContent(activeChapter19Num);
     }
 
-    function getAllNodesFlat() {
-      const list = [];
-      ROADMAP_STAGES.forEach(st => {
-        st.nodes.forEach(n => list.push({ ...n, stageNumber: st.stageNumber, stageTitle: st.title }));
-      });
-      return list;
-    }
-
-    function updateCurrentActiveNode() {
-      const allNodes = getAllNodesFlat();
-      const firstUnfinished = allNodes.find(n => !completedNodes.includes(n.id));
-      currentActiveNodeId = firstUnfinished ? firstUnfinished.id : allNodes[allNodes.length - 1].id;
-    }
-
-    // 判斷節點狀態：'completed' | 'active' | 'locked'
-    function getNodeStatus(nodeId) {
-      if (completedNodes.includes(nodeId)) return 'completed';
-      if (nodeId === currentActiveNodeId) return 'active';
-      const allNodes = getAllNodesFlat();
-      const idx = allNodes.findIndex(n => n.id === nodeId);
-      if (idx === 0) return 'active';
-      const prevNode = allNodes[idx - 1];
-      if (completedNodes.includes(prevNode.id)) return 'active';
-      return 'locked';
-    }
-
-    // 簡易 Markdown 粗體與段落轉譯輔助函式（保留所有 $...$ 與 $$...$$ 供 MathJax 渲染）
     function formatRichText(text) {
       if (!text) return '';
       return text
@@ -34630,7 +36102,6 @@ window.WebFISStudio = (function () {
         .replace(/\n/g, '<br />');
     }
 
-    // 安全呼叫 MathJax 與 Plotly 輔助函式 (防崩潰保護)
     function safeTypesetMath(elements) {
       try {
         if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
@@ -34654,7 +36125,6 @@ window.WebFISStudio = (function () {
       }
     }
 
-    // 初始化載入 (直接讀取預載的 window.FUZZY_COURSE_DATA，不使用 fetch 以徹底避免 file:// CORS 紅字報錯)
     function initApp() {
       
       if (!courseData && window.FUZZY_COURSE_DATA) {
@@ -34668,10 +36138,11 @@ window.WebFISStudio = (function () {
       }
 
       try { loadRoadmapProgress(); } catch (e) { console.error(e); }
+      try { initQuizChapterFilterOptions(); } catch (e) { console.error(e); }
+      try { initLab19Select(); } catch (e) { console.error(e); }
       try { renderRoadmap(); } catch (e) { console.error(e); }
-      try { renderSidebarMiniRoadmap(); } catch (e) { console.error(e); }
       try { renderChapterNav(); } catch (e) { console.error(e); }
-      try { renderChapterContent(activeChapterId); } catch (e) { console.error(e); }
+      try { renderChapterContent(activeChapter19Num); } catch (e) { console.error(e); }
       try { renderLectureNotes(); } catch (e) { console.error(e); }
       try { renderMisconceptions(); } catch (e) { console.error(e); }
       try { renderQuizzes(); } catch (e) { console.error(e); }
@@ -34683,14 +36154,11 @@ window.WebFISStudio = (function () {
       } catch (e) { console.warn(e); }
     }
 
-    // =========================================================================
-    // 學習地圖渲染與連動邏輯
-    // =========================================================================
     function renderRoadmap() {
       try {
-        const allNodes = getAllNodesFlat();
-        const doneCount = completedNodes.length;
-        const totalCount = allNodes.length;
+        const list = window.CHAPTERS_19_DATA || [];
+        const totalCount = list.length || 19;
+        const doneCount = completedChapters19.length;
         const pct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
 
         const pctEl = document.getElementById('roadmap-percent-text');
@@ -34698,281 +36166,146 @@ window.WebFISStudio = (function () {
         const barEl = document.getElementById('roadmap-progress-bar');
         if (barEl) barEl.style.width = `${pct}%`;
         const countEl = document.getElementById('roadmap-count-text');
-        if (countEl) countEl.textContent = `已完成 ${doneCount} / ${totalCount} 個核心關卡`;
+        if (countEl) countEl.textContent = `已完成 ${doneCount} / ${totalCount} 章`;
         const pillEl = document.getElementById('header-progress-pill');
-        if (pillEl) pillEl.textContent = `闖關進度 ${pct}% (${doneCount}/${totalCount})`;
+        if (pillEl) pillEl.textContent = `進度 ${doneCount} / ${totalCount} 章 (${pct}%)`;
 
-        const activeNodeObj = allNodes.find(n => n.id === currentActiveNodeId) || allNodes[0];
+        const nextCh = list.find(c => !completedChapters19.includes(c.ch)) || list[0];
         const continueBtn = document.getElementById('continue-learning-btn');
-        if (continueBtn && activeNodeObj) {
+        if (continueBtn && nextCh) {
           if (doneCount === totalCount && totalCount > 0) {
-            continueBtn.innerHTML = `<span>🏆 恭喜全數通關！前往互動實驗室自由探索</span>`;
+            continueBtn.innerHTML = `<span>🏆 恭喜完成全書 19 章！前往互動實驗室探索</span>`;
           } else {
-            continueBtn.innerHTML = `<span>🚀 繼續挑戰：${activeNodeObj.code} ${activeNodeObj.title.slice(0, 16)}...</span>`;
+            continueBtn.innerHTML = `<span>🚀 前往下一未完成：${nextCh.code} ${nextCh.title.replace(/^第 \d+ 章：/, '')}</span>`;
           }
         }
 
         const container = document.getElementById('roadmap-stages-container');
         if (!container) return;
 
-        container.innerHTML = ROADMAP_STAGES.map((stage) => {
-          const stageDoneCount = stage.nodes.filter(n => completedNodes.includes(n.id)).length;
-          const isStageAllDone = stageDoneCount === stage.nodes.length;
-          const gridCols = stage.nodes.length === 4 ? 'lg:grid-cols-2' : (stage.nodes.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2');
+        const allPages = getBookPagesList();
+        const groups = ['基礎理論篇', '工程控制篇', '智慧演算法與進階應用篇'];
+        const groupDesc = {
+          '基礎理論篇': 'Ch.01 ~ Ch.06 · 模糊集合、α-截集、模糊運算、模糊數與模糊關係',
+          '工程控制篇': 'Ch.07 ~ Ch.10 · 倒單擺、變頻冷氣、模糊洗衣機與汽車 ABS 實務',
+          '智慧演算法與進階應用篇': 'Ch.11 ~ Ch.19 · ANFIS、影像識別、MCDM、ICU 醫療、FTS、FCM、GA、自適應與未來展望'
+        };
 
-        const nodesHtml = stage.nodes.map(node => {
-          const status = getNodeStatus(node.id);
-          let cardStyle = 'roadmap-node-locked';
-          let statusBadge = `<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">🔒 尚未解鎖</span>`;
-          let actionBtnText = '預覽關卡內容 →';
-          let checkBtnClass = 'border-slate-600 text-slate-400 hover:border-sky-400 hover:text-sky-300';
+        container.innerHTML = groups.map(grp => {
+          const grpChapters = list.filter(c => c.stageGroup === grp);
+          const grpDone = grpChapters.filter(c => completedChapters19.includes(c.ch)).length;
+          const cardsHtml = grpChapters.map(ch => {
+            const isDone = completedChapters19.includes(ch.ch);
+            const isCurrent = ch.ch === activeChapter19Num;
+            const pageCount = allPages.filter(p => Number(p.chapter) === ch.ch).length;
 
-          if (status === 'completed') {
-            cardStyle = 'roadmap-node-completed';
-            statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✅ 已完成</span>`;
-            actionBtnText = '複習本關教材 →';
-            checkBtnClass = 'bg-emerald-500 border-emerald-400 text-slate-950 font-bold';
-          } else if (status === 'active') {
-            cardStyle = 'roadmap-node-active';
-            statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-500/25 text-sky-300 border border-sky-400/50 animate-pulse">🔥 進行中・已解鎖</span>`;
-            actionBtnText = '立即開始學習 →';
-            checkBtnClass = 'border-sky-400 text-sky-300 hover:bg-sky-500/20';
-          }
+            let borderCls = 'border-slate-800 hover:border-sky-500/50 bg-slate-900/70';
+            if (isCurrent) borderCls = 'border-sky-400 bg-sky-950/35 ring-1 ring-sky-400/50';
+            else if (isDone) borderCls = 'border-emerald-500/40 bg-emerald-950/20';
+
+            return `
+              <div onclick="selectChapter19(${ch.ch}, true)"
+                class="cursor-pointer rounded-2xl p-4 border transition-all flex flex-col justify-between gap-3 ${borderCls}">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">${ch.icon}</span>
+                    <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-950 text-sky-300 border border-slate-800">${ch.code}</span>
+                  </div>
+                  ${isDone
+                    ? '<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✅ 已完成</span>'
+                    : (isCurrent
+                      ? '<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/40">📖 閱讀中</span>'
+                      : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">待學習</span>')}
+                </div>
+                <div>
+                  <h4 class="text-sm sm:text-base font-bold text-white leading-snug">${ch.title.replace(/^第 \d+ 章：/, '')}</h4>
+                  <p class="text-xs text-slate-400 mt-1">頁 ${ch.pageRange} · ${pageCount} 頁導讀 · 3 題測驗</p>
+                </div>
+              </div>
+            `;
+          }).join('');
 
           return `
-            <div class="rounded-2xl p-6 transition-all flex flex-col justify-between gap-5 ${cardStyle}">
-              <div class="space-y-3">
-                <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700 text-xs font-mono font-bold text-sky-300">關卡 ${node.code}</span>
-                    <span class="text-xs text-slate-400 font-medium">${node.typeTag}</span>
-                  </div>
-                  ${statusBadge}
+            <div class="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 class="text-lg sm:text-xl font-bold text-white">${grp}</h3>
+                  <p class="text-xs sm:text-sm text-slate-400">${groupDesc[grp]}</p>
                 </div>
-
-                <h4 onclick="navigateToRoadmapNode('${node.id}')" class="text-lg sm:text-xl font-bold text-white hover:text-sky-300 cursor-pointer transition leading-snug">
-                  ${node.title}
-                </h4>
-
-                <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
-                  ${node.desc}
-                </p>
+                <span class="text-xs font-bold px-3 py-1 rounded-full bg-slate-900 border border-slate-700 text-emerald-300">
+                  完成 ${grpDone} / ${grpChapters.length} 章
+                </span>
               </div>
-
-              <div class="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
-                <!-- 手動打勾完成按鈕 -->
-                <button onclick="toggleNodeComplete('${node.id}', event)"
-                  class="px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-semibold transition flex items-center gap-2 ${checkBtnClass}">
-                  <span>${status === 'completed' ? '✓ 已標記完成' : '☐ 標記完成'}</span>
-                </button>
-
-                <!-- 進入關卡連動按鈕 -->
-                <button onclick="navigateToRoadmapNode('${node.id}')"
-                  class="px-4 py-2 rounded-xl ${status === 'active' ? 'bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold shadow-md shadow-sky-500/20' : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-semibold'} text-xs sm:text-sm transition">
-                  ${actionBtnText}
-                </button>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                ${cardsHtml}
               </div>
             </div>
           `;
         }).join('');
-
-        return `
-          <div class="glass-panel rounded-3xl p-6 sm:p-8 border ${isStageAllDone ? 'border-emerald-500/35' : 'border-slate-800'} space-y-6 relative">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
-              <div class="flex items-start sm:items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center text-2xl shrink-0 shadow-inner">
-                  ${stage.badgeIcon}
-                </div>
-                <div>
-                  <div class="flex items-center gap-2.5">
-                    <span class="text-xs font-extrabold uppercase tracking-widest text-sky-400">${stage.stageNumber}</span>
-                    ${isStageAllDone ? '<span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">🎉 本階段已通關</span>' : ''}
-                  </div>
-                  <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">${stage.title}</h3>
-                  <p class="text-sm sm:text-base text-slate-400 mt-0.5">${stage.subtitle}</p>
-                </div>
-              </div>
-              <div class="bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800 text-xs sm:text-sm text-slate-300 font-mono shrink-0 self-start sm:self-center">
-                階段進度：<strong class="${isStageAllDone ? 'text-emerald-400' : 'text-sky-400'}">${stageDoneCount} / ${stage.nodes.length}</strong>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 ${gridCols} gap-5">
-              ${nodesHtml}
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([container]);
+      } catch (err) {
+        console.error('renderRoadmap error:', err);
       }
-    } catch (err) {
-      console.error('renderRoadmap error:', err);
-    }
-  }
-
-    function renderSidebarMiniRoadmap() {
-      const box = document.getElementById('sidebar-mini-roadmap');
-      if (!box) return;
-      const allNodes = getAllNodesFlat();
-      box.innerHTML = allNodes.map(n => {
-        const isDone = completedNodes.includes(n.id);
-        const isCurrent = n.id === currentActiveNodeId;
-        return `
-          <button onclick="navigateToRoadmapNode('${n.id}')"
-            class="w-full text-left px-3 py-2 rounded-xl transition flex items-center justify-between gap-2 ${isCurrent ? 'bg-sky-500/20 border border-sky-500/40 text-white font-semibold' : 'hover:bg-slate-800/70 text-slate-300'}">
-            <span class="truncate">${isDone ? '✅' : (isCurrent ? '🔥' : '🔒')} ${n.code} ${n.title.split('：')[0]}</span>
-          </button>
-        `;
-      }).join('');
     }
 
-    // 點擊學習地圖節點：自動切換分頁、載入對應章節/模組/筆記/測驗/模擬器並高亮捲動
-    function navigateToRoadmapNode(nodeId) {
-      const allNodes = getAllNodesFlat();
-      const target = allNodes.find(n => n.id === nodeId);
-      if (!target) return;
-
-      currentActiveNodeId = nodeId;
-      const act = target.action;
-
-      if (act.tab === 'theory') {
-        activeChapterId = act.chapterId;
-        renderChapterNav();
-        renderChapterContent(activeChapterId);
-        switchTab('theory');
-        if (act.ch1Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh1Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh1Module(act.ch1Module);
-          }, 80);
-        }
-        if (act.ch2Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh2Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh2Module(act.ch2Module);
-          }, 80);
-        }
-        if (act.ch3Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh3Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh3Module(act.ch3Module);
-          }, 80);
-        }
-        if (act.ch4Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh4Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh4Module(act.ch4Module);
-          }, 80);
-        }
-        if (act.ch5Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh5Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh5Module(act.ch5Module);
-          }, 80);
-        }
-        if (act.ch6Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh6Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh6Module(act.ch6Module);
-          }, 80);
-        }
-        if (act.ch7Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh7Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh7Module(act.ch7Module);
-          }, 80);
-        }
-      } else if (act.tab === 'notes') {
-        switchTab('notes');
-      } else if (act.tab === 'lab') {
-        switchTab('lab');
-        if (act.scenarioTemp !== undefined) {
-          applyScenario(act.scenarioTemp);
-        }
+    function selectChapter19(chNum, shouldScroll) {
+      activeChapter19Num = Number(chNum) || 1;
+      activeBookPageFilter19 = 'all';
+      renderRoadmap();
+      renderChapterNav();
+      renderChapterContent(activeChapter19Num);
+      if (shouldScroll) {
+        const ws = document.getElementById('chapter-workspace');
+        if (ws) ws.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    }
 
-      updateMissionBanner();
-      renderSidebarMiniRoadmap();
-
-      setTimeout(() => {
-        if (act.scrollTo) {
-          const el = document.getElementById(act.scrollTo);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            el.classList.remove('pulse-focus');
-            void el.offsetWidth;
-            el.classList.add('pulse-focus');
-          }
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 150);
+    function toggleChapter19Complete(chNum) {
+      const n = Number(chNum);
+      if (completedChapters19.includes(n)) {
+        completedChapters19 = completedChapters19.filter(x => x !== n);
+      } else {
+        completedChapters19.push(n);
+      }
+      saveRoadmapProgress();
     }
 
     function continueCurrentStage() {
-      navigateToRoadmapNode(currentActiveNodeId);
-    }
-
-    function toggleNodeComplete(nodeId, event) {
-      if (event) event.stopPropagation();
-      const idx = completedNodes.indexOf(nodeId);
-      if (idx >= 0) {
-        completedNodes.splice(idx, 1);
-      } else {
-        completedNodes.push(nodeId);
+      const list = window.CHAPTERS_19_DATA || [];
+      if (completedChapters19.length >= list.length && list.length > 0) {
+        switchTab('lab');
+        return;
       }
-      saveRoadmapProgress();
-    }
-
-    function toggleCurrentNodeComplete() {
-      if (!completedNodes.includes(currentActiveNodeId)) {
-        completedNodes.push(currentActiveNodeId);
+      const nextCh = list.find(c => !completedChapters19.includes(c.ch)) || list[0];
+      if (nextCh) {
+        selectChapter19(nextCh.ch, true);
       }
-      saveRoadmapProgress();
-      navigateToRoadmapNode(currentActiveNodeId);
     }
 
     function unlockAllRoadmapNodes() {
-      completedNodes = getAllNodesFlat().map(n => n.id);
+      const list = window.CHAPTERS_19_DATA || [];
+      completedChapters19 = list.map(c => c.ch);
       saveRoadmapProgress();
     }
 
     function resetRoadmapProgress() {
-      completedNodes = [];
+      completedChapters19 = [];
       saveRoadmapProgress();
     }
 
-    function updateMissionBanner() {
-      try {
-        const allNodes = getAllNodesFlat();
-        const node = allNodes.find(n => n.id === currentActiveNodeId) || allNodes[0];
-        if (!node) return;
-        const isDone = completedNodes.includes(node.id);
+    function renderSidebarMiniRoadmap() {}
+    function updateMissionBanner() {}
+    function toggleCurrentNodeComplete() { toggleChapter19Complete(activeChapter19Num); }
+    function navigateToRoadmapNode() {}
 
-        const stageEl = document.getElementById('mission-banner-stage');
-        if (stageEl) stageEl.textContent = `${node.stageNumber} • 關卡 ${node.code}`;
-        const titleEl = document.getElementById('mission-banner-title');
-        if (titleEl) titleEl.textContent = node.title;
-
-        const btn = document.getElementById('mission-complete-btn');
-        if (btn) {
-          if (isDone) {
-            btn.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 font-bold text-sm transition flex items-center gap-2';
-            btn.innerHTML = '<span>✓ 本關已完成（點擊前往下一關）</span>';
-          } else {
-            btn.className = 'px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20 flex items-center gap-2';
-            btn.innerHTML = '<span>✅ 標記本關完成並解鎖下一關</span>';
-          }
-        }
-      } catch (err) {
-        console.error('updateMissionBanner error:', err);
-      }
-    }
-
-    // 切換五大教學與設計分頁
     function switchTab(tabName) {
       try {
-        const tabs = ['roadmap', 'theory', 'notes', 'lab', 'fis'];
+        const normalizedTab = tabName === 'theory' ? 'roadmap' : tabName;
+        const tabs = ['roadmap', 'notes', 'lab', 'fis'];
         tabs.forEach(t => {
           const btn = document.getElementById(`tab-btn-${t}`);
           const panel = document.getElementById(`tab-panel-${t}`);
           if (!btn || !panel) return;
-          if (t === tabName) {
+          if (t === normalizedTab) {
             btn.classList.add('tab-active');
             btn.classList.remove('text-slate-300');
             panel.classList.remove('hidden');
@@ -34983,20 +36316,19 @@ window.WebFISStudio = (function () {
           }
         });
 
-        const banner = document.getElementById('active-mission-banner');
-        if (banner) {
-          if (tabName === 'roadmap') {
-            banner.classList.add('hidden');
-            renderRoadmap();
-          } else {
-            banner.classList.remove('hidden');
-            updateMissionBanner();
-          }
+        if (tabName === 'theory') {
+          const ws = document.getElementById('chapter-workspace');
+          if (ws) setTimeout(() => ws.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
         }
 
-        if (tabName === 'lab') {
+        if (normalizedTab === 'roadmap') {
+          renderRoadmap();
+        } else if (normalizedTab === 'lab') {
           setTimeout(() => {
             try {
+              if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
+                FuzzyWidgets.renderChapter19Lab(activeLab19Chapter, 'lab-ch19-unified-stage');
+              }
               if (currentLabHubTab === 'flagship') {
                 updateLabSimulation();
                 if (window.Plotly && window.Plotly.Plots) {
@@ -35008,7 +36340,7 @@ window.WebFISStudio = (function () {
               }
             } catch (e) { console.warn(e); }
           }, 60);
-        } else if (tabName === 'fis') {
+        } else if (normalizedTab === 'fis') {
           setTimeout(() => {
             try {
               if (window.WebFISStudio && typeof window.WebFISStudio.init === 'function') {
@@ -35480,193 +36812,234 @@ window.WebFISStudio = (function () {
 
     function renderChapterNav() {
       const navList = document.getElementById('chapter-nav-list');
-      if (!navList || !courseData || !Array.isArray(courseData.chapters)) return;
+      const list = window.CHAPTERS_19_DATA || [];
+      if (!navList || !list.length) return;
 
-      const getMod = (fnName) => (window.FuzzyWidgets && typeof window.FuzzyWidgets[fnName] === 'function')
-        ? window.FuzzyWidgets[fnName]()
-        : 'all';
-
-      const modStateMap = {
-        ch1_intro: { chNum: 1, mod: getMod('getActiveCh1Module'), switchFn: 'switchCh1Module', color: 'sky' },
-        ch2_fuzzy_sets: { chNum: 2, mod: getMod('getActiveCh2Module'), switchFn: 'switchCh2Module', color: 'sky' },
-        ch3_operations_extension: { chNum: 3, mod: getMod('getActiveCh3Module'), switchFn: 'switchCh3Module', color: 'amber' },
-        ch4_fuzzy_relations: { chNum: 4, mod: getMod('getActiveCh4Module'), switchFn: 'switchCh4Module', color: 'sky' },
-        ch5_logic_inference: { chNum: 5, mod: getMod('getActiveCh5Module'), switchFn: 'switchCh5Module', color: 'rose' },
-        ch6_fuzzy_control: { chNum: 6, mod: getMod('getActiveCh6Module'), switchFn: 'switchCh6Module', color: 'cyan' },
-        ch7_advanced_applications: { chNum: 7, mod: getMod('getActiveCh7Module'), switchFn: 'switchCh7Module', color: 'violet' },
-        fuzzy_sets: { chNum: 1, mod: getMod('getActiveCh1Module'), switchFn: 'switchCh1Module', color: 'sky' },
-        fuzzy_relations_inference: { chNum: 2, mod: getMod('getActiveCh2Module'), switchFn: 'switchCh2Module', color: 'sky' },
-        fuzzy_control_applications: { chNum: 3, mod: getMod('getActiveCh3Module'), switchFn: 'switchCh3Module', color: 'amber' },
-        fuzzy_numbers_extension: { chNum: 4, mod: getMod('getActiveCh4Module'), switchFn: 'switchCh4Module', color: 'amber' },
-        fuzzy_decision_evaluation: { chNum: 5, mod: getMod('getActiveCh5Module'), switchFn: 'switchCh5Module', color: 'rose' },
-        fuzzy_clustering_pattern: { chNum: 6, mod: getMod('getActiveCh6Module'), switchFn: 'switchCh6Module', color: 'cyan' },
-        advanced_fuzzy_neuro: { chNum: 7, mod: getMod('getActiveCh7Module'), switchFn: 'switchCh7Module', color: 'violet' }
-      };
-
-      navList.innerHTML = courseData.chapters.map(ch => {
-        const isActive = ch.id === activeChapterId;
-        const info = modStateMap[ch.id];
-
-        let subMenuHtml = '';
-        if (isActive && info) {
-          const num = info.chNum;
-          const curMod = info.mod;
-          const fn = info.switchFn;
-          const col = info.color;
-          const activeBg = `bg-gradient-to-r from-${col}-500 to-${col === 'amber' ? 'orange' : col === 'sky' ? 'indigo' : col === 'rose' ? 'pink' : col === 'cyan' ? 'blue' : 'purple'}-600 text-white font-bold shadow-md`;
-
-          subMenuHtml = `
-            <div class="mt-1.5 ml-3 pl-3 border-l-2 border-${col}-500/35 space-y-1.5 py-1.5">
-              <div class="text-[11px] font-bold uppercase tracking-wider text-${col}-400/90 px-2 pb-0.5">
-                Chapter 0${num} 四大標準學習模組
-              </div>
-              <button id="ch${num}-subtab-btn-all" onclick="FuzzyWidgets.${fn}('all', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'all' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>📑</span>
-                <span>展開全部 4 大模組</span>
-              </button>
-              <button id="ch${num}-subtab-btn-m1" onclick="FuzzyWidgets.${fn}('m1', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm1' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>🏛️</span>
-                <span>【模組 1】通論 (Overview)</span>
-              </button>
-              <button id="ch${num}-subtab-btn-m2" onclick="FuzzyWidgets.${fn}('m2', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm2' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>📘</span>
-                <span>【模組 2】專書逐頁精讀</span>
-              </button>
-              <button id="ch${num}-subtab-btn-m3" onclick="FuzzyWidgets.${fn}('m3', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm3' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>📊</span>
-                <span>【模組 3】多維度模擬圖</span>
-              </button>
-              <button id="ch${num}-subtab-btn-m4" onclick="FuzzyWidgets.${fn}('m4', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm4' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>✍️</span>
-                <span>【模組 4】題目練習與詳解</span>
-              </button>
-            </div>
-          `;
-        }
-
+      const allPages = getBookPagesList();
+      navList.innerHTML = list.map(ch => {
+        const isActive = ch.ch === activeChapter19Num;
+        const isDone = completedChapters19.includes(ch.ch);
+        const pageCount = allPages.filter(p => Number(p.chapter) === ch.ch).length;
         return `
-          <div class="space-y-1">
-            <button onclick="selectChapter('${ch.id}')"
-              class="w-full text-left px-4 py-3 rounded-xl transition flex flex-col gap-0.5 ${isActive ? 'chapter-active font-bold' : 'hover:bg-slate-800/70 text-slate-300'}">
-              <span class="text-xs uppercase tracking-wider ${isActive ? 'text-sky-400' : 'text-slate-500'}">${ch.number}</span>
-              <span class="text-base leading-snug">${ch.title.split(' (')[0]}</span>
-            </button>
-            ${subMenuHtml}
-          </div>
+          <button onclick="selectChapter19(${ch.ch}, false)"
+            class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between gap-2 ${isActive ? 'chapter-active font-bold' : 'hover:bg-slate-800/70 text-slate-300'}">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-mono ${isActive ? 'text-sky-400' : 'text-slate-500'}">${ch.code}</span>
+                <span class="text-xs text-slate-500">(${pageCount}頁)</span>
+              </div>
+              <div class="text-sm truncate leading-snug">${ch.title.replace(/^第 \d+ 章：/, '')}</div>
+            </div>
+            <span class="shrink-0 text-sm">${isDone ? '✅' : (isActive ? '📖' : '')}</span>
+          </button>
         `;
       }).join('');
     }
 
     function selectChapter(chapterId) {
-      activeChapterId = chapterId;
-            const chapterToNodeMap = {
-        fuzzy_sets: 's1_n1',
-        fuzzy_relations_inference: 's2_n1',
-        fuzzy_control_applications: 's3_n1',
-        fuzzy_numbers_extension: 's4_n1',
-        fuzzy_decision_evaluation: 's5_n1',
-        fuzzy_clustering_pattern: 's6_n1',
-        advanced_fuzzy_neuro: 's7_n1'
-      };
-      if (chapterToNodeMap[chapterId]) {
-        currentActiveNodeId = chapterToNodeMap[chapterId];
-        updateMissionBanner();
-        renderSidebarMiniRoadmap();
-      }
-      renderChapterNav();
-      renderChapterContent(chapterId);
+      const m = String(chapterId || '').match(/(\d+)/);
+      selectChapter19(m ? Number(m[1]) : 1, false);
     }
 
-        function renderChapterContent(chapterId) {
-      const normId = normalizeChapterId(chapterId);
-      const ch = courseData.chapters.find(c => normalizeChapterId(c.id) === normId) || courseData.chapters[0];
+    function filterChapter19BookPage(pageId) {
+      activeBookPageFilter19 = pageId;
+      renderChapterContent(activeChapter19Num);
+    }
+
+    function answerChapter19Quiz(quizId, optionIndex) {
+      quizAnswers[quizId] = optionIndex;
+      renderChapterContent(activeChapter19Num);
+      renderQuizzes();
+    }
+
+    function renderChapterContent(chNumOrId) {
+      const list = window.CHAPTERS_19_DATA || [];
+      let chNum = Number(chNumOrId);
+      if (!chNum || isNaN(chNum)) {
+        const m = String(chNumOrId || '').match(/(\d+)/);
+        chNum = m ? Number(m[1]) : 1;
+      }
+      activeChapter19Num = chNum;
+
+      const ch = list.find(c => c.ch === chNum) || list[0];
       if (!ch) return;
 
       const container = document.getElementById('chapter-content-container');
+      if (!container) return;
 
-      const headerCardHtml = `
-        <!-- 章節標頭卡 -->
-        <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-sky-500/25 space-y-5">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <span class="text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">${ch.number}</span>
-            <div class="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm text-slate-300">
-              <span class="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">📘 ${ch.book_source}</span>
-              <span class="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">📑 ${ch.slide_source}</span>
+      const allPages = getBookPagesList();
+      const chPages = allPages.filter(p => Number(p.chapter) === ch.ch);
+      const filteredPages = activeBookPageFilter19 === 'all'
+        ? chPages
+        : chPages.filter(p => p.page_id === activeBookPageFilter19);
+
+      const isDone = completedChapters19.includes(ch.ch);
+
+      const prereqHtml = (ch.prerequisites || []).map(pr =>
+        `<span class="px-2.5 py-1 rounded-lg bg-slate-900 text-sky-300 border border-slate-700 text-xs font-semibold">${pr}</span>`
+      ).join('');
+
+      const conceptsHtml = (ch.keyConcepts || []).map((c, idx) => `
+        <div class="refined-card p-5 space-y-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-300 text-xs font-bold flex items-center justify-center border border-sky-500/30">${idx + 1}</span>
+            <h4 class="text-base sm:text-lg font-bold text-white">${c.term}</h4>
+          </div>
+          <p class="text-sm sm:text-base text-slate-300 leading-relaxed">${c.explanation}</p>
+          <div class="formula-display-card text-teal-200">${c.formula}</div>
+        </div>
+      `).join('');
+
+      const pageBadgesHtml = chPages.map(p => `
+        <button onclick="filterChapter19BookPage('${p.page_id}')"
+          class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition ${activeBookPageFilter19 === p.page_id ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'}">
+          ${p.page_id}
+        </button>
+      `).join('');
+
+      const pagesCardsHtml = filteredPages.map(p => `
+        <div class="refined-card p-5 space-y-3 border-l-4 border-l-sky-500/60">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-mono font-bold">頁 ${p.page_id}</span>
+              <span class="text-xs text-slate-400">${p.section || ''}</span>
             </div>
+            <span class="text-xs text-emerald-300 font-semibold">${p.book_ref_badge || ('《認識 Fuzzy》頁 ' + p.page_id)}</span>
           </div>
-          <div class="space-y-2">
-            <h2 class="text-2xl sm:text-3xl font-bold text-white leading-tight">${ch.title}</h2>
-            <p class="text-base sm:text-lg text-sky-300 font-medium">${ch.subtitle}</p>
-          </div>
-          <div class="prose-reading border-t border-slate-800/90 pt-5 mb-0">
-            <p class="mb-0">${formatRichText(ch.overview)}</p>
-          </div>
+          <h4 class="text-base sm:text-lg font-bold text-white">${p.title}</h4>
+          <div class="text-sm sm:text-base text-slate-300 leading-relaxed">${formatRichText(p.summary || '')}</div>
+          ${p.formulas && p.formulas.length ? `
+            <div class="space-y-2 pt-1">
+              ${p.formulas.map(f => `<div class="formula-display-card text-teal-200 text-sm">${f}</div>`).join('')}
+            </div>` : ''}
+          ${p.book_examples && p.book_examples.length ? `
+            <ul class="text-xs sm:text-sm text-amber-200/90 bg-amber-950/25 border border-amber-500/20 rounded-xl p-3.5 space-y-1 list-disc list-inside">
+              ${p.book_examples.map(ex => `<li>${formatRichText(ex)}</li>`).join('')}
+            </ul>` : ''}
         </div>
-      `;
+      `).join('');
 
-      const footerNavHtml = `
-        <!-- 章節底部打卡與下一關引導 -->
-        <div class="glass-panel rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
-          <button onclick="switchTab('roadmap')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">
-            🗺️ 返回智慧學習地圖
-          </button>
-          <button onclick="toggleCurrentNodeComplete()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20">
-            ✅ 學完本章節・標記完成並前往下一關 →
-          </button>
-        </div>
-      `;
+      const quizzesHtml = (ch.quizzes || []).map((q, qIdx) => {
+        const selected = quizAnswers[q.id];
+        const isAnswered = selected !== undefined;
+        const isCorrect = selected === q.answer_index;
+        const optsHtml = q.options.map((opt, optIdx) => {
+          let cls = 'bg-slate-900/90 hover:bg-slate-800 border-slate-700/80 text-slate-100';
+          let badge = String.fromCharCode(65 + optIdx);
+          if (isAnswered) {
+            if (optIdx === q.answer_index) { cls = 'bg-emerald-950/70 border-emerald-500/70 text-emerald-200 font-semibold'; badge = '✓'; }
+            else if (optIdx === selected) { cls = 'bg-rose-950/70 border-rose-500/70 text-rose-200'; badge = '✗'; }
+            else { cls = 'bg-slate-900/40 border-slate-800/50 text-slate-500'; }
+          }
+          return `
+            <button onclick="answerChapter19Quiz('${q.id}', ${optIdx})"
+              class="w-full text-left p-3.5 rounded-xl border transition flex items-center gap-3 text-sm sm:text-base ${cls}">
+              <span class="w-6 h-6 shrink-0 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold">${badge}</span>
+              <span>${opt}</span>
+            </button>
+          `;
+        }).join('');
 
-      // 渲染四大標準學習模組
+        return `
+          <div class="refined-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-400">${ch.code} 隨堂測驗 #${qIdx + 1}</span>
+              ${isAnswered ? `<span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${isCorrect ? '答對了！' : '請再確認解析'}</span>` : ''}
+            </div>
+            <div class="text-base sm:text-lg font-bold text-white">${q.question}</div>
+            <div class="grid grid-cols-1 gap-2.5">${optsHtml}</div>
+            ${isAnswered ? `
+              <div class="bg-slate-950/90 p-4 rounded-xl border border-indigo-500/35 text-sm text-slate-200 leading-relaxed">
+                <strong class="text-indigo-300">💡 詳解：</strong> ${q.explanation}
+              </div>` : ''}
+          </div>
+        `;
+      }).join('');
+
       container.innerHTML = `
-        ${headerCardHtml}
-        ${window.FuzzyWidgets ? FuzzyWidgets.getChapterInteractiveHtml(normId) : ''}
-        ${footerNavHtml}
+        <!-- 標頭與 (a) 本章核心通論與先備知識 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-sky-500/25 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl">${ch.icon}</span>
+              <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">${ch.code} · ${ch.stageGroup}</span>
+            </div>
+            <span class="text-xs sm:text-sm bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 text-emerald-300 font-semibold">
+              📘 原書頁碼 ${ch.pageRange}（共 ${chPages.length} 頁精讀）
+            </span>
+          </div>
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white leading-tight">${ch.title}</h2>
+            <p class="text-sm sm:text-base text-sky-300 font-medium mt-1">${ch.subtitle}</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <span class="text-xs text-slate-400 font-bold">先備知識：</span>
+            ${prereqHtml}
+          </div>
+          <div class="prose-reading border-t border-slate-800/90 pt-4">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-sky-400 mb-2">(a) 本章核心通論</h3>
+            <p class="mb-0">${ch.overview}</p>
+          </div>
+          <div class="space-y-4 pt-2">${conceptsHtml}</div>
+        </div>
+
+        <!-- (b) 課本各節重點導讀與精確頁碼徽章 (282 筆頁碼導讀映射) -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-teal-500/25 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-teal-400">(b) Textbook Page-by-Page Companion</span>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">課本各節重點導讀與頁碼對照 (${chPages.length} 頁)</h3>
+            </div>
+            <button onclick="filterChapter19BookPage('all')"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${activeBookPageFilter19 === 'all' ? 'bg-teal-500 text-slate-950' : 'bg-slate-900 text-slate-300 border border-slate-700'}">
+              顯示全部 ${chPages.length} 頁
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+            ${pageBadgesHtml}
+          </div>
+          <div class="space-y-4">${pagesCardsHtml}</div>
+        </div>
+
+        <!-- (c) 本章互動視覺化驗證 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-indigo-500/25 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">(c) Interactive Visual Verification</span>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">${ch.labConfig ? ch.labConfig.title : '本章互動視覺化驗證'}</h3>
+              <p class="text-sm text-slate-400 mt-0.5">${ch.labConfig ? ch.labConfig.subtitle : ''}</p>
+            </div>
+            <button onclick="activeLab19Chapter=${ch.ch}; switchTab('lab');"
+              class="px-3.5 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition">
+              🎛️ 在完整實驗室開啟 →
+            </button>
+          </div>
+          <div id="ch19-interactive-lab-holder"></div>
+        </div>
+
+        <!-- (d) 本章隨堂練習題 + 完成本章學習按鈕 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-emerald-500/25 space-y-5">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">(d) Practice & Progress Check</span>
+            <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">本章隨堂練習題 (${(ch.quizzes || []).length} 題附詳解)</h3>
+          </div>
+          <div class="space-y-4">${quizzesHtml}</div>
+
+          <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              ${ch.ch > 1 ? `<button onclick="selectChapter19(${ch.ch - 1}, true)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">← 上一章 (Ch.${String(ch.ch - 1).padStart(2, '0')})</button>` : ''}
+              ${ch.ch < 19 ? `<button onclick="selectChapter19(${ch.ch + 1}, true)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">下一章 (Ch.${String(ch.ch + 1).padStart(2, '0')}) →</button>` : ''}
+            </div>
+            <button onclick="toggleChapter19Complete(${ch.ch})"
+              class="px-5 py-3 rounded-xl font-bold text-sm sm:text-base transition shadow-lg flex items-center gap-2 ${isDone ? 'bg-slate-800 text-emerald-300 border border-emerald-500/40 hover:bg-slate-700' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/25'}">
+              <span>${isDone ? '✓ 已完成本章學習（點擊可取消）' : '✅ 完成本章學習並更新進度'}</span>
+            </button>
+          </div>
+        </div>
       `;
 
-      // 呼叫書頁課本導讀畫廊渲染
-      const colorMap = {
-        ch1_intro: 'sky',
-        ch2_fuzzy_sets: 'teal',
-        ch3_operations_extension: 'amber',
-        ch4_fuzzy_relations: 'indigo',
-        ch5_logic_inference: 'rose',
-        ch6_fuzzy_control: 'emerald',
-        ch7_advanced_applications: 'violet'
-      };
-      const curColor = colorMap[normId] || 'sky';
-
-      // 嘗試填充可能存在的 gallery 容器
-      const galleryHolders = [
-        'ch1-book-gallery-body',
-        'ch2-book-gallery-body',
-        'ch3-book-gallery-body',
-        'ch4-book-gallery-body',
-        'ch5-book-gallery-body',
-        'ch6-book-gallery-body',
-        'ch7-book-gallery-body',
-        'chapter2-book-gallery-body',
-        'chapter34-book-gallery-body',
-        'chapter56-book-gallery-body',
-        'chapter4-book-gallery-body',
-        'chapter5-book-gallery-body',
-        'chapter6-book-gallery-body',
-        'chapter7-book-gallery-body'
-      ];
-
-      for (const hid of galleryHolders) {
-        if (document.getElementById(hid)) {
-          renderParentBookGallery(normId, hid, curColor);
-          break;
-        }
-      }
-
-      if (window.FuzzyWidgets && typeof FuzzyWidgets.initChapterWidgets === 'function') {
-        setTimeout(() => FuzzyWidgets.initChapterWidgets(normId), 60);
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
+        setTimeout(() => FuzzyWidgets.renderChapter19Lab(ch.ch, 'ch19-interactive-lab-holder'), 40);
       }
       safeTypesetMath([container]);
     }
@@ -35734,9 +37107,59 @@ window.WebFISStudio = (function () {
       `).join('');
     }
 
+    function getAllQuizzes19() {
+      const list = window.CHAPTERS_19_DATA || [];
+      const all = [];
+      list.forEach(ch => {
+        (ch.quizzes || []).forEach(q => {
+          all.push({ ...q, chNum: ch.ch, chapterLabel: `${ch.code} ${ch.title.replace(/^第 \d+ 章：/, '')}` });
+        });
+      });
+      return all;
+    }
+
+    function initQuizChapterFilterOptions() {
+      const sel = document.getElementById('quiz-chapter-filter');
+      const list = window.CHAPTERS_19_DATA || [];
+      if (!sel || !list.length) return;
+      sel.innerHTML = `<option value="all">📚 全部 19 章綜合測驗 (${getAllQuizzes19().length} 題)</option>` +
+        list.map(ch => `<option value="${ch.ch}">${ch.code}：${ch.title.replace(/^第 \d+ 章：/, '')} (${(ch.quizzes || []).length} 題)</option>`).join('');
+    }
+
+    function setQuizChapterFilter(val) {
+      quizChapterFilter = val;
+      renderQuizzes();
+    }
+
+    function initLab19Select() {
+      const sel = document.getElementById('lab-ch19-select');
+      const list = window.CHAPTERS_19_DATA || [];
+      if (!sel || !list.length) return;
+      sel.innerHTML = list.map(ch => `<option value="${ch.ch}">${ch.code}：${ch.title.replace(/^第 \d+ 章：/, '')}</option>`).join('');
+      sel.value = String(activeLab19Chapter);
+    }
+
+    function selectLab19Chapter(chNum) {
+      activeLab19Chapter = Number(chNum) || 1;
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
+        FuzzyWidgets.renderChapter19Lab(activeLab19Chapter, 'lab-ch19-unified-stage');
+      }
+    }
+
+    function jumpToChapter19FromLab() {
+      switchTab('roadmap');
+      selectChapter19(activeLab19Chapter, true);
+    }
+
     function renderQuizzes() {
-      const list = document.getElementById('quiz-list');
-      list.innerHTML = courseData.quizzes.map((q, qIdx) => {
+      const listEl = document.getElementById('quiz-list');
+      if (!listEl) return;
+      const allQ = getAllQuizzes19();
+      const filteredQ = quizChapterFilter === 'all'
+        ? allQ
+        : allQ.filter(q => String(q.chNum) === String(quizChapterFilter));
+
+      listEl.innerHTML = filteredQ.map((q, qIdx) => {
         const selected = quizAnswers[q.id];
         const isAnswered = selected !== undefined;
         const isCorrect = selected === q.answer_index;
@@ -35768,8 +37191,8 @@ window.WebFISStudio = (function () {
 
         return `
           <div id="quiz-card-${q.id}" class="refined-card p-6 sm:p-7 space-y-5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs sm:text-sm font-bold text-indigo-400">第 ${qIdx + 1} 題・${q.chapter}</span>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs sm:text-sm font-bold text-indigo-400">第 ${qIdx + 1} 題・${q.chapterLabel}</span>
               ${isAnswered ? `<span class="text-xs sm:text-sm font-bold px-3 py-1 rounded-full ${isCorrect ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}">${isCorrect ? '答對了！' : '觀念需釐清'}</span>` : ''}
             </div>
             <div class="text-lg sm:text-xl font-bold text-white leading-relaxed">${q.question}</div>
@@ -35786,39 +37209,33 @@ window.WebFISStudio = (function () {
       }).join('');
 
       updateQuizScore();
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([list]);
-      }
+      safeTypesetMath([listEl]);
     }
 
     function answerQuiz(quizId, optionIndex) {
       quizAnswers[quizId] = optionIndex;
-      const q = courseData.quizzes.find(item => item.id === quizId);
-      if (q && optionIndex === q.answer_index) {
-        if (quizId === 'q1' && !completedNodes.includes('s1_n4')) {
-          completedNodes.push('s1_n4');
-          saveRoadmapProgress();
-        }
-        if (quizId === 'q5' && !completedNodes.includes('s3_n2')) {
-          completedNodes.push('s3_n2');
-          saveRoadmapProgress();
-        }
-      }
       renderQuizzes();
+      renderChapterContent(activeChapter19Num);
     }
 
     function resetQuiz() {
       quizAnswers = {};
       renderQuizzes();
+      renderChapterContent(activeChapter19Num);
     }
 
     function updateQuizScore() {
-      const total = courseData.quizzes.length;
+      const allQ = getAllQuizzes19();
+      const filteredQ = quizChapterFilter === 'all'
+        ? allQ
+        : allQ.filter(q => String(q.chNum) === String(quizChapterFilter));
+      const total = filteredQ.length;
       let correct = 0;
-      courseData.quizzes.forEach(q => {
+      filteredQ.forEach(q => {
         if (quizAnswers[q.id] === q.answer_index) correct++;
       });
-      document.getElementById('quiz-score-Text').textContent = `${correct} / ${total}`;
+      const scoreEl = document.getElementById('quiz-score-Text');
+      if (scoreEl) scoreEl.textContent = `${correct} / ${total}`;
     }
 
     // =========================================================================
@@ -36437,7 +37854,7 @@ window.WebFISStudio = (function () {
     window.continueCurrentStage = continueCurrentStage;
     window.unlockAllRoadmapNodes = unlockAllRoadmapNodes;
     window.resetRoadmapProgress = resetRoadmapProgress;
-    window.toggleNodeComplete = toggleNodeComplete;
+    window.toggleNodeComplete = toggleChapter19Complete;
     window.toggleCurrentNodeComplete = toggleCurrentNodeComplete;
     window.openBookPhotoModal = openBookPhotoModal;
     window.prevBookPhotoModal = prevBookPhotoModal;
@@ -36451,6 +37868,13 @@ window.WebFISStudio = (function () {
     window.filterChapter34Page = filterChapter34Page;
     window.filterChapter56Page = filterChapter56Page;
     window.handleManualPhotoUpload = handleManualPhotoUpload;
+    window.selectChapter19 = selectChapter19;
+    window.toggleChapter19Complete = toggleChapter19Complete;
+    window.filterChapter19BookPage = filterChapter19BookPage;
+    window.answerChapter19Quiz = answerChapter19Quiz;
+    window.setQuizChapterFilter = setQuizChapterFilter;
+    window.selectLab19Chapter = selectLab19Chapter;
+    window.jumpToChapter19FromLab = jumpToChapter19FromLab;
     window.renderChapterNav = renderChapterNav;
     window.renderChapterContent = renderChapterContent;
     window.initApp = initApp;

@@ -29,6 +29,7 @@
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
   <!-- 預載本地教材資料 (透過外部腳本載入 window.FUZZY_COURSE_DATA，徹底解決 file:// CORS 阻擋，確保 F12 Console 零紅字報錯) -->
   <script src="course_data.js"></script>
+  <script src="chapters_19_data.js"></script>
   <script src="book_pages.js"></script>
   <!-- 預載 Chapter 01 四大標準學習模組與 Plotly.js 多維度互動圖表引擎 -->
   <script src="interactive_widgets.js"></script>
@@ -190,31 +191,27 @@
           </div>
           <div>
             <div class="flex items-center gap-2.5">
-              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Fuzzy 模糊邏輯雙核心學習平台</h1>
+              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Fuzzy 模糊邏輯全書伴讀與互動平台</h1>
               <span id="header-progress-pill" class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
-                闖關進度 0%
+                進度 0 / 19 章 (0%)
               </span>
             </div>
             <p class="text-sm text-slate-400 mt-0.5">
-              智慧學習地圖導引 × 《認識 Fuzzy》實體書全書 19 章 282 處重點導讀與頁碼對照 × 七大真實篇章 × Plotly 互動實驗室
+              《認識 Fuzzy》全書 19 章 282 處頁碼導讀 × 19 章互動模擬驗證 × 57 題隨堂測驗 × Web FIS Studio
             </p>
           </div>
         </div>
       </div>
 
-      <!-- 五大教學與設計分頁切換器 (Tabs，預設首頁為智慧學習地圖) -->
+      <!-- 四大核心模組導覽列 -->
       <nav class="flex flex-wrap items-center gap-2 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
         <button id="tab-btn-roadmap" onclick="switchTab('roadmap')" class="tab-active px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
-          <span>🗺️</span>
-          <span>智慧學習地圖</span>
-        </button>
-        <button id="tab-btn-theory" onclick="switchTab('theory')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
           <span>📖</span>
-          <span>基礎理論導讀</span>
+          <span>全書 19 章伴讀地圖</span>
         </button>
         <button id="tab-btn-notes" onclick="switchTab('notes')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
           <span>🎧</span>
-          <span>課堂重點與測驗</span>
+          <span>課堂重點與模擬測驗</span>
         </button>
         <button id="tab-btn-lab" onclick="switchTab('lab')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
           <span>🎛️</span>
@@ -228,132 +225,79 @@
     </div>
   </header>
 
-  <!-- 當前闖關任務導引列 (在非地圖分頁顯示，隨頁面自然滾動不置頂遮擋主學習區) -->
-  <div id="active-mission-banner" class="hidden bg-slate-900/95 border-b border-sky-500/30 px-6 py-3">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <button onclick="switchTab('roadmap')" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs sm:text-sm font-semibold border border-slate-700 transition flex items-center gap-1.5 shrink-0">
-          <span>← 返回學習地圖</span>
-        </button>
-        <div class="text-sm sm:text-base text-slate-200">
-          <span id="mission-banner-stage" class="text-xs font-bold uppercase tracking-wider text-sky-400 mr-2">STAGE 1</span>
-          <strong id="mission-banner-title" class="text-white">當前學習節點</strong>
-        </div>
-      </div>
-      <div class="flex items-center gap-3 shrink-0">
-        <button id="mission-complete-btn" onclick="toggleCurrentNodeComplete()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-          <span>✅ 標記本關完成並解鎖下一關</span>
-        </button>
-      </div>
-    </div>
-  </div>
-
   <!-- 主內容區 -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
     <!-- ===================================================================== -->
-    <!-- 【首頁分頁：Fuzzy 智慧學習地圖（Learning Roadmap）】 -->
+    <!-- 【核心模組 1：全書 19 章伴讀地圖（整合地圖總覽、進度追蹤與 19 章完整導讀）】 -->
     <!-- ===================================================================== -->
     <section id="tab-panel-roadmap" class="space-y-10">
 
-      <!-- 學習地圖頂部總覽與進度儀表板 -->
+      <!-- 頂部進度儀表板 -->
       <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-sky-500/30 relative overflow-hidden">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           <div class="lg:col-span-8 space-y-4">
             <div class="flex flex-wrap items-center gap-2.5">
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold uppercase tracking-widest">
-                <span>🧭 Interactive Learning Roadmap</span>
+                <span>📖 Single Source of Truth · Ch.01 ~ Ch.19</span>
               </div>
               <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
-                <span>📖 實體書 100% 伴讀導引：全書 19 大章節共 282 處精煉重點導讀與課本頁碼對照（零版權圖檔）</span>
+                <span>完整映射 282 筆課本頁碼導讀（零原書翻拍圖檔）</span>
               </div>
             </div>
             <h2 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-              Fuzzy 模糊邏輯・《認識 Fuzzy》原書章節闖關學習地圖 (Stage 01 ～ 07)
+              《認識 Fuzzy》全書 19 章伴讀學習地圖
             </h2>
             <p class="prose-reading text-slate-300 mb-0">
-              完全對齊《認識 Fuzzy》原書真實章節順序：第 1 章 緒論 ➔ 第 2 章 模糊集合 ➔ 第 3 章 模糊集合之運算與擴展原理 ➔ 第 4 章 模糊關係 ➔ 第 5 章 模糊邏輯與推論 ➔ 第 6 章 模糊控制 ➔ 第 7 章 模糊應用與進階系統。四段式教學架構（通論、課本各節導讀、互動模擬器、隨堂測驗）隨學隨打勾，解鎖完整智慧控制通關成就！
+              與《認識 Fuzzy》原書目錄 100% 同步：每一章皆包含 <strong>(a) 核心通論與先備知識</strong>、<strong>(b) 課本頁碼重點導讀</strong>、<strong>(c) Plotly 互動視覺化驗證</strong> 與 <strong>(d) 隨堂練習與進度打勾</strong>。點選下方任意章節卡片，即可直接在工作區展開精讀！
             </p>
           </div>
 
-          <!-- 右側闖關進度統計卡 -->
+          <!-- 右側 0/19 進度統計卡 -->
           <div class="lg:col-span-4 refined-card p-6 border-sky-500/30 space-y-4">
             <div class="flex items-center justify-between">
-              <span class="text-sm font-bold text-slate-300">整體學習完成度</span>
+              <span class="text-sm font-bold text-slate-300">全書 19 章完成度</span>
               <span id="roadmap-percent-text" class="text-2xl font-extrabold text-emerald-400 font-mono">0%</span>
             </div>
             <div class="w-full h-3.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800 p-0.5">
               <div id="roadmap-progress-bar" class="h-full rounded-full bg-gradient-to-r from-sky-400 via-indigo-500 to-emerald-400 transition-all duration-500" style="width: 0%"></div>
             </div>
             <div class="flex items-center justify-between text-xs text-slate-400 pt-1">
-              <span id="roadmap-count-text">已完成 0 / 28 個核心關卡</span>
+              <span id="roadmap-count-text">已完成 0 / 19 章</span>
               <div class="flex items-center gap-3">
-                <button onclick="unlockAllRoadmapNodes()" class="text-sky-400 hover:text-sky-300 underline">全部解鎖</button>
+                <button onclick="unlockAllRoadmapNodes()" class="text-sky-400 hover:text-sky-300 underline">全部標記完成</button>
                 <button onclick="resetRoadmapProgress()" class="text-slate-400 hover:text-rose-300 underline">重置進度</button>
               </div>
             </div>
             <button id="continue-learning-btn" onclick="continueCurrentStage()" class="w-full py-3 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-sky-500/25 transition flex items-center justify-center gap-2">
-              <span>🚀 進入當前進行中關卡</span>
+              <span>🚀 前往下一未完成章節</span>
             </button>
           </div>
         </div>
+      </div>
 
-        <!-- 狀態圖例說明 -->
-        <div class="flex flex-wrap items-center gap-6 mt-7 pt-6 border-t border-slate-800/80 text-xs sm:text-sm text-slate-300">
-          <div class="flex items-center gap-2">
-            <span class="w-3.5 h-3.5 rounded-full bg-emerald-400 shadow shadow-emerald-500/50"></span>
-            <span><strong>已完成 (Completed)</strong>：已掌握並打勾通關</span>
+      <!-- 19 章總覽地圖卡片區 (由 JS 動態渲染三大篇章 Ch.01~19) -->
+      <div id="roadmap-stages-container" class="space-y-6"></div>
+
+      <!-- 雙欄 19 章伴讀工作區（左側 Ch.01~19 快速目錄 + 右側 4 大標準區塊） -->
+      <div id="chapter-workspace" class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start pt-4 border-t border-slate-800/80">
+        <aside class="lg:col-span-4 xl:col-span-3 space-y-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1">
+          <div class="glass-panel rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-sm font-bold uppercase tracking-wider text-sky-400">全書 19 章目錄</h3>
+              <span class="text-xs px-2.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">Ch.01 ~ 19</span>
+            </div>
+            <div id="chapter-nav-list" class="space-y-1.5">
+              <!-- 由 JS 動態渲染 Ch.01 ~ Ch.19 目錄 -->
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <span class="w-3.5 h-3.5 rounded-full bg-sky-400 animate-pulse shadow shadow-sky-400/60"></span>
-            <span><strong>進行中 / 已解鎖 (In Progress)</strong>：當前推薦挑戰關卡</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <span class="w-3.5 h-3.5 rounded-full bg-slate-600"></span>
-            <span><strong>尚未解鎖 (Locked)</strong>：完成前一關卡自動解鎖（亦可點擊預覽）</span>
-          </div>
+        </aside>
+
+        <div class="lg:col-span-8 xl:col-span-9 max-w-4xl w-full mx-auto space-y-8" id="chapter-content-container">
+          <!-- 由 JS 動態渲染當前章節四大標準區塊 (a) 通論 (b) 頁碼導讀 (c) 互動驗證 (d) 隨堂測驗 & 完成按鈕 -->
         </div>
       </div>
 
-      <!-- 四大階段學習地圖主體 (由 JS 動態渲染) -->
-      <div id="roadmap-stages-container" class="space-y-8">
-        <!-- Stage 1 ~ Stage 4 卡片與關卡節點 -->
-      </div>
-
-    </section>
-
-    <!-- ===================================================================== -->
-    <!-- 【分頁一：基礎理論導讀（Book & Slides）】 -->
-    <!-- ===================================================================== -->
-    <section id="tab-panel-theory" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      <!-- 左側章節與子模組導覽列 + 迷你學習路線圖 -->
-      <aside class="lg:col-span-4 xl:col-span-3 space-y-5 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pr-1">
-        <div class="glass-panel rounded-2xl p-5">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-sm font-bold uppercase tracking-wider text-sky-400">理論章節與模組導覽</h2>
-            <span class="text-xs px-2.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/30 font-bold">7 大核心篇章 (全數旗艦升級)</span>
-          </div>
-          <div id="chapter-nav-list" class="space-y-2">
-            <!-- 由 JS 動態渲染 7 大章節按鈕與四大標準學習模組子選單 -->
-          </div>
-        </div>
-
-        <!-- 側邊快速闖關導引卡 -->
-        <div class="glass-panel rounded-2xl p-5 space-y-3.5 border border-sky-500/25">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-sky-400">🗺️ 學習地圖快速跳轉</span>
-            <button onclick="switchTab('roadmap')" class="text-xs text-sky-300 hover:underline">展開全圖 →</button>
-          </div>
-          <div id="sidebar-mini-roadmap" class="space-y-2 text-xs">
-            <!-- 由 JS 渲染四大階段迷你進度 -->
-          </div>
-        </div>
-      </aside>
-
-      <!-- 右側理論圖文、數學公式與對照範例 (限制最佳閱讀寬度 max-w-4xl) -->
-      <div class="lg:col-span-8 xl:col-span-9 max-w-4xl w-full mx-auto space-y-8" id="chapter-content-container">
-        <!-- 由 JS 動態渲染章節內容 -->
-      </div>
     </section>
 
     <!-- ===================================================================== -->
@@ -396,17 +340,20 @@
         </div>
       </div>
 
-      <!-- 隨堂觀念小測驗 (Interactive Quiz) -->
+      <!-- 隨堂觀念小測驗 (全書 Ch.01 ~ Ch.19 模擬測驗中心) -->
       <div id="quiz-section" class="glass-panel rounded-3xl p-7 sm:p-8 border border-indigo-500/30">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <div>
-            <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">Interactive Assessment</span>
-            <h3 class="text-2xl font-bold text-white mt-1">隨堂觀念小測驗 (含《認識 Fuzzy》第 2 章課後習題 2.7 & 2.8)</h3>
-            <p class="text-base text-slate-400 mt-1">點擊選項立即批改，並檢視完整數學推導解析</p>
+            <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">Interactive Assessment · Ch.01 ~ Ch.19</span>
+            <h3 class="text-2xl font-bold text-white mt-1">全書 19 章模擬測驗中心 (57 題精選附詳解)</h3>
+            <p class="text-base text-slate-400 mt-1">可依 Ch.01 ~ Ch.19 篩選單章練習或進行全書綜合測驗，點擊選項立即批改</p>
           </div>
-          <div class="flex items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <select id="quiz-chapter-filter" onchange="setQuizChapterFilter(this.value)" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-slate-200 font-semibold">
+              <option value="all">📚 全部 19 章綜合測驗 (57 題)</option>
+            </select>
             <div class="bg-slate-900/90 px-4 py-2.5 rounded-xl border border-slate-800 text-base">
-              目前得分：<span id="quiz-score-Text" class="font-bold text-emerald-400">0 / 5</span>
+              目前得分：<span id="quiz-score-Text" class="font-bold text-emerald-400">0 / 57</span>
             </div>
             <button onclick="resetQuiz()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sm font-semibold text-slate-200 transition">
               🔄 重新作答
@@ -518,6 +465,24 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- 0. 全書 19 章專屬模擬器快速切換與檢視器 (Ch.01 ~ Ch.19) -->
+      <div class="glass-panel rounded-3xl p-6 border border-indigo-500/25 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">All 19 Chapters Interactive Simulators</span>
+            <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5">《認識 Fuzzy》全書 19 章模擬器直達選單</h3>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <select id="lab-ch19-select" onchange="selectLab19Chapter(Number(this.value))" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-200 font-semibold">
+            </select>
+            <button id="lab-ch19-goto-btn" onclick="jumpToChapter19FromLab()" class="px-3.5 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs sm:text-sm font-bold transition shrink-0">
+              📖 前往該章導讀 →
+            </button>
+          </div>
+        </div>
+        <div id="lab-ch19-unified-stage"></div>
       </div>
 
       <!-- 1. 旗艦實驗室容器：原冷氣機溫控系統 (Mamdani COG/MOM) -->
@@ -1011,313 +976,19 @@
     // 四大階段「Fuzzy 智慧學習地圖 (Learning Roadmap)」結構定義
     // =========================================================================
         // =========================================================================
-    // 完全依照《認識 Fuzzy》原書真實章節架構編排之「智慧學習地圖 (Learning Roadmap)」
-    // 七大階段 (Stage 01 ~ Stage 07) • 28 個核心闖關節點 • 四段式教學架構
+    // 《認識 Fuzzy》全書 19 章統一資料模型 (Single Source of Truth)
     // =========================================================================
-    const ROADMAP_STAGES = [
-      {
-        stageId: 'stage_1',
-        stageNumber: 'Stage 01',
-        title: '緒論篇：第 1 章 緒論與模糊理論起源',
-        subtitle: '原書第 1 章（頁 1-1 ～ 1-7）、二分法極限、愛因斯坦名言與全書宏觀藍圖',
-        accentColor: 'sky',
-        badgeIcon: '🌱',
-        nodes: [
-          {
-            id: 's1_n1',
-            code: '1-1',
-            title: '【模組 1：通論】模糊思維起源、二分法侷限與愛因斯坦真實悖論',
-            desc: '掌握生活中的模糊語意溝通優勢、民國65年大考二分法教訓、愛因斯坦 1921 年精確與真實權衡名言，以及 Zadeh 二十年堅持。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm1', scrollTo: 'ch1-module-sec-m1' }
-          },
-          {
-            id: 's1_n2',
-            code: '1-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 1 章 各節導讀與頁碼對照（共 7 頁）',
-            desc: '對照實體課本頁 1-1 至 1-7，研讀札德創立論文、美日歐研究版圖、日本家電智慧化包裝與全書 19 章宏觀架構。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm2', scrollTo: 'ch1-module-sec-m2' }
-          },
-          {
-            id: 's1_n3',
-            code: '1-3',
-            title: '【模組 3：互動實驗室】日常語意模糊量化儀與二分法 vs. 連續過渡模擬器',
-            desc: '操作互動圖表，體驗年齡、體重、溫度等日常抽象語言如何數量化為平滑連續的歸屬曲線。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm3', scrollTo: 'ch1-module-sec-m3' }
-          },
-          {
-            id: 's1_n4',
-            code: '1-4',
-            title: '【模組 4：隨堂練習】緒論核心觀念、歷史發展與愛因斯坦名言測驗 (5題)',
-            desc: '挑戰 5 道由淺入深的緒論觀念考題，檢視對模糊理論哲學基礎與世界歷史脈絡的掌握度。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch1_intro', chModule: 'm4', scrollTo: 'ch1-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_2',
-        stageNumber: 'Stage 02',
-        title: '集合基礎篇：第 2 章 模糊集合理論與基礎定義',
-        subtitle: '原書第 2 章（頁 2-1 ～ 2-15）、意義數量化、四大典型歸屬函數與 α-截集',
-        accentColor: 'teal',
-        badgeIcon: '📐',
-        nodes: [
-          {
-            id: 's2_n1',
-            code: '2-1',
-            title: '【模組 1：通論】明確集合特性函數 vs. 模糊歸屬函數與 Zadeh 記法',
-            desc: '掌握明確特性函數 {0, 1} 與模糊歸屬度閉區間 [0, 1] 差異、連續積分符號、正則性、支撐集與凸模糊集合定義。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm1', scrollTo: 'ch1-module-sec-m1' }
-          },
-          {
-            id: 's2_n2',
-            code: '2-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 2 章 各節導讀與頁碼對照（共 15 頁）',
-            desc: '對照實體課本頁 2-1 至 2-15，研讀圖 2.1 胖老、圖 2.2 小朋友年齡方波 vs 鐘形、圖 2.7 典型造型與圖 2.9 α-cut 切割。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm2', scrollTo: 'ch1-module-sec-m2' }
-          },
-          {
-            id: 's2_n3',
-            code: '2-3',
-            title: '【模組 3：互動實驗室】四大典型歸屬函數 (trimf/trapmf/gaussmf/smf) 與 α-截集',
-            desc: '操作 Plotly 互動實驗室，動態拖曳三角波、梯形、高斯鐘形與 S 形參數，實時觀察 α 水平截割曲線變動。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm3', scrollTo: 'ch1-module-sec-m3' }
-          },
-          {
-            id: 's2_n4',
-            code: '2-4',
-            title: '【模組 4：隨堂練習】模糊集合基礎、歸屬度計算與課後習題 2.7 & 2.8 (8題)',
-            desc: '實戰演練 8 道精選題目（包含實體課本第 2 章習題 2.7、2.8 及跨校考題），附完整推導詳解。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch2_fuzzy_sets', chModule: 'm4', scrollTo: 'ch1-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_3',
-        stageNumber: 'Stage 03',
-        title: '運算擴展篇：第 3 章 模糊集合之運算與擴展原理',
-        subtitle: '原書第 3、4、5 章（共 58 頁）、廣義範數、Zadeh 擴展原理與模糊數算術',
-        accentColor: 'amber',
-        badgeIcon: '⚡',
-        nodes: [
-          {
-            id: 's3_n1',
-            code: '3-1',
-            title: '【模組 1：通論】交聯補運算、排中律與矛盾律失效、擴展原理與模糊算術',
-            desc: '深入交集 Min/t-norm、聯集 Max/s-norm，論證排中律破除；精通 Zadeh 擴展原理與三角形/梯形模糊數四則運算。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm1', scrollTo: 'ch4-module-sec-m1' }
-          },
-          {
-            id: 's3_n2',
-            code: '3-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 3、4、5 章 各節導讀與頁碼對照（共 58 頁）',
-            desc: '對照實體書第 3 章（基本運算 15 頁）、第 4 章（公理運算 12 頁）、第 5 章（模糊數算術與方程求解 31 頁）。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm2', scrollTo: 'ch4-module-sec-m2' }
-          },
-          {
-            id: 's3_n3',
-            code: '3-3',
-            title: '【模組 3：互動實驗室】擴展原理非線性映射 & 三角形模糊數四則運算合成儀',
-            desc: '操作動態模擬器，驗證 y = x² 函數映射與三角形模糊數 (a, b, c) 加減乘除合成曲線。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm3', scrollTo: 'ch4-module-sec-m3' }
-          },
-          {
-            id: 's3_n4',
-            code: '3-4',
-            title: '【模組 4：隨堂練習】擴展原理映射、α-cut 區間算術與方程式求解 (8題)',
-            desc: '挑戰 8 道運算與擴展原理進階計算題，含 α-cut 區間推導與王邱畫圖法逐步詳解。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch3_operations_extension', chModule: 'm4', scrollTo: 'ch4-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_4',
-        stageNumber: 'Stage 04',
-        title: '關係合成篇：第 4 章 模糊關係與合成運算',
-        subtitle: '原書第 6 章（頁 6-1 ～ 6-14）、笛卡兒積空間、Max-Min/Product 合成與等價關係',
-        accentColor: 'indigo',
-        badgeIcon: '🔗',
-        nodes: [
-          {
-            id: 's4_n1',
-            code: '4-1',
-            title: '【模組 1：通論】明確關係 vs. 模糊關係、笛卡兒積熱點矩陣與等價關係',
-            desc: '掌握二維論域上的關聯性量化、Max-Min 與 Max-Product 合成三大定理證明，以及模糊等價關係之自反/對稱/傳遞性。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm1', scrollTo: 'ch2-module-sec-m1' }
-          },
-          {
-            id: 's4_n2',
-            code: '4-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 6 章 各節導讀與頁碼對照（共 16 頁）',
-            desc: '對照實體課本頁 6-1 至 6-16，研讀模糊關係矩陣表 6.1~6.8、合成運算逐步算例與工程關係模型。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm2', scrollTo: 'ch2-module-sec-m2' }
-          },
-          {
-            id: 's4_n3',
-            code: '4-3',
-            title: '【模組 3：互動實驗室】笛卡兒積 2D/3D 熱點曲面 & 3×3 Max-Min 矩陣合成計算機',
-            desc: '互動輸入自訂模糊關係矩陣，即時展示 Max-Min 與 Max-Product 矩陣合成的逐步計算過程與熱點圖。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm3', scrollTo: 'ch2-module-sec-m3' }
-          },
-          {
-            id: 's4_n4',
-            code: '4-4',
-            title: '【模組 4：隨堂練習】Max-Min / Max-Product 合成手算與等價關係判別 (6題)',
-            desc: '演練 6 道矩陣合成與傳遞閉包手算題，逐步對照數學推導步驟。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch4_fuzzy_relations', chModule: 'm4', scrollTo: 'ch2-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_5',
-        stageNumber: 'Stage 05',
-        title: '邏輯推論篇：第 5 章 模糊邏輯與模糊推論',
-        subtitle: '原書第 7、8、9、10 章（共 62 頁）、語言變數、GMP 推論工廠與四大解模糊化',
-        accentColor: 'rose',
-        badgeIcon: '🧠',
-        nodes: [
-          {
-            id: 's5_n1',
-            code: '5-1',
-            title: '【模組 1：通論】語言變數、模糊命題、廣義假言推理 (GMP) 與四大解模糊化',
-            desc: '精通語言變數架構、Zadeh/Mamdani/Larsen 模糊蘊含、推論工廠多規則前項激發度運算與 COG/MOM/BOA 解模糊化。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm1', scrollTo: 'ch2-module-sec-m1' }
-          },
-          {
-            id: 's5_n2',
-            code: '5-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 7～10 章 各節導讀與頁碼對照（共 62 頁）',
-            desc: '對照實體書第 7 章（模糊邏輯）、第 8 章（推論工廠）、第 9 章（計算實例）與第 10 章（模糊化與解模糊化）。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm2', scrollTo: 'ch2-module-sec-m2' }
-          },
-          {
-            id: 's5_n3',
-            code: '5-3',
-            title: '【模組 3：互動實驗室】Mamdani 推論工廠動態激發 & 四大解模糊化對比實驗室',
-            desc: '操作多規則激發裁切模擬器，即時切換 COG 重心法、MOM 最大平均法、BOA 面積等分法，比較其工程響應特性。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm3', scrollTo: 'ch2-module-sec-m3' }
-          },
-          {
-            id: 's5_n4',
-            code: '5-4',
-            title: '【模組 4：隨堂練習】推論工廠逐步推導、離散重心法手算與家電規則庫 (8題)',
-            desc: '挑戰 8 道手動計算前項激發度、後項面積聯集與重心積分題目，附全公式步驟詳解。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch5_logic_inference', chModule: 'm4', scrollTo: 'ch2-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_6',
-        stageNumber: 'Stage 06',
-        title: '控制工程篇：第 6 章 模糊控制器設計與工程應用',
-        subtitle: '原書第 11、13、14、15 章（共 60 頁）、FLC 架構、3D 控制曲面與通用逼近器',
-        accentColor: 'emerald',
-        badgeIcon: '🎛️',
-        nodes: [
-          {
-            id: 's6_n1',
-            code: '6-1',
-            title: '【模組 1：通論】FLC 四大單元、相平面阻尼、3D 控制曲面與李亞普諾夫穩定性',
-            desc: '精通輸入誤差 e 與變化率 Δe 之縮放因子整定、5×5 FAM 規則庫設計、非線性控制曲面流形與 T-S 模糊動態模型。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm1', scrollTo: 'ch3-module-sec-m1' }
-          },
-          {
-            id: 's6_n2',
-            code: '6-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 11、13、14、15 章 各節導讀與頁碼對照（共 60 頁）',
-            desc: '對照實體書第 11 章（控制器設計 15 頁）、第 13 章（倒單擺實務 15 頁）、第 14 章（ABS 煞車 15 頁）與第 15 章（通用逼近器 15 頁）。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm2', scrollTo: 'ch3-module-sec-m2' }
-          },
-          {
-            id: 's6_n3',
-            code: '6-3',
-            title: '【模組 3：互動實驗室】冷氣 5×5 FAM 溫控模擬器 & 3D 非線性控制曲面動態旋轉儀',
-            desc: '調整溫度誤差與變化率滑桿，觀察 FAM 規則高亮激發，並在 3D 控制曲面上動態即時標示工作點軌跡。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm3', scrollTo: 'ch3-module-sec-m3' }
-          },
-          {
-            id: 's6_n4',
-            code: '6-4',
-            title: '【模組 4：隨堂練習】FAM 規則阻尼調校、倒單擺平衡與 TSK 煞車控制 (8題)',
-            desc: '實戰演練 8 道工程實務設計題（含縮放因子計算、仙台地鐵加減速控制及通用逼近定理證明）。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch6_fuzzy_control', chModule: 'm4', scrollTo: 'ch3-module-sec-m4' }
-          }
-        ]
-      },
-      {
-        stageId: 'stage_7',
-        stageNumber: 'Stage 07',
-        title: '應用智慧篇：第 7 章 模糊應用與進階系統',
-        subtitle: '原書第 12、16、17、18、19 章（共 79 頁）、Bellman-Zadeh 決策、FCM 分群與 ANFIS',
-        accentColor: 'violet',
-        badgeIcon: '🚀',
-        nodes: [
-          {
-            id: 's7_n1',
-            code: '7-1',
-            title: '【模組 1：通論】Bellman-Zadeh 決策、MCDM 評判、FCM 柔性分群與 ANFIS 五層架構',
-            desc: '掌握目標與約束對稱交集決策、多指標權重合成 B = W ○ R、FCM 隸屬度矩陣交替迭代，以及 ANFIS 混合學習算法。',
-            typeTag: '🧭 模組 1：本章通論',
-            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm1', scrollTo: 'ch5-module-sec-m1' }
-          },
-          {
-            id: 's7_n2',
-            code: '7-2',
-            title: '【模組 2：課本導讀】《認識 Fuzzy》第 12、16～19 章 各節導讀與頁碼對照（共 79 頁）',
-            desc: '對照實體書第 12 章（FCM 分群）、第 16 章（圖形識別）、第 17 章（模糊決策）、第 18 章（ANFIS 整合）與第 19 章（未來展望）。',
-            typeTag: '📖 模組 2：課本各節導讀',
-            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm2', scrollTo: 'ch5-module-sec-m2' }
-          },
-          {
-            id: 's7_n3',
-            code: '7-3',
-            title: '【模組 3：互動實驗室】Bellman-Zadeh 最佳決策搜尋 & FCM 柔性聚類 & ANFIS 擬合',
-            desc: '操作 3 座前沿互動實驗室：搜尋最佳妥協決策點、在 2D 散佈圖動態迭代 FCM 聚類中心、觀察 ANFIS 網路權重自適應演化。',
-            typeTag: '🎛️ 模組 3：互動實驗室',
-            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm3', scrollTo: 'ch5-module-sec-m3' }
-          },
-          {
-            id: 's7_n4',
-            code: '7-4',
-            title: '【模組 4：隨堂練習】MCDM 評判矩陣、FCM 目標函數優化與 ANFIS 學習推導 (8題)',
-            desc: '挑戰 8 道進階智慧系統綜合題目，包含綜合評判算子、FCM 拉格朗日乘子推導與混合學習矩陣構造。',
-            typeTag: '✍️ 模組 4：隨堂練習與詳解',
-            action: { tab: 'theory', chapterId: 'ch7_advanced_applications', chModule: 'm4', scrollTo: 'ch5-module-sec-m4' }
-          }
-        ]
-      }
-    ];
+    const CHAPTERS_19 = window.CHAPTERS_19_DATA || [];
 
     // 全域狀態
     let courseData = window.FUZZY_COURSE_DATA || null;
     let activeChapterId = 'ch1_intro';
-    let selectedBookPageFilter = 'all'; // 'all' 或 '2-1' ~ '2-15'
+    let activeChapter19Num = 1;
+    let activeBookPageFilter19 = 'all';
+    let quizChapterFilter = 'all';
+    let activeLab19Chapter = 1;
     let quizAnswers = {};
-    let completedNodes = [];
-    let currentActiveNodeId = 's1_n1';
+    let completedChapters19 = [];
 
     function normalizeChapterId(id) {
       const legacyMap = {
@@ -1332,58 +1003,29 @@
       return legacyMap[id] || id || 'ch1_intro';
     }
 
-    // 載入與儲存學習地圖進度 (localStorage)
     function loadRoadmapProgress() {
       try {
-        const saved = localStorage.getItem('fuzzy_roadmap_completed_v2');
+        const saved = localStorage.getItem('fuzzy_completed_chapters_19_v1');
         if (saved) {
-          completedNodes = JSON.parse(saved);
+          const parsed = JSON.parse(saved);
+          completedChapters19 = Array.isArray(parsed) ? parsed.map(Number).filter(n => n >= 1 && n <= 19) : [];
         } else {
-          completedNodes = [];
+          completedChapters19 = [];
         }
       } catch (e) {
-        completedNodes = [];
+        completedChapters19 = [];
       }
-      updateCurrentActiveNode();
     }
 
     function saveRoadmapProgress() {
       try {
-        localStorage.setItem('fuzzy_roadmap_completed_v2', JSON.stringify(completedNodes));
+        localStorage.setItem('fuzzy_completed_chapters_19_v1', JSON.stringify(completedChapters19));
       } catch (e) {}
-      updateCurrentActiveNode();
       renderRoadmap();
-      renderSidebarMiniRoadmap();
-      updateMissionBanner();
+      renderChapterNav();
+      renderChapterContent(activeChapter19Num);
     }
 
-    function getAllNodesFlat() {
-      const list = [];
-      ROADMAP_STAGES.forEach(st => {
-        st.nodes.forEach(n => list.push({ ...n, stageNumber: st.stageNumber, stageTitle: st.title }));
-      });
-      return list;
-    }
-
-    function updateCurrentActiveNode() {
-      const allNodes = getAllNodesFlat();
-      const firstUnfinished = allNodes.find(n => !completedNodes.includes(n.id));
-      currentActiveNodeId = firstUnfinished ? firstUnfinished.id : allNodes[allNodes.length - 1].id;
-    }
-
-    // 判斷節點狀態：'completed' | 'active' | 'locked'
-    function getNodeStatus(nodeId) {
-      if (completedNodes.includes(nodeId)) return 'completed';
-      if (nodeId === currentActiveNodeId) return 'active';
-      const allNodes = getAllNodesFlat();
-      const idx = allNodes.findIndex(n => n.id === nodeId);
-      if (idx === 0) return 'active';
-      const prevNode = allNodes[idx - 1];
-      if (completedNodes.includes(prevNode.id)) return 'active';
-      return 'locked';
-    }
-
-    // 簡易 Markdown 粗體與段落轉譯輔助函式（保留所有 $...$ 與 $$...$$ 供 MathJax 渲染）
     function formatRichText(text) {
       if (!text) return '';
       return text
@@ -1392,7 +1034,6 @@
         .replace(/\n/g, '<br />');
     }
 
-    // 安全呼叫 MathJax 與 Plotly 輔助函式 (防崩潰保護)
     function safeTypesetMath(elements) {
       try {
         if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
@@ -1416,7 +1057,6 @@
       }
     }
 
-    // 初始化載入 (直接讀取預載的 window.FUZZY_COURSE_DATA，不使用 fetch 以徹底避免 file:// CORS 紅字報錯)
     function initApp() {
       try { setupModalZoomEvents(); } catch(e) { console.warn(e); }
       if (!courseData && window.FUZZY_COURSE_DATA) {
@@ -1430,10 +1070,11 @@
       }
 
       try { loadRoadmapProgress(); } catch (e) { console.error(e); }
+      try { initQuizChapterFilterOptions(); } catch (e) { console.error(e); }
+      try { initLab19Select(); } catch (e) { console.error(e); }
       try { renderRoadmap(); } catch (e) { console.error(e); }
-      try { renderSidebarMiniRoadmap(); } catch (e) { console.error(e); }
       try { renderChapterNav(); } catch (e) { console.error(e); }
-      try { renderChapterContent(activeChapterId); } catch (e) { console.error(e); }
+      try { renderChapterContent(activeChapter19Num); } catch (e) { console.error(e); }
       try { renderLectureNotes(); } catch (e) { console.error(e); }
       try { renderMisconceptions(); } catch (e) { console.error(e); }
       try { renderQuizzes(); } catch (e) { console.error(e); }
@@ -1445,14 +1086,11 @@
       } catch (e) { console.warn(e); }
     }
 
-    // =========================================================================
-    // 學習地圖渲染與連動邏輯
-    // =========================================================================
     function renderRoadmap() {
       try {
-        const allNodes = getAllNodesFlat();
-        const doneCount = completedNodes.length;
-        const totalCount = allNodes.length;
+        const list = window.CHAPTERS_19_DATA || [];
+        const totalCount = list.length || 19;
+        const doneCount = completedChapters19.length;
         const pct = totalCount > 0 ? Math.round((doneCount / totalCount) * 100) : 0;
 
         const pctEl = document.getElementById('roadmap-percent-text');
@@ -1460,281 +1098,146 @@
         const barEl = document.getElementById('roadmap-progress-bar');
         if (barEl) barEl.style.width = `${pct}%`;
         const countEl = document.getElementById('roadmap-count-text');
-        if (countEl) countEl.textContent = `已完成 ${doneCount} / ${totalCount} 個核心關卡`;
+        if (countEl) countEl.textContent = `已完成 ${doneCount} / ${totalCount} 章`;
         const pillEl = document.getElementById('header-progress-pill');
-        if (pillEl) pillEl.textContent = `闖關進度 ${pct}% (${doneCount}/${totalCount})`;
+        if (pillEl) pillEl.textContent = `進度 ${doneCount} / ${totalCount} 章 (${pct}%)`;
 
-        const activeNodeObj = allNodes.find(n => n.id === currentActiveNodeId) || allNodes[0];
+        const nextCh = list.find(c => !completedChapters19.includes(c.ch)) || list[0];
         const continueBtn = document.getElementById('continue-learning-btn');
-        if (continueBtn && activeNodeObj) {
+        if (continueBtn && nextCh) {
           if (doneCount === totalCount && totalCount > 0) {
-            continueBtn.innerHTML = `<span>🏆 恭喜全數通關！前往互動實驗室自由探索</span>`;
+            continueBtn.innerHTML = `<span>🏆 恭喜完成全書 19 章！前往互動實驗室探索</span>`;
           } else {
-            continueBtn.innerHTML = `<span>🚀 繼續挑戰：${activeNodeObj.code} ${activeNodeObj.title.slice(0, 16)}...</span>`;
+            continueBtn.innerHTML = `<span>🚀 前往下一未完成：${nextCh.code} ${nextCh.title.replace(/^第 \d+ 章：/, '')}</span>`;
           }
         }
 
         const container = document.getElementById('roadmap-stages-container');
         if (!container) return;
 
-        container.innerHTML = ROADMAP_STAGES.map((stage) => {
-          const stageDoneCount = stage.nodes.filter(n => completedNodes.includes(n.id)).length;
-          const isStageAllDone = stageDoneCount === stage.nodes.length;
-          const gridCols = stage.nodes.length === 4 ? 'lg:grid-cols-2' : (stage.nodes.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2');
+        const allPages = getBookPagesList();
+        const groups = ['基礎理論篇', '工程控制篇', '智慧演算法與進階應用篇'];
+        const groupDesc = {
+          '基礎理論篇': 'Ch.01 ~ Ch.06 · 模糊集合、α-截集、模糊運算、模糊數與模糊關係',
+          '工程控制篇': 'Ch.07 ~ Ch.10 · 倒單擺、變頻冷氣、模糊洗衣機與汽車 ABS 實務',
+          '智慧演算法與進階應用篇': 'Ch.11 ~ Ch.19 · ANFIS、影像識別、MCDM、ICU 醫療、FTS、FCM、GA、自適應與未來展望'
+        };
 
-        const nodesHtml = stage.nodes.map(node => {
-          const status = getNodeStatus(node.id);
-          let cardStyle = 'roadmap-node-locked';
-          let statusBadge = `<span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">🔒 尚未解鎖</span>`;
-          let actionBtnText = '預覽關卡內容 →';
-          let checkBtnClass = 'border-slate-600 text-slate-400 hover:border-sky-400 hover:text-sky-300';
+        container.innerHTML = groups.map(grp => {
+          const grpChapters = list.filter(c => c.stageGroup === grp);
+          const grpDone = grpChapters.filter(c => completedChapters19.includes(c.ch)).length;
+          const cardsHtml = grpChapters.map(ch => {
+            const isDone = completedChapters19.includes(ch.ch);
+            const isCurrent = ch.ch === activeChapter19Num;
+            const pageCount = allPages.filter(p => Number(p.chapter) === ch.ch).length;
 
-          if (status === 'completed') {
-            cardStyle = 'roadmap-node-completed';
-            statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✅ 已完成</span>`;
-            actionBtnText = '複習本關教材 →';
-            checkBtnClass = 'bg-emerald-500 border-emerald-400 text-slate-950 font-bold';
-          } else if (status === 'active') {
-            cardStyle = 'roadmap-node-active';
-            statusBadge = `<span class="text-xs font-bold px-2.5 py-1 rounded-full bg-sky-500/25 text-sky-300 border border-sky-400/50 animate-pulse">🔥 進行中・已解鎖</span>`;
-            actionBtnText = '立即開始學習 →';
-            checkBtnClass = 'border-sky-400 text-sky-300 hover:bg-sky-500/20';
-          }
+            let borderCls = 'border-slate-800 hover:border-sky-500/50 bg-slate-900/70';
+            if (isCurrent) borderCls = 'border-sky-400 bg-sky-950/35 ring-1 ring-sky-400/50';
+            else if (isDone) borderCls = 'border-emerald-500/40 bg-emerald-950/20';
+
+            return `
+              <div onclick="selectChapter19(${ch.ch}, true)"
+                class="cursor-pointer rounded-2xl p-4 border transition-all flex flex-col justify-between gap-3 ${borderCls}">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-lg">${ch.icon}</span>
+                    <span class="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-950 text-sky-300 border border-slate-800">${ch.code}</span>
+                  </div>
+                  ${isDone
+                    ? '<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">✅ 已完成</span>'
+                    : (isCurrent
+                      ? '<span class="text-xs font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-400/40">📖 閱讀中</span>'
+                      : '<span class="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">待學習</span>')}
+                </div>
+                <div>
+                  <h4 class="text-sm sm:text-base font-bold text-white leading-snug">${ch.title.replace(/^第 \d+ 章：/, '')}</h4>
+                  <p class="text-xs text-slate-400 mt-1">頁 ${ch.pageRange} · ${pageCount} 頁導讀 · 3 題測驗</p>
+                </div>
+              </div>
+            `;
+          }).join('');
 
           return `
-            <div class="rounded-2xl p-6 transition-all flex flex-col justify-between gap-5 ${cardStyle}">
-              <div class="space-y-3">
-                <div class="flex items-center justify-between gap-2">
-                  <div class="flex items-center gap-2">
-                    <span class="px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-700 text-xs font-mono font-bold text-sky-300">關卡 ${node.code}</span>
-                    <span class="text-xs text-slate-400 font-medium">${node.typeTag}</span>
-                  </div>
-                  ${statusBadge}
+            <div class="glass-panel rounded-3xl p-6 border border-slate-800 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 class="text-lg sm:text-xl font-bold text-white">${grp}</h3>
+                  <p class="text-xs sm:text-sm text-slate-400">${groupDesc[grp]}</p>
                 </div>
-
-                <h4 onclick="navigateToRoadmapNode('${node.id}')" class="text-lg sm:text-xl font-bold text-white hover:text-sky-300 cursor-pointer transition leading-snug">
-                  ${node.title}
-                </h4>
-
-                <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
-                  ${node.desc}
-                </p>
+                <span class="text-xs font-bold px-3 py-1 rounded-full bg-slate-900 border border-slate-700 text-emerald-300">
+                  完成 ${grpDone} / ${grpChapters.length} 章
+                </span>
               </div>
-
-              <div class="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
-                <!-- 手動打勾完成按鈕 -->
-                <button onclick="toggleNodeComplete('${node.id}', event)"
-                  class="px-3.5 py-2 rounded-xl border text-xs sm:text-sm font-semibold transition flex items-center gap-2 ${checkBtnClass}">
-                  <span>${status === 'completed' ? '✓ 已標記完成' : '☐ 標記完成'}</span>
-                </button>
-
-                <!-- 進入關卡連動按鈕 -->
-                <button onclick="navigateToRoadmapNode('${node.id}')"
-                  class="px-4 py-2 rounded-xl ${status === 'active' ? 'bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold shadow-md shadow-sky-500/20' : 'bg-slate-800/90 hover:bg-slate-700 text-slate-200 font-semibold'} text-xs sm:text-sm transition">
-                  ${actionBtnText}
-                </button>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5">
+                ${cardsHtml}
               </div>
             </div>
           `;
         }).join('');
-
-        return `
-          <div class="glass-panel rounded-3xl p-6 sm:p-8 border ${isStageAllDone ? 'border-emerald-500/35' : 'border-slate-800'} space-y-6 relative">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
-              <div class="flex items-start sm:items-center gap-4">
-                <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-700 flex items-center justify-center text-2xl shrink-0 shadow-inner">
-                  ${stage.badgeIcon}
-                </div>
-                <div>
-                  <div class="flex items-center gap-2.5">
-                    <span class="text-xs font-extrabold uppercase tracking-widest text-sky-400">${stage.stageNumber}</span>
-                    ${isStageAllDone ? '<span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold">🎉 本階段已通關</span>' : ''}
-                  </div>
-                  <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">${stage.title}</h3>
-                  <p class="text-sm sm:text-base text-slate-400 mt-0.5">${stage.subtitle}</p>
-                </div>
-              </div>
-              <div class="bg-slate-900/90 px-4 py-2 rounded-xl border border-slate-800 text-xs sm:text-sm text-slate-300 font-mono shrink-0 self-start sm:self-center">
-                階段進度：<strong class="${isStageAllDone ? 'text-emerald-400' : 'text-sky-400'}">${stageDoneCount} / ${stage.nodes.length}</strong>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 ${gridCols} gap-5">
-              ${nodesHtml}
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([container]);
+      } catch (err) {
+        console.error('renderRoadmap error:', err);
       }
-    } catch (err) {
-      console.error('renderRoadmap error:', err);
-    }
-  }
-
-    function renderSidebarMiniRoadmap() {
-      const box = document.getElementById('sidebar-mini-roadmap');
-      if (!box) return;
-      const allNodes = getAllNodesFlat();
-      box.innerHTML = allNodes.map(n => {
-        const isDone = completedNodes.includes(n.id);
-        const isCurrent = n.id === currentActiveNodeId;
-        return `
-          <button onclick="navigateToRoadmapNode('${n.id}')"
-            class="w-full text-left px-3 py-2 rounded-xl transition flex items-center justify-between gap-2 ${isCurrent ? 'bg-sky-500/20 border border-sky-500/40 text-white font-semibold' : 'hover:bg-slate-800/70 text-slate-300'}">
-            <span class="truncate">${isDone ? '✅' : (isCurrent ? '🔥' : '🔒')} ${n.code} ${n.title.split('：')[0]}</span>
-          </button>
-        `;
-      }).join('');
     }
 
-    // 點擊學習地圖節點：自動切換分頁、載入對應章節/模組/筆記/測驗/模擬器並高亮捲動
-    function navigateToRoadmapNode(nodeId) {
-      const allNodes = getAllNodesFlat();
-      const target = allNodes.find(n => n.id === nodeId);
-      if (!target) return;
-
-      currentActiveNodeId = nodeId;
-      const act = target.action;
-
-      if (act.tab === 'theory') {
-        activeChapterId = act.chapterId;
-        renderChapterNav();
-        renderChapterContent(activeChapterId);
-        switchTab('theory');
-        if (act.ch1Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh1Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh1Module(act.ch1Module);
-          }, 80);
-        }
-        if (act.ch2Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh2Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh2Module(act.ch2Module);
-          }, 80);
-        }
-        if (act.ch3Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh3Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh3Module(act.ch3Module);
-          }, 80);
-        }
-        if (act.ch4Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh4Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh4Module(act.ch4Module);
-          }, 80);
-        }
-        if (act.ch5Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh5Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh5Module(act.ch5Module);
-          }, 80);
-        }
-        if (act.ch6Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh6Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh6Module(act.ch6Module);
-          }, 80);
-        }
-        if (act.ch7Module && window.FuzzyWidgets && typeof FuzzyWidgets.switchCh7Module === 'function') {
-          setTimeout(() => {
-            FuzzyWidgets.switchCh7Module(act.ch7Module);
-          }, 80);
-        }
-      } else if (act.tab === 'notes') {
-        switchTab('notes');
-      } else if (act.tab === 'lab') {
-        switchTab('lab');
-        if (act.scenarioTemp !== undefined) {
-          applyScenario(act.scenarioTemp);
-        }
+    function selectChapter19(chNum, shouldScroll) {
+      activeChapter19Num = Number(chNum) || 1;
+      activeBookPageFilter19 = 'all';
+      renderRoadmap();
+      renderChapterNav();
+      renderChapterContent(activeChapter19Num);
+      if (shouldScroll) {
+        const ws = document.getElementById('chapter-workspace');
+        if (ws) ws.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    }
 
-      updateMissionBanner();
-      renderSidebarMiniRoadmap();
-
-      setTimeout(() => {
-        if (act.scrollTo) {
-          const el = document.getElementById(act.scrollTo);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            el.classList.remove('pulse-focus');
-            void el.offsetWidth;
-            el.classList.add('pulse-focus');
-          }
-        } else {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-      }, 150);
+    function toggleChapter19Complete(chNum) {
+      const n = Number(chNum);
+      if (completedChapters19.includes(n)) {
+        completedChapters19 = completedChapters19.filter(x => x !== n);
+      } else {
+        completedChapters19.push(n);
+      }
+      saveRoadmapProgress();
     }
 
     function continueCurrentStage() {
-      navigateToRoadmapNode(currentActiveNodeId);
-    }
-
-    function toggleNodeComplete(nodeId, event) {
-      if (event) event.stopPropagation();
-      const idx = completedNodes.indexOf(nodeId);
-      if (idx >= 0) {
-        completedNodes.splice(idx, 1);
-      } else {
-        completedNodes.push(nodeId);
+      const list = window.CHAPTERS_19_DATA || [];
+      if (completedChapters19.length >= list.length && list.length > 0) {
+        switchTab('lab');
+        return;
       }
-      saveRoadmapProgress();
-    }
-
-    function toggleCurrentNodeComplete() {
-      if (!completedNodes.includes(currentActiveNodeId)) {
-        completedNodes.push(currentActiveNodeId);
+      const nextCh = list.find(c => !completedChapters19.includes(c.ch)) || list[0];
+      if (nextCh) {
+        selectChapter19(nextCh.ch, true);
       }
-      saveRoadmapProgress();
-      navigateToRoadmapNode(currentActiveNodeId);
     }
 
     function unlockAllRoadmapNodes() {
-      completedNodes = getAllNodesFlat().map(n => n.id);
+      const list = window.CHAPTERS_19_DATA || [];
+      completedChapters19 = list.map(c => c.ch);
       saveRoadmapProgress();
     }
 
     function resetRoadmapProgress() {
-      completedNodes = [];
+      completedChapters19 = [];
       saveRoadmapProgress();
     }
 
-    function updateMissionBanner() {
-      try {
-        const allNodes = getAllNodesFlat();
-        const node = allNodes.find(n => n.id === currentActiveNodeId) || allNodes[0];
-        if (!node) return;
-        const isDone = completedNodes.includes(node.id);
+    function renderSidebarMiniRoadmap() {}
+    function updateMissionBanner() {}
+    function toggleCurrentNodeComplete() { toggleChapter19Complete(activeChapter19Num); }
+    function navigateToRoadmapNode() {}
 
-        const stageEl = document.getElementById('mission-banner-stage');
-        if (stageEl) stageEl.textContent = `${node.stageNumber} • 關卡 ${node.code}`;
-        const titleEl = document.getElementById('mission-banner-title');
-        if (titleEl) titleEl.textContent = node.title;
-
-        const btn = document.getElementById('mission-complete-btn');
-        if (btn) {
-          if (isDone) {
-            btn.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 font-bold text-sm transition flex items-center gap-2';
-            btn.innerHTML = '<span>✓ 本關已完成（點擊前往下一關）</span>';
-          } else {
-            btn.className = 'px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20 flex items-center gap-2';
-            btn.innerHTML = '<span>✅ 標記本關完成並解鎖下一關</span>';
-          }
-        }
-      } catch (err) {
-        console.error('updateMissionBanner error:', err);
-      }
-    }
-
-    // 切換五大教學與設計分頁
     function switchTab(tabName) {
       try {
-        const tabs = ['roadmap', 'theory', 'notes', 'lab', 'fis'];
+        const normalizedTab = tabName === 'theory' ? 'roadmap' : tabName;
+        const tabs = ['roadmap', 'notes', 'lab', 'fis'];
         tabs.forEach(t => {
           const btn = document.getElementById(`tab-btn-${t}`);
           const panel = document.getElementById(`tab-panel-${t}`);
           if (!btn || !panel) return;
-          if (t === tabName) {
+          if (t === normalizedTab) {
             btn.classList.add('tab-active');
             btn.classList.remove('text-slate-300');
             panel.classList.remove('hidden');
@@ -1745,20 +1248,19 @@
           }
         });
 
-        const banner = document.getElementById('active-mission-banner');
-        if (banner) {
-          if (tabName === 'roadmap') {
-            banner.classList.add('hidden');
-            renderRoadmap();
-          } else {
-            banner.classList.remove('hidden');
-            updateMissionBanner();
-          }
+        if (tabName === 'theory') {
+          const ws = document.getElementById('chapter-workspace');
+          if (ws) setTimeout(() => ws.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
         }
 
-        if (tabName === 'lab') {
+        if (normalizedTab === 'roadmap') {
+          renderRoadmap();
+        } else if (normalizedTab === 'lab') {
           setTimeout(() => {
             try {
+              if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
+                FuzzyWidgets.renderChapter19Lab(activeLab19Chapter, 'lab-ch19-unified-stage');
+              }
               if (currentLabHubTab === 'flagship') {
                 updateLabSimulation();
                 if (window.Plotly && window.Plotly.Plots) {
@@ -1770,7 +1272,7 @@
               }
             } catch (e) { console.warn(e); }
           }, 60);
-        } else if (tabName === 'fis') {
+        } else if (normalizedTab === 'fis') {
           setTimeout(() => {
             try {
               if (window.WebFISStudio && typeof window.WebFISStudio.init === 'function') {
@@ -2242,193 +1744,234 @@
 
     function renderChapterNav() {
       const navList = document.getElementById('chapter-nav-list');
-      if (!navList || !courseData || !Array.isArray(courseData.chapters)) return;
+      const list = window.CHAPTERS_19_DATA || [];
+      if (!navList || !list.length) return;
 
-      const getMod = (fnName) => (window.FuzzyWidgets && typeof window.FuzzyWidgets[fnName] === 'function')
-        ? window.FuzzyWidgets[fnName]()
-        : 'all';
-
-      const modStateMap = {
-        ch1_intro: { chNum: 1, mod: getMod('getActiveCh1Module'), switchFn: 'switchCh1Module', color: 'sky' },
-        ch2_fuzzy_sets: { chNum: 2, mod: getMod('getActiveCh2Module'), switchFn: 'switchCh2Module', color: 'sky' },
-        ch3_operations_extension: { chNum: 3, mod: getMod('getActiveCh3Module'), switchFn: 'switchCh3Module', color: 'amber' },
-        ch4_fuzzy_relations: { chNum: 4, mod: getMod('getActiveCh4Module'), switchFn: 'switchCh4Module', color: 'sky' },
-        ch5_logic_inference: { chNum: 5, mod: getMod('getActiveCh5Module'), switchFn: 'switchCh5Module', color: 'rose' },
-        ch6_fuzzy_control: { chNum: 6, mod: getMod('getActiveCh6Module'), switchFn: 'switchCh6Module', color: 'cyan' },
-        ch7_advanced_applications: { chNum: 7, mod: getMod('getActiveCh7Module'), switchFn: 'switchCh7Module', color: 'violet' },
-        fuzzy_sets: { chNum: 1, mod: getMod('getActiveCh1Module'), switchFn: 'switchCh1Module', color: 'sky' },
-        fuzzy_relations_inference: { chNum: 2, mod: getMod('getActiveCh2Module'), switchFn: 'switchCh2Module', color: 'sky' },
-        fuzzy_control_applications: { chNum: 3, mod: getMod('getActiveCh3Module'), switchFn: 'switchCh3Module', color: 'amber' },
-        fuzzy_numbers_extension: { chNum: 4, mod: getMod('getActiveCh4Module'), switchFn: 'switchCh4Module', color: 'amber' },
-        fuzzy_decision_evaluation: { chNum: 5, mod: getMod('getActiveCh5Module'), switchFn: 'switchCh5Module', color: 'rose' },
-        fuzzy_clustering_pattern: { chNum: 6, mod: getMod('getActiveCh6Module'), switchFn: 'switchCh6Module', color: 'cyan' },
-        advanced_fuzzy_neuro: { chNum: 7, mod: getMod('getActiveCh7Module'), switchFn: 'switchCh7Module', color: 'violet' }
-      };
-
-      navList.innerHTML = courseData.chapters.map(ch => {
-        const isActive = ch.id === activeChapterId;
-        const info = modStateMap[ch.id];
-
-        let subMenuHtml = '';
-        if (isActive && info) {
-          const num = info.chNum;
-          const curMod = info.mod;
-          const fn = info.switchFn;
-          const col = info.color;
-          const activeBg = `bg-gradient-to-r from-${col}-500 to-${col === 'amber' ? 'orange' : col === 'sky' ? 'indigo' : col === 'rose' ? 'pink' : col === 'cyan' ? 'blue' : 'purple'}-600 text-white font-bold shadow-md`;
-
-          subMenuHtml = `
-            <div class="mt-1.5 ml-3 pl-3 border-l-2 border-${col}-500/35 space-y-1.5 py-1.5">
-              <div class="text-[11px] font-bold uppercase tracking-wider text-${col}-400/90 px-2 pb-0.5">
-                Chapter 0${num} 四大標準學習模組
-              </div>
-              <button id="ch${num}-subtab-btn-all" onclick="FuzzyWidgets.${fn}('all', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'all' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>📑</span>
-                <span>展開全部 4 大模組</span>
-              </button>
-              <button id="ch${num}-subtab-btn-m1" onclick="FuzzyWidgets.${fn}('m1', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm1' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>🏛️</span>
-                <span>【模組 1】通論 (Overview)</span>
-              </button>
-              <button id="ch${num}-subtab-btn-m2" onclick="FuzzyWidgets.${fn}('m2', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm2' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>📘</span>
-                <span>【模組 2】專書逐頁精讀</span>
-              </button>
-              <button id="ch${num}-subtab-btn-m3" onclick="FuzzyWidgets.${fn}('m3', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm3' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>📊</span>
-                <span>【模組 3】多維度模擬圖</span>
-              </button>
-              <button id="ch${num}-subtab-btn-m4" onclick="FuzzyWidgets.${fn}('m4', true)"
-                class="w-full text-left px-3 py-2 rounded-xl text-xs sm:text-sm transition flex items-center gap-2 ${curMod === 'm4' ? activeBg : 'text-slate-300 hover:bg-slate-800/80 hover:text-white font-medium'}">
-                <span>✍️</span>
-                <span>【模組 4】題目練習與詳解</span>
-              </button>
-            </div>
-          `;
-        }
-
+      const allPages = getBookPagesList();
+      navList.innerHTML = list.map(ch => {
+        const isActive = ch.ch === activeChapter19Num;
+        const isDone = completedChapters19.includes(ch.ch);
+        const pageCount = allPages.filter(p => Number(p.chapter) === ch.ch).length;
         return `
-          <div class="space-y-1">
-            <button onclick="selectChapter('${ch.id}')"
-              class="w-full text-left px-4 py-3 rounded-xl transition flex flex-col gap-0.5 ${isActive ? 'chapter-active font-bold' : 'hover:bg-slate-800/70 text-slate-300'}">
-              <span class="text-xs uppercase tracking-wider ${isActive ? 'text-sky-400' : 'text-slate-500'}">${ch.number}</span>
-              <span class="text-base leading-snug">${ch.title.split(' (')[0]}</span>
-            </button>
-            ${subMenuHtml}
-          </div>
+          <button onclick="selectChapter19(${ch.ch}, false)"
+            class="w-full text-left px-3.5 py-2.5 rounded-xl transition flex items-center justify-between gap-2 ${isActive ? 'chapter-active font-bold' : 'hover:bg-slate-800/70 text-slate-300'}">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <span class="text-xs font-mono ${isActive ? 'text-sky-400' : 'text-slate-500'}">${ch.code}</span>
+                <span class="text-xs text-slate-500">(${pageCount}頁)</span>
+              </div>
+              <div class="text-sm truncate leading-snug">${ch.title.replace(/^第 \d+ 章：/, '')}</div>
+            </div>
+            <span class="shrink-0 text-sm">${isDone ? '✅' : (isActive ? '📖' : '')}</span>
+          </button>
         `;
       }).join('');
     }
 
     function selectChapter(chapterId) {
-      activeChapterId = chapterId;
-            const chapterToNodeMap = {
-        fuzzy_sets: 's1_n1',
-        fuzzy_relations_inference: 's2_n1',
-        fuzzy_control_applications: 's3_n1',
-        fuzzy_numbers_extension: 's4_n1',
-        fuzzy_decision_evaluation: 's5_n1',
-        fuzzy_clustering_pattern: 's6_n1',
-        advanced_fuzzy_neuro: 's7_n1'
-      };
-      if (chapterToNodeMap[chapterId]) {
-        currentActiveNodeId = chapterToNodeMap[chapterId];
-        updateMissionBanner();
-        renderSidebarMiniRoadmap();
-      }
-      renderChapterNav();
-      renderChapterContent(chapterId);
+      const m = String(chapterId || '').match(/(\d+)/);
+      selectChapter19(m ? Number(m[1]) : 1, false);
     }
 
-        function renderChapterContent(chapterId) {
-      const normId = normalizeChapterId(chapterId);
-      const ch = courseData.chapters.find(c => normalizeChapterId(c.id) === normId) || courseData.chapters[0];
+    function filterChapter19BookPage(pageId) {
+      activeBookPageFilter19 = pageId;
+      renderChapterContent(activeChapter19Num);
+    }
+
+    function answerChapter19Quiz(quizId, optionIndex) {
+      quizAnswers[quizId] = optionIndex;
+      renderChapterContent(activeChapter19Num);
+      renderQuizzes();
+    }
+
+    function renderChapterContent(chNumOrId) {
+      const list = window.CHAPTERS_19_DATA || [];
+      let chNum = Number(chNumOrId);
+      if (!chNum || isNaN(chNum)) {
+        const m = String(chNumOrId || '').match(/(\d+)/);
+        chNum = m ? Number(m[1]) : 1;
+      }
+      activeChapter19Num = chNum;
+
+      const ch = list.find(c => c.ch === chNum) || list[0];
       if (!ch) return;
 
       const container = document.getElementById('chapter-content-container');
+      if (!container) return;
 
-      const headerCardHtml = `
-        <!-- 章節標頭卡 -->
-        <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-sky-500/25 space-y-5">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <span class="text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">${ch.number}</span>
-            <div class="flex flex-wrap items-center gap-2.5 text-xs sm:text-sm text-slate-300">
-              <span class="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">📘 ${ch.book_source}</span>
-              <span class="bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800">📑 ${ch.slide_source}</span>
+      const allPages = getBookPagesList();
+      const chPages = allPages.filter(p => Number(p.chapter) === ch.ch);
+      const filteredPages = activeBookPageFilter19 === 'all'
+        ? chPages
+        : chPages.filter(p => p.page_id === activeBookPageFilter19);
+
+      const isDone = completedChapters19.includes(ch.ch);
+
+      const prereqHtml = (ch.prerequisites || []).map(pr =>
+        `<span class="px-2.5 py-1 rounded-lg bg-slate-900 text-sky-300 border border-slate-700 text-xs font-semibold">${pr}</span>`
+      ).join('');
+
+      const conceptsHtml = (ch.keyConcepts || []).map((c, idx) => `
+        <div class="refined-card p-5 space-y-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-lg bg-sky-500/20 text-sky-300 text-xs font-bold flex items-center justify-center border border-sky-500/30">${idx + 1}</span>
+            <h4 class="text-base sm:text-lg font-bold text-white">${c.term}</h4>
+          </div>
+          <p class="text-sm sm:text-base text-slate-300 leading-relaxed">${c.explanation}</p>
+          <div class="formula-display-card text-teal-200">${c.formula}</div>
+        </div>
+      `).join('');
+
+      const pageBadgesHtml = chPages.map(p => `
+        <button onclick="filterChapter19BookPage('${p.page_id}')"
+          class="px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition ${activeBookPageFilter19 === p.page_id ? 'bg-sky-500 text-slate-950' : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800'}">
+          ${p.page_id}
+        </button>
+      `).join('');
+
+      const pagesCardsHtml = filteredPages.map(p => `
+        <div class="refined-card p-5 space-y-3 border-l-4 border-l-sky-500/60">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-mono font-bold">頁 ${p.page_id}</span>
+              <span class="text-xs text-slate-400">${p.section || ''}</span>
             </div>
+            <span class="text-xs text-emerald-300 font-semibold">${p.book_ref_badge || ('《認識 Fuzzy》頁 ' + p.page_id)}</span>
           </div>
-          <div class="space-y-2">
-            <h2 class="text-2xl sm:text-3xl font-bold text-white leading-tight">${ch.title}</h2>
-            <p class="text-base sm:text-lg text-sky-300 font-medium">${ch.subtitle}</p>
-          </div>
-          <div class="prose-reading border-t border-slate-800/90 pt-5 mb-0">
-            <p class="mb-0">${formatRichText(ch.overview)}</p>
-          </div>
+          <h4 class="text-base sm:text-lg font-bold text-white">${p.title}</h4>
+          <div class="text-sm sm:text-base text-slate-300 leading-relaxed">${formatRichText(p.summary || '')}</div>
+          ${p.formulas && p.formulas.length ? `
+            <div class="space-y-2 pt-1">
+              ${p.formulas.map(f => `<div class="formula-display-card text-teal-200 text-sm">${f}</div>`).join('')}
+            </div>` : ''}
+          ${p.book_examples && p.book_examples.length ? `
+            <ul class="text-xs sm:text-sm text-amber-200/90 bg-amber-950/25 border border-amber-500/20 rounded-xl p-3.5 space-y-1 list-disc list-inside">
+              ${p.book_examples.map(ex => `<li>${formatRichText(ex)}</li>`).join('')}
+            </ul>` : ''}
         </div>
-      `;
+      `).join('');
 
-      const footerNavHtml = `
-        <!-- 章節底部打卡與下一關引導 -->
-        <div class="glass-panel rounded-2xl p-5 flex flex-wrap items-center justify-between gap-4">
-          <button onclick="switchTab('roadmap')" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">
-            🗺️ 返回智慧學習地圖
-          </button>
-          <button onclick="toggleCurrentNodeComplete()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20">
-            ✅ 學完本章節・標記完成並前往下一關 →
-          </button>
-        </div>
-      `;
+      const quizzesHtml = (ch.quizzes || []).map((q, qIdx) => {
+        const selected = quizAnswers[q.id];
+        const isAnswered = selected !== undefined;
+        const isCorrect = selected === q.answer_index;
+        const optsHtml = q.options.map((opt, optIdx) => {
+          let cls = 'bg-slate-900/90 hover:bg-slate-800 border-slate-700/80 text-slate-100';
+          let badge = String.fromCharCode(65 + optIdx);
+          if (isAnswered) {
+            if (optIdx === q.answer_index) { cls = 'bg-emerald-950/70 border-emerald-500/70 text-emerald-200 font-semibold'; badge = '✓'; }
+            else if (optIdx === selected) { cls = 'bg-rose-950/70 border-rose-500/70 text-rose-200'; badge = '✗'; }
+            else { cls = 'bg-slate-900/40 border-slate-800/50 text-slate-500'; }
+          }
+          return `
+            <button onclick="answerChapter19Quiz('${q.id}', ${optIdx})"
+              class="w-full text-left p-3.5 rounded-xl border transition flex items-center gap-3 text-sm sm:text-base ${cls}">
+              <span class="w-6 h-6 shrink-0 rounded-md bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold">${badge}</span>
+              <span>${opt}</span>
+            </button>
+          `;
+        }).join('');
 
-      // 渲染四大標準學習模組
+        return `
+          <div class="refined-card p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-400">${ch.code} 隨堂測驗 #${qIdx + 1}</span>
+              ${isAnswered ? `<span class="text-xs font-bold px-2.5 py-0.5 rounded-full ${isCorrect ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${isCorrect ? '答對了！' : '請再確認解析'}</span>` : ''}
+            </div>
+            <div class="text-base sm:text-lg font-bold text-white">${q.question}</div>
+            <div class="grid grid-cols-1 gap-2.5">${optsHtml}</div>
+            ${isAnswered ? `
+              <div class="bg-slate-950/90 p-4 rounded-xl border border-indigo-500/35 text-sm text-slate-200 leading-relaxed">
+                <strong class="text-indigo-300">💡 詳解：</strong> ${q.explanation}
+              </div>` : ''}
+          </div>
+        `;
+      }).join('');
+
       container.innerHTML = `
-        ${headerCardHtml}
-        ${window.FuzzyWidgets ? FuzzyWidgets.getChapterInteractiveHtml(normId) : ''}
-        ${footerNavHtml}
+        <!-- 標頭與 (a) 本章核心通論與先備知識 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-sky-500/25 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+              <span class="text-2xl">${ch.icon}</span>
+              <span class="text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30">${ch.code} · ${ch.stageGroup}</span>
+            </div>
+            <span class="text-xs sm:text-sm bg-slate-900/90 px-3 py-1.5 rounded-xl border border-slate-800 text-emerald-300 font-semibold">
+              📘 原書頁碼 ${ch.pageRange}（共 ${chPages.length} 頁精讀）
+            </span>
+          </div>
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-white leading-tight">${ch.title}</h2>
+            <p class="text-sm sm:text-base text-sky-300 font-medium mt-1">${ch.subtitle}</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <span class="text-xs text-slate-400 font-bold">先備知識：</span>
+            ${prereqHtml}
+          </div>
+          <div class="prose-reading border-t border-slate-800/90 pt-4">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-sky-400 mb-2">(a) 本章核心通論</h3>
+            <p class="mb-0">${ch.overview}</p>
+          </div>
+          <div class="space-y-4 pt-2">${conceptsHtml}</div>
+        </div>
+
+        <!-- (b) 課本各節重點導讀與精確頁碼徽章 (282 筆頁碼導讀映射) -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-teal-500/25 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-teal-400">(b) Textbook Page-by-Page Companion</span>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">課本各節重點導讀與頁碼對照 (${chPages.length} 頁)</h3>
+            </div>
+            <button onclick="filterChapter19BookPage('all')"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${activeBookPageFilter19 === 'all' ? 'bg-teal-500 text-slate-950' : 'bg-slate-900 text-slate-300 border border-slate-700'}">
+              顯示全部 ${chPages.length} 頁
+            </button>
+          </div>
+          <div class="flex flex-wrap gap-1.5 bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+            ${pageBadgesHtml}
+          </div>
+          <div class="space-y-4">${pagesCardsHtml}</div>
+        </div>
+
+        <!-- (c) 本章互動視覺化驗證 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-indigo-500/25 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">(c) Interactive Visual Verification</span>
+              <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">${ch.labConfig ? ch.labConfig.title : '本章互動視覺化驗證'}</h3>
+              <p class="text-sm text-slate-400 mt-0.5">${ch.labConfig ? ch.labConfig.subtitle : ''}</p>
+            </div>
+            <button onclick="activeLab19Chapter=${ch.ch}; switchTab('lab');"
+              class="px-3.5 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition">
+              🎛️ 在完整實驗室開啟 →
+            </button>
+          </div>
+          <div id="ch19-interactive-lab-holder"></div>
+        </div>
+
+        <!-- (d) 本章隨堂練習題 + 完成本章學習按鈕 -->
+        <div class="glass-panel rounded-3xl p-7 sm:p-8 border border-emerald-500/25 space-y-5">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400">(d) Practice & Progress Check</span>
+            <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">本章隨堂練習題 (${(ch.quizzes || []).length} 題附詳解)</h3>
+          </div>
+          <div class="space-y-4">${quizzesHtml}</div>
+
+          <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              ${ch.ch > 1 ? `<button onclick="selectChapter19(${ch.ch - 1}, true)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">← 上一章 (Ch.${String(ch.ch - 1).padStart(2, '0')})</button>` : ''}
+              ${ch.ch < 19 ? `<button onclick="selectChapter19(${ch.ch + 1}, true)" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-semibold transition">下一章 (Ch.${String(ch.ch + 1).padStart(2, '0')}) →</button>` : ''}
+            </div>
+            <button onclick="toggleChapter19Complete(${ch.ch})"
+              class="px-5 py-3 rounded-xl font-bold text-sm sm:text-base transition shadow-lg flex items-center gap-2 ${isDone ? 'bg-slate-800 text-emerald-300 border border-emerald-500/40 hover:bg-slate-700' : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/25'}">
+              <span>${isDone ? '✓ 已完成本章學習（點擊可取消）' : '✅ 完成本章學習並更新進度'}</span>
+            </button>
+          </div>
+        </div>
       `;
 
-      // 呼叫書頁課本導讀畫廊渲染
-      const colorMap = {
-        ch1_intro: 'sky',
-        ch2_fuzzy_sets: 'teal',
-        ch3_operations_extension: 'amber',
-        ch4_fuzzy_relations: 'indigo',
-        ch5_logic_inference: 'rose',
-        ch6_fuzzy_control: 'emerald',
-        ch7_advanced_applications: 'violet'
-      };
-      const curColor = colorMap[normId] || 'sky';
-
-      // 嘗試填充可能存在的 gallery 容器
-      const galleryHolders = [
-        'ch1-book-gallery-body',
-        'ch2-book-gallery-body',
-        'ch3-book-gallery-body',
-        'ch4-book-gallery-body',
-        'ch5-book-gallery-body',
-        'ch6-book-gallery-body',
-        'ch7-book-gallery-body',
-        'chapter2-book-gallery-body',
-        'chapter34-book-gallery-body',
-        'chapter56-book-gallery-body',
-        'chapter4-book-gallery-body',
-        'chapter5-book-gallery-body',
-        'chapter6-book-gallery-body',
-        'chapter7-book-gallery-body'
-      ];
-
-      for (const hid of galleryHolders) {
-        if (document.getElementById(hid)) {
-          renderParentBookGallery(normId, hid, curColor);
-          break;
-        }
-      }
-
-      if (window.FuzzyWidgets && typeof FuzzyWidgets.initChapterWidgets === 'function') {
-        setTimeout(() => FuzzyWidgets.initChapterWidgets(normId), 60);
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
+        setTimeout(() => FuzzyWidgets.renderChapter19Lab(ch.ch, 'ch19-interactive-lab-holder'), 40);
       }
       safeTypesetMath([container]);
     }
@@ -2496,9 +2039,59 @@
       `).join('');
     }
 
+    function getAllQuizzes19() {
+      const list = window.CHAPTERS_19_DATA || [];
+      const all = [];
+      list.forEach(ch => {
+        (ch.quizzes || []).forEach(q => {
+          all.push({ ...q, chNum: ch.ch, chapterLabel: `${ch.code} ${ch.title.replace(/^第 \d+ 章：/, '')}` });
+        });
+      });
+      return all;
+    }
+
+    function initQuizChapterFilterOptions() {
+      const sel = document.getElementById('quiz-chapter-filter');
+      const list = window.CHAPTERS_19_DATA || [];
+      if (!sel || !list.length) return;
+      sel.innerHTML = `<option value="all">📚 全部 19 章綜合測驗 (${getAllQuizzes19().length} 題)</option>` +
+        list.map(ch => `<option value="${ch.ch}">${ch.code}：${ch.title.replace(/^第 \d+ 章：/, '')} (${(ch.quizzes || []).length} 題)</option>`).join('');
+    }
+
+    function setQuizChapterFilter(val) {
+      quizChapterFilter = val;
+      renderQuizzes();
+    }
+
+    function initLab19Select() {
+      const sel = document.getElementById('lab-ch19-select');
+      const list = window.CHAPTERS_19_DATA || [];
+      if (!sel || !list.length) return;
+      sel.innerHTML = list.map(ch => `<option value="${ch.ch}">${ch.code}：${ch.title.replace(/^第 \d+ 章：/, '')}</option>`).join('');
+      sel.value = String(activeLab19Chapter);
+    }
+
+    function selectLab19Chapter(chNum) {
+      activeLab19Chapter = Number(chNum) || 1;
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
+        FuzzyWidgets.renderChapter19Lab(activeLab19Chapter, 'lab-ch19-unified-stage');
+      }
+    }
+
+    function jumpToChapter19FromLab() {
+      switchTab('roadmap');
+      selectChapter19(activeLab19Chapter, true);
+    }
+
     function renderQuizzes() {
-      const list = document.getElementById('quiz-list');
-      list.innerHTML = courseData.quizzes.map((q, qIdx) => {
+      const listEl = document.getElementById('quiz-list');
+      if (!listEl) return;
+      const allQ = getAllQuizzes19();
+      const filteredQ = quizChapterFilter === 'all'
+        ? allQ
+        : allQ.filter(q => String(q.chNum) === String(quizChapterFilter));
+
+      listEl.innerHTML = filteredQ.map((q, qIdx) => {
         const selected = quizAnswers[q.id];
         const isAnswered = selected !== undefined;
         const isCorrect = selected === q.answer_index;
@@ -2530,8 +2123,8 @@
 
         return `
           <div id="quiz-card-${q.id}" class="refined-card p-6 sm:p-7 space-y-5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs sm:text-sm font-bold text-indigo-400">第 ${qIdx + 1} 題・${q.chapter}</span>
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs sm:text-sm font-bold text-indigo-400">第 ${qIdx + 1} 題・${q.chapterLabel}</span>
               ${isAnswered ? `<span class="text-xs sm:text-sm font-bold px-3 py-1 rounded-full ${isCorrect ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'}">${isCorrect ? '答對了！' : '觀念需釐清'}</span>` : ''}
             </div>
             <div class="text-lg sm:text-xl font-bold text-white leading-relaxed">${q.question}</div>
@@ -2548,39 +2141,33 @@
       }).join('');
 
       updateQuizScore();
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([list]);
-      }
+      safeTypesetMath([listEl]);
     }
 
     function answerQuiz(quizId, optionIndex) {
       quizAnswers[quizId] = optionIndex;
-      const q = courseData.quizzes.find(item => item.id === quizId);
-      if (q && optionIndex === q.answer_index) {
-        if (quizId === 'q1' && !completedNodes.includes('s1_n4')) {
-          completedNodes.push('s1_n4');
-          saveRoadmapProgress();
-        }
-        if (quizId === 'q5' && !completedNodes.includes('s3_n2')) {
-          completedNodes.push('s3_n2');
-          saveRoadmapProgress();
-        }
-      }
       renderQuizzes();
+      renderChapterContent(activeChapter19Num);
     }
 
     function resetQuiz() {
       quizAnswers = {};
       renderQuizzes();
+      renderChapterContent(activeChapter19Num);
     }
 
     function updateQuizScore() {
-      const total = courseData.quizzes.length;
+      const allQ = getAllQuizzes19();
+      const filteredQ = quizChapterFilter === 'all'
+        ? allQ
+        : allQ.filter(q => String(q.chNum) === String(quizChapterFilter));
+      const total = filteredQ.length;
       let correct = 0;
-      courseData.quizzes.forEach(q => {
+      filteredQ.forEach(q => {
         if (quizAnswers[q.id] === q.answer_index) correct++;
       });
-      document.getElementById('quiz-score-Text').textContent = `${correct} / ${total}`;
+      const scoreEl = document.getElementById('quiz-score-Text');
+      if (scoreEl) scoreEl.textContent = `${correct} / ${total}`;
     }
 
     // =========================================================================
@@ -3199,7 +2786,7 @@
     window.continueCurrentStage = continueCurrentStage;
     window.unlockAllRoadmapNodes = unlockAllRoadmapNodes;
     window.resetRoadmapProgress = resetRoadmapProgress;
-    window.toggleNodeComplete = toggleNodeComplete;
+    window.toggleNodeComplete = toggleChapter19Complete;
     window.toggleCurrentNodeComplete = toggleCurrentNodeComplete;
     window.openBookPhotoModal = openBookPhotoModal;
     window.prevBookPhotoModal = prevBookPhotoModal;
@@ -3213,6 +2800,13 @@
     window.filterChapter34Page = filterChapter34Page;
     window.filterChapter56Page = filterChapter56Page;
     window.handleManualPhotoUpload = handleManualPhotoUpload;
+    window.selectChapter19 = selectChapter19;
+    window.toggleChapter19Complete = toggleChapter19Complete;
+    window.filterChapter19BookPage = filterChapter19BookPage;
+    window.answerChapter19Quiz = answerChapter19Quiz;
+    window.setQuizChapterFilter = setQuizChapterFilter;
+    window.selectLab19Chapter = selectLab19Chapter;
+    window.jumpToChapter19FromLab = jumpToChapter19FromLab;
     window.renderChapterNav = renderChapterNav;
     window.renderChapterContent = renderChapterContent;
     window.initApp = initApp;
