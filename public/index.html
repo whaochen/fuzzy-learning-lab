@@ -31410,6 +31410,769 @@ window.FuzzyWidgets = (function () {
     }
   }
 
+  // =========================================================================
+  // 全書 19 章統一互動計算與視覺化模擬器 (Single Source of Truth)
+  // =========================================================================
+  const LAB_19_META = {
+    1:  { shortTitle: '緒論與概念對比', count: 1, badge: '原書第 1 章 · 課本圖 1.1 高個子/室溫 Crisp vs. Fuzzy', title: 'Ch.01 二值邏輯 (Crisp) vs. 模糊集合 (Fuzzy) 對比滑桿' },
+    2:  { shortTitle: '模糊集合與 α-cut', count: 2, badge: '原書第 2 章 · 課本圖 2.7 造型 & 圖 2.9 α-截集切片', title: 'Ch.02 歸屬函數即時塑形圖 ＋ α-cut 互動切片計算器' },
+    3:  { shortTitle: '模糊集合運算', count: 1, badge: '原書第 3 章 · 標準 Min/Max & Sugeno/Yager 參數補集', title: 'Ch.03 交集、聯集、補集與參數化運算動態疊圖' },
+    4:  { shortTitle: '擴展原理與模糊數', count: 2, badge: '原書第 4 章 · 模糊數加減乘除 & y=f(x) 映射', title: 'Ch.04 模糊數四則計算器 (A⊕B, A⊖B, A⊗B, A⊘B) ＋ 函數映射' },
+    5:  { shortTitle: '模糊關係矩陣', count: 1, badge: '原書第 5 章 · 卡迪興乘積與關係強度熱力圖', title: 'Ch.05 模糊關係矩陣 R(X×Y) 互動編輯與 2D 熱力圖' },
+    6:  { shortTitle: '關係合成計算器', count: 1, badge: '原書第 6 章 · Max-Min / Max-Product 逐步合成計算', title: 'Ch.06 Max-Min & Max-Product 關係矩陣合成計算器（高亮每格步驟）' },
+    7:  { shortTitle: '模糊邏輯與 GMP', count: 1, badge: '原書第 7 章 · 單條/多條 IF-THEN 規則激發強度 (Firing Strength)', title: 'Ch.07 IF-THEN 規則激發強度計算器與倒單擺平衡響應' },
+    8:  { shortTitle: '近似推論規則庫', count: 1, badge: '原書第 8 章 · Mamdani 截頂 / Larsen 乘積推論對比', title: 'Ch.08 多規則激發截頂與變頻冷氣溫控動態比較' },
+    9:  { shortTitle: '六大解模糊化實驗室', count: 1, badge: '原書第 9 章 · COA / BOA / MOM / SOM / LOM 精確數值標記', title: 'Ch.09 解模糊化六大方法對比實驗室 (COA, BOA, MOM, SOM, LOM)' },
+    10: { shortTitle: '模糊控制與 ABS', count: 1, badge: '原書第 10 章 · 課本經典溫控/ABS 滑移率最佳化', title: 'Ch.10 模糊控制器實戰與 ABS 滑移率摩擦曲線' },
+    11: { shortTitle: 'PID 模糊與船舶自動舵', count: 1, badge: '原書第 11 章 · 船舶航向模糊控制 (Marine Autopilot)', title: 'Ch.11 船舶航向模糊控制 (海浪干擾、航向收斂與舵角平滑)' },
+    12: { shortTitle: 'T-S 模糊模型計算器', count: 1, badge: '原書第 12 章 · Takagi-Sugeno 線性後件部加權混合', title: 'Ch.12 Takagi-Sugeno 線性後件部加權混合計算器' },
+    13: { shortTitle: '系統穩定與光電散熱', count: 1, badge: '原書第 13 章 · 光電板微氣候散熱模糊調節 (PV Cooling)', title: 'Ch.13 光電板微氣候散熱模糊調節與淨發電效益模擬器' },
+    14: { shortTitle: '量化因子參數調校', count: 1, badge: '原書第 14 章 · 量化因子 Ke, Kd, Ku 對暫態響應影響', title: 'Ch.14 量化因子 (Ke, Kd, Ku) 對上升時間與超越量模擬器' },
+    15: { shortTitle: '適應性與時間序列', count: 1, badge: '原書第 15 章 · 模糊時間序列 (FTS) 預測與適應調校', title: 'Ch.15 模糊時間序列 (FTS) 語意切分與預測曲線模擬器' },
+    16: { shortTitle: '模糊決策與綜合評判', count: 2, badge: '原書第 16 章 · W∘R 模糊綜合評判 ＋ Bellman-Zadeh 尋優', title: 'Ch.16 權重矩陣 W∘R 綜合評判計算器 ＋ Bellman-Zadeh 尋優圖' },
+    17: { shortTitle: '模糊聚類 (FCM)', count: 1, badge: '原書第 17 章 · Fuzzy C-Means 單步迭代 / 自動收斂', title: 'Ch.17 互動式 Fuzzy C-Means (FCM) 分群迭代與 U 矩陣模擬器' },
+    18: { shortTitle: '類神經模糊 (ANFIS)', count: 1, badge: '原書第 18 章 · ANFIS 五層前向計算與 RMSE 收斂曲線', title: 'Ch.18 ANFIS 五層架構前向計算器與非線性逼近誤差曲線' },
+    19: { shortTitle: 'GA 演化與儲能 EMS', count: 2, badge: '原書第 19 章 · GA 參數尋優 ＋ 24h 儲能微電網 EMS (BESS)', title: 'Ch.19 GA 演化尋找最佳歸屬函數 ＋ 24 小時儲能微電網 SOC 決策' }
+  };
+
+  function getLab19Meta() {
+    return LAB_19_META;
+  }
+
+  // Ch.17 FCM 互動狀態
+  const fcmPts19 = [
+    [1.2, 1.8], [1.8, 2.4], [2.2, 1.5], [2.6, 2.8], [1.5, 3.1],
+    [6.5, 6.2], [7.2, 7.0], [7.8, 6.5], [6.8, 7.6], [8.1, 7.4],
+    [4.2, 4.5], [4.7, 4.9]
+  ];
+  let fcmState19 = { v1: [2.5, 5.5], v2: [6.0, 2.5], iter: 0, historyJ: [] };
+
+  function fcmComputeStep(m) {
+    const p = 2 / (m - 1);
+    const u1 = [], u2 = [];
+    let J = 0;
+    fcmPts19.forEach(pt => {
+      const d1 = Math.max(1e-4, Math.hypot(pt[0] - fcmState19.v1[0], pt[1] - fcmState19.v1[1]));
+      const d2 = Math.max(1e-4, Math.hypot(pt[0] - fcmState19.v2[0], pt[1] - fcmState19.v2[1]));
+      const w1 = 1 / (1 + Math.pow(d1 / d2, p));
+      const w2 = 1 - w1;
+      u1.push(w1); u2.push(w2);
+      J += Math.pow(w1, m) * d1 * d1 + Math.pow(w2, m) * d2 * d2;
+    });
+    let num1 = [0, 0], den1 = 0, num2 = [0, 0], den2 = 0;
+    fcmPts19.forEach((pt, idx) => {
+      const a1 = Math.pow(u1[idx], m), a2 = Math.pow(u2[idx], m);
+      num1[0] += a1 * pt[0]; num1[1] += a1 * pt[1]; den1 += a1;
+      num2[0] += a2 * pt[0]; num2[1] += a2 * pt[1]; den2 += a2;
+    });
+    fcmState19.v1 = [num1[0] / den1, num1[1] / den1];
+    fcmState19.v2 = [num2[0] / den2, num2[1] / den2];
+    fcmState19.iter += 1;
+    fcmState19.historyJ.push(Number(J.toFixed(2)));
+    return { u1, u2, J };
+  }
+
+  function fcmStep19() {
+    const mEl = document.getElementById('ch19-in-17a');
+    const m = mEl ? parseFloat(mEl.value) : 2.0;
+    fcmComputeStep(m);
+    updateChapter19Lab(17);
+  }
+
+  function fcmAuto19() {
+    const mEl = document.getElementById('ch19-in-17a');
+    const m = mEl ? parseFloat(mEl.value) : 2.0;
+    for (let i = 0; i < 8; i++) fcmComputeStep(m);
+    updateChapter19Lab(17);
+  }
+
+  function fcmReset19() {
+    fcmState19 = { v1: [2.5, 5.5], v2: [6.0, 2.5], iter: 0, historyJ: [] };
+    updateChapter19Lab(17);
+  }
+
+  function renderChapter19Lab(chNum, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const meta = LAB_19_META[chNum] || { badge: `原書第 ${chNum} 章`, title: `Ch.${String(chNum).padStart(2,'0')} 互動實驗室` };
+    const plotId = `ch19-lab-plot-${chNum}`;
+    const readoutId = `ch19-lab-readout-${chNum}`;
+
+    const controlsByCh = {
+      1: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">目前探測數值 (身高 cm / 室溫 °C): <span id="ch19-val-1c" class="text-emerald-300 font-bold">173</span>
+            <input id="ch19-in-1c" type="range" min="150" max="195" step="1" value="173" oninput="FuzzyWidgets.updateChapter19Lab(1)" class="w-full accent-emerald-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">明確集合「高個子」門檻 (cm): <span id="ch19-val-1b" class="text-rose-300 font-bold">175</span>
+            <input id="ch19-in-1b" type="range" min="165" max="185" step="1" value="175" oninput="FuzzyWidgets.updateChapter19Lab(1)" class="w-full accent-rose-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">模糊過渡斜率 k: <span id="ch19-val-1a" class="text-sky-300 font-bold">0.25</span>
+            <input id="ch19-in-1a" type="range" min="0.1" max="0.6" step="0.05" value="0.25" oninput="FuzzyWidgets.updateChapter19Lab(1)" class="w-full accent-sky-400 mt-1">
+          </label>
+        </div>`,
+      2: `
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <label class="block text-xs text-slate-300">歸屬函數造型:
+            <select id="ch19-in-2a" onchange="FuzzyWidgets.updateChapter19Lab(2)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="tri" selected>三角形 (Triangular)</option>
+              <option value="trap">梯形 (Trapezoidal)</option>
+              <option value="gauss">高斯 (Gaussian)</option>
+              <option value="bell">廣義鐘形 (Bell)</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">中心點 b/c: <span id="ch19-val-2b" class="text-teal-300 font-bold">5.0</span>
+            <input id="ch19-in-2b" type="range" min="2" max="8" step="0.5" value="5" oninput="FuzzyWidgets.updateChapter19Lab(2)" class="w-full accent-teal-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">寬度/σ 參數: <span id="ch19-val-2c" class="text-teal-300 font-bold">2.5</span>
+            <input id="ch19-in-2c" type="range" min="0.8" max="4.0" step="0.2" value="2.5" oninput="FuzzyWidgets.updateChapter19Lab(2)" class="w-full accent-teal-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">α-cut 水平切片 α: <span id="ch19-val-2d" class="text-amber-300 font-bold">0.60</span>
+            <input id="ch19-in-2d" type="range" min="0.05" max="0.95" step="0.05" value="0.60" oninput="FuzzyWidgets.updateChapter19Lab(2)" class="w-full accent-amber-400 mt-1">
+          </label>
+        </div>`,
+      3: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">運算子家族:
+            <select id="ch19-in-3a" onchange="FuzzyWidgets.updateChapter19Lab(3)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="minmax" selected>標準 Min / Max / 1-μ</option>
+              <option value="prod">代數積 a·b / 代數和 a+b-ab</option>
+              <option value="sugeno">Sugeno 參數化補集 (λ)</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">集合 B 偏移: <span id="ch19-val-3b" class="text-cyan-300 font-bold">2.5</span>
+            <input id="ch19-in-3b" type="range" min="0" max="5" step="0.5" value="2.5" oninput="FuzzyWidgets.updateChapter19Lab(3)" class="w-full accent-cyan-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">Sugeno 補集參數 λ: <span id="ch19-val-3c" class="text-amber-300 font-bold">1.0</span>
+            <input id="ch19-in-3c" type="range" min="-0.8" max="5.0" step="0.2" value="1.0" oninput="FuzzyWidgets.updateChapter19Lab(3)" class="w-full accent-amber-400 mt-1">
+          </label>
+        </div>`,
+      4: `
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <label class="block text-xs text-slate-300">四則運算 / 映射:
+            <select id="ch19-in-4a" onchange="FuzzyWidgets.updateChapter19Lab(4)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="add" selected>模糊加法 (A ⊕ B)</option>
+              <option value="sub">模糊減法 (A ⊖ B)</option>
+              <option value="mul">模糊乘法 (A ⊗ B)</option>
+              <option value="div">模糊除法 (A ⊘ B)</option>
+              <option value="sq">擴展原理 y = x²</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">模糊數 A 中心: <span id="ch19-val-4b" class="text-sky-300 font-bold">4.0</span>
+            <input id="ch19-in-4b" type="range" min="1" max="6" step="0.5" value="4.0" oninput="FuzzyWidgets.updateChapter19Lab(4)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">模糊數 B 中心: <span id="ch19-val-4c" class="text-purple-300 font-bold">2.0</span>
+            <input id="ch19-in-4c" type="range" min="1" max="5" step="0.5" value="2.0" oninput="FuzzyWidgets.updateChapter19Lab(4)" class="w-full accent-purple-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">α-cut 驗證水平: <span id="ch19-val-4d" class="text-emerald-300 font-bold">0.50</span>
+            <input id="ch19-in-4d" type="range" min="0" max="1" step="0.1" value="0.50" oninput="FuzzyWidgets.updateChapter19Lab(4)" class="w-full accent-emerald-400 mt-1">
+          </label>
+        </div>`,
+      5: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">R(1,1) 強度: <span id="ch19-val-5a" class="text-indigo-300 font-bold">0.9</span>
+            <input id="ch19-in-5a" type="range" min="0" max="1" step="0.1" value="0.9" oninput="FuzzyWidgets.updateChapter19Lab(5)" class="w-full accent-indigo-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">R(2,2) 強度: <span id="ch19-val-5b" class="text-indigo-300 font-bold">0.8</span>
+            <input id="ch19-in-5b" type="range" min="0" max="1" step="0.1" value="0.8" oninput="FuzzyWidgets.updateChapter19Lab(5)" class="w-full accent-indigo-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">雜訊干擾強度: <span id="ch19-val-5c" class="text-indigo-300 font-bold">0.2</span>
+            <input id="ch19-in-5c" type="range" min="0" max="0.8" step="0.1" value="0.2" oninput="FuzzyWidgets.updateChapter19Lab(5)" class="w-full accent-indigo-400 mt-1">
+          </label>
+        </div>`,
+      6: `
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <label class="block text-xs text-slate-300">合成算子:
+            <select id="ch19-in-6a" onchange="FuzzyWidgets.updateChapter19Lab(6)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="maxmin" selected>Max-Min 合成</option>
+              <option value="maxprod">Max-Product 合成</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">檢視格 (列 i, 欄 j):
+            <select id="ch19-in-6b" onchange="FuzzyWidgets.updateChapter19Lab(6)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="0,0">格 (x1, z1)</option>
+              <option value="0,1" selected>格 (x1, z2)</option>
+              <option value="1,1">格 (x2, z2)</option>
+              <option value="2,2">格 (x3, z3)</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">調整 R[0][1] 數值: <span id="ch19-val-6c" class="text-sky-300 font-bold">0.6</span>
+            <input id="ch19-in-6c" type="range" min="0" max="1" step="0.1" value="0.6" oninput="FuzzyWidgets.updateChapter19Lab(6)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">調整 S[1][1] 數值: <span id="ch19-val-6d" class="text-emerald-300 font-bold">0.8</span>
+            <input id="ch19-in-6d" type="range" min="0" max="1" step="0.1" value="0.8" oninput="FuzzyWidgets.updateChapter19Lab(6)" class="w-full accent-emerald-400 mt-1">
+          </label>
+        </div>`,
+      7: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">前提條件 1 歸屬度 μ_A(x): <span id="ch19-val-7a" class="text-emerald-300 font-bold">0.70</span>
+            <input id="ch19-in-7a" type="range" min="0" max="1" step="0.05" value="0.70" oninput="FuzzyWidgets.updateChapter19Lab(7)" class="w-full accent-emerald-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">前提條件 2 歸屬度 μ_B(y): <span id="ch19-val-7b" class="text-emerald-300 font-bold">0.45</span>
+            <input id="ch19-in-7b" type="range" min="0" max="1" step="0.05" value="0.45" oninput="FuzzyWidgets.updateChapter19Lab(7)" class="w-full accent-emerald-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">連接算子 (AND / OR):
+            <select id="ch19-in-7c" onchange="FuzzyWidgets.updateChapter19Lab(7)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="min" selected>AND (取 min)</option>
+              <option value="prod">AND (代數積 a·b)</option>
+              <option value="max">OR (取 max)</option>
+            </select>
+          </label>
+        </div>`,
+      8: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">室溫偏差 ΔT (°C): <span id="ch19-val-8a" class="text-cyan-300 font-bold">5.0</span>
+            <input id="ch19-in-8a" type="range" min="1" max="9" step="0.5" value="5.0" oninput="FuzzyWidgets.updateChapter19Lab(8)" class="w-full accent-cyan-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">推論蘊涵法:
+            <select id="ch19-in-8b" onchange="FuzzyWidgets.updateChapter19Lab(8)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="min" selected>Mamdani 截頂法 (Min)</option>
+              <option value="prod">Larsen 縮放法 (Product)</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">高溫規則權重: <span id="ch19-val-8c" class="text-cyan-300 font-bold">0.80</span>
+            <input id="ch19-in-8c" type="range" min="0.2" max="1.0" step="0.1" value="0.8" oninput="FuzzyWidgets.updateChapter19Lab(8)" class="w-full accent-cyan-400 mt-1">
+          </label>
+        </div>`,
+      9: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">規則 1 (左側低輸出) 截斷高度: <span id="ch19-val-9a" class="text-sky-300 font-bold">0.35</span>
+            <input id="ch19-in-9a" type="range" min="0.05" max="0.95" step="0.05" value="0.35" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">規則 2 (右側高輸出平台) 截斷高度: <span id="ch19-val-9b" class="text-emerald-300 font-bold">0.80</span>
+            <input id="ch19-in-9b" type="range" min="0.05" max="0.95" step="0.05" value="0.80" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-emerald-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">高輸出中心移動: <span id="ch19-val-9c" class="text-amber-300 font-bold">75</span>
+            <input id="ch19-in-9c" type="range" min="60" max="88" step="2" value="75" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-amber-400 mt-1">
+          </label>
+        </div>`,
+      10: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">路面狀態:
+            <select id="ch19-in-10a" onchange="FuzzyWidgets.updateChapter19Lab(10)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
+              <option value="dry" selected>乾燥柏油 (Dry)</option>
+              <option value="wet">濕滑路面 (Wet)</option>
+              <option value="ice">結冰路面 (Icy)</option>
+            </select>
+          </label>
+          <label class="block text-xs text-slate-300">目標滑移率 λ: <span id="ch19-val-10b" class="text-rose-300 font-bold">0.18</span>
+            <input id="ch19-in-10b" type="range" min="0.02" max="0.95" step="0.02" value="0.18" oninput="FuzzyWidgets.updateChapter19Lab(10)" class="w-full accent-rose-400 mt-1">
+          </label>
+        </div>`,
+      11: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">海浪側風干擾強度 (級): <span id="ch19-val-11a" class="text-sky-300 font-bold">4.0</span>
+            <input id="ch19-in-11a" type="range" min="1" max="8" step="0.5" value="4.0" oninput="FuzzyWidgets.updateChapter19Lab(11)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">目標變更航向角 (deg): <span id="ch19-val-11b" class="text-emerald-300 font-bold">30</span>
+            <input id="ch19-in-11b" type="range" min="10" max="60" step="5" value="30" oninput="FuzzyWidgets.updateChapter19Lab(11)" class="w-full accent-emerald-400 mt-1">
+          </label>
+        </div>`,
+      12: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">輸入狀態 x: <span id="ch19-val-12a" class="text-amber-300 font-bold">3.5</span>
+            <input id="ch19-in-12a" type="range" min="0" max="10" step="0.5" value="3.5" oninput="FuzzyWidgets.updateChapter19Lab(12)" class="w-full accent-amber-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">規則 1 線性斜率 p1: <span id="ch19-val-12b" class="text-sky-300 font-bold">0.8</span>
+            <input id="ch19-in-12b" type="range" min="0.2" max="2.0" step="0.2" value="0.8" oninput="FuzzyWidgets.updateChapter19Lab(12)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">規則 2 線性斜率 p2: <span id="ch19-val-12c" class="text-emerald-300 font-bold">1.8</span>
+            <input id="ch19-in-12c" type="range" min="0.5" max="3.0" step="0.2" value="1.8" oninput="FuzzyWidgets.updateChapter19Lab(12)" class="w-full accent-emerald-400 mt-1">
+          </label>
+        </div>`,
+      13: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">日照輻射強度 (W/m²): <span id="ch19-val-13a" class="text-amber-300 font-bold">950</span>
+            <input id="ch19-in-13a" type="range" min="300" max="1200" step="50" value="950" oninput="FuzzyWidgets.updateChapter19Lab(13)" class="w-full accent-amber-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">環境風速 (m/s): <span id="ch19-val-13b" class="text-cyan-300 font-bold">2.5</span>
+            <input id="ch19-in-13b" type="range" min="0.5" max="8.0" step="0.5" value="2.5" oninput="FuzzyWidgets.updateChapter19Lab(13)" class="w-full accent-cyan-400 mt-1">
+          </label>
+        </div>`,
+      14: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">誤差量化因子 Ke: <span id="ch19-val-14a" class="text-sky-300 font-bold">1.2</span>
+            <input id="ch19-in-14a" type="range" min="0.4" max="2.5" step="0.1" value="1.2" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">微分量化因子 Kd: <span id="ch19-val-14b" class="text-emerald-300 font-bold">1.0</span>
+            <input id="ch19-in-14b" type="range" min="0.2" max="2.2" step="0.1" value="1.0" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-emerald-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">輸出比例因子 Ku: <span id="ch19-val-14c" class="text-amber-300 font-bold">1.1</span>
+            <input id="ch19-in-14c" type="range" min="0.5" max="2.0" step="0.1" value="1.1" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-amber-400 mt-1">
+          </label>
+        </div>`,
+      15: `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label class="block text-xs text-slate-300">論域語意區間數 n: <span id="ch19-val-15a" class="text-indigo-300 font-bold">7</span>
+            <input id="ch19-in-15a" type="range" min="3" max="12" step="1" value="7" oninput="FuzzyWidgets.updateChapter19Lab(15)" class="w-full accent-indigo-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">二階趨勢平滑權重: <span id="ch19-val-15b" class="text-indigo-300 font-bold">0.6</span>
+            <input id="ch19-in-15b" type="range" min="0.1" max="0.9" step="0.1" value="0.6" oninput="FuzzyWidgets.updateChapter19Lab(15)" class="w-full accent-indigo-400 mt-1">
+          </label>
+        </div>`,
+      16: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">指標1 (效能) 權重 w1: <span id="ch19-val-16a" class="text-sky-300 font-bold">0.50</span>
+            <input id="ch19-in-16a" type="range" min="0.1" max="0.8" step="0.05" value="0.50" oninput="FuzzyWidgets.updateChapter19Lab(16)" class="w-full accent-sky-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">指標2 (成本) 權重 w2: <span id="ch19-val-16b" class="text-rose-300 font-bold">0.30</span>
+            <input id="ch19-in-16b" type="range" min="0.1" max="0.8" step="0.05" value="0.30" oninput="FuzzyWidgets.updateChapter19Lab(16)" class="w-full accent-rose-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">目標/限制折衷門檻: <span id="ch19-val-16c" class="text-emerald-300 font-bold">5.5</span>
+            <input id="ch19-in-16c" type="range" min="3" max="8" step="0.5" value="5.5" oninput="FuzzyWidgets.updateChapter19Lab(16)" class="w-full accent-emerald-400 mt-1">
+          </label>
+        </div>`,
+      17: `
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <label class="block text-xs text-slate-300 flex-1 min-w-[200px]">模糊指數 m (m→1 趨近 K-Means): <span id="ch19-val-17a" class="text-cyan-300 font-bold">2.0</span>
+            <input id="ch19-in-17a" type="range" min="1.2" max="4.0" step="0.2" value="2.0" oninput="FuzzyWidgets.updateChapter19Lab(17)" class="w-full accent-cyan-400 mt-1">
+          </label>
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="FuzzyWidgets.fcmStep19()" class="px-3.5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs transition">▶ 迭代一步</button>
+            <button onclick="FuzzyWidgets.fcmAuto19()" class="px-3.5 py-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 text-white font-bold text-xs transition">⚡ 自動收斂 (8步)</button>
+            <button onclick="FuzzyWidgets.fcmReset19()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition">🔄 重置</button>
+          </div>
+        </div>`,
+      18: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">學習率 η: <span id="ch19-val-18a" class="text-violet-300 font-bold">0.15</span>
+            <input id="ch19-in-18a" type="range" min="0.05" max="0.40" step="0.05" value="0.15" oninput="FuzzyWidgets.updateChapter19Lab(18)" class="w-full accent-violet-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">訓練 Epoch 數: <span id="ch19-val-18b" class="text-violet-300 font-bold">30</span>
+            <input id="ch19-in-18b" type="range" min="5" max="60" step="5" value="30" oninput="FuzzyWidgets.updateChapter19Lab(18)" class="w-full accent-violet-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">L1 測試輸入 x*: <span id="ch19-val-18c" class="text-sky-300 font-bold">1.2</span>
+            <input id="ch19-in-18c" type="range" min="-2.5" max="2.5" step="0.25" value="1.2" oninput="FuzzyWidgets.updateChapter19Lab(18)" class="w-full accent-sky-400 mt-1">
+          </label>
+        </div>`,
+      19: `
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <label class="block text-xs text-slate-300">GA 突變率: <span id="ch19-val-19a" class="text-emerald-300 font-bold">0.08</span>
+            <input id="ch19-in-19a" type="range" min="0.01" max="0.25" step="0.01" value="0.08" oninput="FuzzyWidgets.updateChapter19Lab(19)" class="w-full accent-emerald-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">尖峰電價倍率: <span id="ch19-val-19b" class="text-amber-300 font-bold">3.0</span>x
+            <input id="ch19-in-19b" type="range" min="1.5" max="5.0" step="0.5" value="3.0" oninput="FuzzyWidgets.updateChapter19Lab(19)" class="w-full accent-amber-400 mt-1">
+          </label>
+          <label class="block text-xs text-slate-300">光電發電係數: <span id="ch19-val-19c" class="text-sky-300 font-bold">1.0</span>
+            <input id="ch19-in-19c" type="range" min="0.4" max="1.6" step="0.2" value="1.0" oninput="FuzzyWidgets.updateChapter19Lab(19)" class="w-full accent-sky-400 mt-1">
+          </label>
+        </div>`
+    };
+
+    el.innerHTML = `
+      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
+          <span class="px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold">${meta.badge}</span>
+          <span class="text-xs text-slate-400 font-semibold">${meta.title}</span>
+        </div>
+        ${controlsByCh[chNum] || ''}
+        <div id="${plotId}" class="w-full h-72 sm:h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+        <div id="${readoutId}" class="text-xs sm:text-sm text-slate-300 bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 leading-relaxed"></div>
+      </div>
+    `;
+
+    updateChapter19Lab(chNum);
+  }
+
+  function updateChapter19Lab(chNum) {
+    if (!window.Plotly) return;
+    const plotEl = document.getElementById(`ch19-lab-plot-${chNum}`);
+    const readoutEl = document.getElementById(`ch19-lab-readout-${chNum}`);
+    if (!plotEl) return;
+
+    const baseLayout = {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(15, 23, 42, 0.75)',
+      font: { color: '#e2e8f0', size: 11 },
+      margin: { t: 28, r: 18, b: 40, l: 48 },
+      legend: { orientation: 'h', y: 1.15, x: 0 }
+    };
+    const cfg = { responsive: true, displayModeBar: false };
+    const getVal = (id, def) => { const n = document.getElementById(id); return n ? n.value : def; };
+    const setTxt = (id, v) => { const n = document.getElementById(id); if (n) n.textContent = v; };
+
+    if (chNum === 1) {
+      const k = parseFloat(getVal('ch19-in-1a', 0.25));
+      const th = parseFloat(getVal('ch19-in-1b', 175));
+      const xProbe = parseFloat(getVal('ch19-in-1c', 173));
+      setTxt('ch19-val-1a', k.toFixed(2)); setTxt('ch19-val-1b', th); setTxt('ch19-val-1c', xProbe);
+      const xs = [], crisp = [], fuzzy = [];
+      for (let x = 150; x <= 195; x += 0.5) {
+        xs.push(x);
+        crisp.push(x >= th ? 1 : 0);
+        fuzzy.push(1 / (1 + Math.exp(-k * (x - th))));
+      }
+      const cVal = xProbe >= th ? 1 : 0;
+      const fVal = 1 / (1 + Math.exp(-k * (xProbe - th)));
+      Plotly.react(plotEl, [
+        { x: xs, y: crisp, name: `明確集合 (≥${th}cm)`, line: { color: '#f43f5e', width: 2.5, dash: 'dash' } },
+        { x: xs, y: fuzzy, name: '模糊集合「高個子」', line: { color: '#38bdf8', width: 3.5 } },
+        { x: [xProbe, xProbe], y: [cVal, fVal], name: '探測身高', mode: 'markers', marker: { color: ['#f43f5e', '#10b981'], size: 11 } }
+      ], { ...baseLayout, xaxis: { title: '身高 (cm)' }, yaxis: { title: '歸屬度 μ(x)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `身高 <b>${xProbe} cm</b>（門檻 ${th} cm）：明確邏輯判定為 <b>${cVal}</b>（非黑即白），模糊邏輯給出連續歸屬度 <b>μ = ${fVal.toFixed(3)}</b>。`;
+    } else if (chNum === 2) {
+      const shape = getVal('ch19-in-2a', 'tri');
+      const c = parseFloat(getVal('ch19-in-2b', 5.0));
+      const w = parseFloat(getVal('ch19-in-2c', 2.5));
+      const alpha = parseFloat(getVal('ch19-in-2d', 0.60));
+      setTxt('ch19-val-2b', c.toFixed(1)); setTxt('ch19-val-2c', w.toFixed(1)); setTxt('ch19-val-2d', alpha.toFixed(2));
+      const xs = [], ys = [], cutPtsX = [];
+      for (let x = 0; x <= 10; x += 0.1) {
+        const xv = Number(x.toFixed(1));
+        xs.push(xv);
+        let y = 0;
+        if (shape === 'tri') y = Math.max(0, 1 - Math.abs(xv - c) / w);
+        else if (shape === 'trap') y = Math.max(0, Math.min(1, (w * 1.2 - Math.abs(xv - c)) / (w * 0.6)));
+        else if (shape === 'gauss') y = Math.exp(-Math.pow(xv - c, 2) / (2 * Math.pow(w * 0.5, 2)));
+        else y = 1 / (1 + Math.pow(Math.abs((xv - c) / (w * 0.6)), 4));
+        ys.push(y);
+        if (y >= alpha) cutPtsX.push(xv);
+      }
+      const x1 = cutPtsX.length ? cutPtsX[0].toFixed(1) : '-';
+      const x2 = cutPtsX.length ? cutPtsX[cutPtsX.length - 1].toFixed(1) : '-';
+      Plotly.react(plotEl, [
+        { x: xs, y: ys, name: `歸屬函數 (${shape})`, fill: 'tozeroy', line: { color: '#2dd4bf', width: 3 } },
+        { x: [0, 10], y: [alpha, alpha], name: `α = ${alpha.toFixed(2)} 切片線`, line: { color: '#f59e0b', width: 2.5, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'μ(x)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `α-cut 切片計算結果：水平線 <b>α = ${alpha.toFixed(2)}</b> 切出的明確區間為 <b>[${x1}, ${x2}]</b>（區間寬度 Δx = ${cutPtsX.length ? (x2 - x1).toFixed(1) : '0.0'}）。`;
+    } else if (chNum === 3) {
+      const op = getVal('ch19-in-3a', 'minmax');
+      const shift = parseFloat(getVal('ch19-in-3b', 2.5));
+      const lam = parseFloat(getVal('ch19-in-3c', 1.0));
+      setTxt('ch19-val-3b', shift.toFixed(1)); setTxt('ch19-val-3c', lam.toFixed(1));
+      const xs = [], yA = [], yB = [], yR1 = [], yR2 = [];
+      for (let x = 0; x <= 10; x += 0.15) {
+        xs.push(Number(x.toFixed(2)));
+        const a = Math.exp(-Math.pow(x - 3.5, 2) / 3.0);
+        const b = Math.exp(-Math.pow(x - (3.5 + shift), 2) / 3.0);
+        yA.push(a); yB.push(b);
+        if (op === 'minmax') { yR1.push(Math.min(a, b)); yR2.push(Math.max(a, b)); }
+        else if (op === 'prod') { yR1.push(a * b); yR2.push(a + b - a * b); }
+        else { yR1.push(1 - a); yR2.push((1 - a) / (1 + lam * a)); }
+      }
+      const traces = op === 'sugeno'
+        ? [
+            { x: xs, y: yA, name: '原集合 A', line: { color: '#38bdf8', width: 2.5 } },
+            { x: xs, y: yR1, name: '標準補集 1-A', line: { color: '#94a3b8', width: 2, dash: 'dot' } },
+            { x: xs, y: yR2, name: `Sugeno 補集 (λ=${lam})`, line: { color: '#f59e0b', width: 3 } }
+          ]
+        : [
+            { x: xs, y: yA, name: '集合 A', line: { color: '#38bdf8', width: 2, dash: 'dot' } },
+            { x: xs, y: yB, name: '集合 B', line: { color: '#a855f7', width: 2, dash: 'dot' } },
+            { x: xs, y: yR1, name: '模糊交集 A∩B', fill: 'tozeroy', line: { color: '#f59e0b', width: 3 } },
+            { x: xs, y: yR2, name: '模糊聯集 A∪B', line: { color: '#10b981', width: 2.5 } }
+          ];
+      Plotly.react(plotEl, traces, { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'μ(x)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = op === 'sugeno'
+        ? `Sugeno 參數補集 $c_\\lambda(a)=(1-a)/(1+\\lambda a)$，平衡點滿足 $a = c_\\lambda(a)$。`
+        : `可切換標準 Min/Max 與代數積/代數和，觀察交疊區域的收縮差異。`;
+    } else if (chNum === 4) {
+      const op = getVal('ch19-in-4a', 'add');
+      const aC = parseFloat(getVal('ch19-in-4b', 4.0));
+      const bC = parseFloat(getVal('ch19-in-4c', 2.0));
+      const al = parseFloat(getVal('ch19-in-4d', 0.50));
+      setTxt('ch19-val-4b', aC.toFixed(1)); setTxt('ch19-val-4c', bC.toFixed(1)); setTxt('ch19-val-4d', al.toFixed(2));
+      const alphas = [0, 0.2, 0.4, 0.6, 0.8, 1.0];
+      const resX = [], resY = [];
+      let ivA = [aC - 1 + al, aC + 1 - al];
+      let ivB = [bC - 0.8 + 0.8 * al, bC + 0.8 - 0.8 * al];
+      const calcIv = (lvl) => {
+        const a1 = aC - 1 + lvl, a2 = aC + 1 - lvl;
+        const b1 = bC - 0.8 * (1 - lvl), b2 = bC + 0.8 * (1 - lvl);
+        if (op === 'add') return [a1 + b1, a2 + b2];
+        if (op === 'sub') return [a1 - b2, a2 - b1];
+        if (op === 'mul') return [a1 * b1, a2 * b2];
+        if (op === 'div') return [a1 / Math.max(0.2, b2), a2 / Math.max(0.2, b1)];
+        return [a1 * a1, a2 * a2];
+      };
+      alphas.forEach(lvl => {
+        const [l, r] = calcIv(lvl);
+        resX.unshift(l); resY.unshift(lvl);
+        resX.push(r); resY.push(lvl);
+      });
+      const [outL, outR] = calcIv(al);
+      Plotly.react(plotEl, [
+        { x: [aC - 1, aC, aC + 1], y: [0, 1, 0], name: `A ≈ ${aC} (±1.0)`, line: { color: '#38bdf8', width: 2, dash: 'dash' } },
+        { x: [bC - 0.8, bC, bC + 0.8], y: [0, 1, 0], name: `B ≈ ${bC} (±0.8)`, line: { color: '#a855f7', width: 2, dash: 'dash' } },
+        { x: resX, y: resY, name: `結果 (${op})`, fill: 'tozeroy', line: { color: '#10b981', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '數值' }, yaxis: { title: '歸屬度 α', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `在 <b>α = ${al.toFixed(2)}</b> 水平下：A<sub>α</sub>=[${ivA[0].toFixed(2)}, ${ivA[1].toFixed(2)}]、B<sub>α</sub>=[${ivB[0].toFixed(2)}, ${ivB[1].toFixed(2)}]，運算結果區間為 <b>[${outL.toFixed(2)}, ${outR.toFixed(2)}]</b>。`;
+    } else if (chNum === 5) {
+      const r11 = parseFloat(getVal('ch19-in-5a', 0.9));
+      const r22 = parseFloat(getVal('ch19-in-5b', 0.8));
+      const noise = parseFloat(getVal('ch19-in-5c', 0.2));
+      setTxt('ch19-val-5a', r11.toFixed(1)); setTxt('ch19-val-5b', r22.toFixed(1)); setTxt('ch19-val-5c', noise.toFixed(1));
+      const R = [
+        [r11, noise, Number((noise * 0.5).toFixed(2))],
+        [noise, r22, Number((noise * 0.8).toFixed(2))],
+        [Number((noise * 0.4).toFixed(2)), noise, 0.95]
+      ];
+      Plotly.react(plotEl, [{ z: R, x: ['y1', 'y2', 'y3'], y: ['x1', 'x2', 'x3'], type: 'heatmap', colorscale: 'YlGnBu', zmin: 0, zmax: 1 }],
+        { ...baseLayout, title: '模糊二元關係矩陣 R(X × Y)' }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `關係矩陣對角強度 [${r11}, ${r22}, 0.95]，非對角耦合干擾 ${noise}。`;
+    } else if (chNum === 6) {
+      const mode = getVal('ch19-in-6a', 'maxmin');
+      const cell = getVal('ch19-in-6b', '0,1').split(',').map(Number);
+      const r01 = parseFloat(getVal('ch19-in-6c', 0.6));
+      const s11 = parseFloat(getVal('ch19-in-6d', 0.8));
+      setTxt('ch19-val-6c', r01.toFixed(1)); setTxt('ch19-val-6d', s11.toFixed(1));
+      const R = [[0.9, r01, 0.2], [0.4, 0.85, 0.5], [0.2, 0.4, 0.9]];
+      const S = [[0.7, 0.3, 0.1], [0.5, s11, 0.4], [0.2, 0.5, 0.9]];
+      const T = [0, 1, 2].map(i => [0, 1, 2].map(j => {
+        const terms = [0, 1, 2].map(k => mode === 'maxmin' ? Math.min(R[i][k], S[k][j]) : Number((R[i][k] * S[k][j]).toFixed(2)));
+        return Number(Math.max(...terms).toFixed(2));
+      }));
+      const ci = cell[0], cj = cell[1];
+      const stepStr = [0, 1, 2].map(k => {
+        const opSym = mode === 'maxmin' ? `min(${R[ci][k]}, ${S[k][cj]})` : `(${R[ci][k]}×${S[k][cj]})`;
+        const val = mode === 'maxmin' ? Math.min(R[ci][k], S[k][cj]) : Number((R[ci][k] * S[k][cj]).toFixed(2));
+        return `${opSym}=${val}`;
+      }).join(' , ');
+      Plotly.react(plotEl, [{ z: T, x: ['z1', 'z2', 'z3'], y: ['x1', 'x2', 'x3'], type: 'heatmap', colorscale: 'Viridis', zmin: 0, zmax: 1 }],
+        { ...baseLayout, title: `合成結果 R ∘ S (${mode})` }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `<b>逐步計算高亮格 (x${ci + 1}, z${cj + 1})</b>：max( ${stepStr} ) = <b class="text-emerald-300">${T[ci][cj]}</b>。`;
+    } else if (chNum === 7) {
+      const mA = parseFloat(getVal('ch19-in-7a', 0.70));
+      const mB = parseFloat(getVal('ch19-in-7b', 0.45));
+      const op = getVal('ch19-in-7c', 'min');
+      setTxt('ch19-val-7a', mA.toFixed(2)); setTxt('ch19-val-7b', mB.toFixed(2));
+      const fire = op === 'min' ? Math.min(mA, mB) : (op === 'prod' ? mA * mB : Math.max(mA, mB));
+      const xs = [], ys = [], cutY = [];
+      for (let x = 0; x <= 10; x += 0.2) {
+        xs.push(Number(x.toFixed(1)));
+        const mf = Math.max(0, 1 - Math.abs(x - 6) / 3);
+        ys.push(mf);
+        cutY.push(Math.min(fire, mf));
+      }
+      Plotly.react(plotEl, [
+        { x: xs, y: ys, name: '後件原始歸屬函數 C', line: { color: '#64748b', width: 2, dash: 'dash' } },
+        { x: xs, y: cutY, name: `激發截斷輸出 (w=${fire.toFixed(2)})`, fill: 'tozeroy', line: { color: '#10b981', width: 3 } }
+      ], { ...baseLayout, xaxis: { title: '輸出論域 u' }, yaxis: { title: 'μ(u)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `IF A (${mA.toFixed(2)}) ${op.toUpperCase()} B (${mB.toFixed(2)}) ➔ 規則激發強度 <b>w = ${fire.toFixed(3)}</b>。`;
+    } else if (chNum === 8) {
+      const dT = parseFloat(getVal('ch19-in-8a', 5.0));
+      const method = getVal('ch19-in-8b', 'min');
+      const wHigh = parseFloat(getVal('ch19-in-8c', 0.8));
+      setTxt('ch19-val-8a', dT.toFixed(1)); setTxt('ch19-val-8c', wHigh.toFixed(2));
+      const ts = [], fzT = [], onoffT = [];
+      for (let t = 0; t <= 25; t += 0.5) {
+        ts.push(t);
+        fzT.push(24 + dT * Math.exp(-0.22 * wHigh * t));
+        onoffT.push(24 + dT * Math.exp(-0.12 * t) + (t > 8 ? 0.8 * Math.sin(0.9 * t) : 0));
+      }
+      Plotly.react(plotEl, [
+        { x: ts, y: fzT, name: `模糊推論 (${method}) 平穩溫控`, line: { color: '#22d3ee', width: 3.5 } },
+        { x: ts, y: onoffT, name: '傳統開關控制震盪', line: { color: '#f43f5e', width: 2, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '時間 (分)' }, yaxis: { title: '室溫 (°C)' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `目標 24°C、推論算子 <b>${method}</b>、規則權重 ${wHigh}：預判降頻大幅減少震盪耗電。`;
+    } else if (chNum === 9) {
+      const h1 = parseFloat(getVal('ch19-in-9a', 0.35));
+      const h2 = parseFloat(getVal('ch19-in-9b', 0.80));
+      const c2 = parseFloat(getVal('ch19-in-9c', 75));
+      setTxt('ch19-val-9a', h1.toFixed(2)); setTxt('ch19-val-9b', h2.toFixed(2)); setTxt('ch19-val-9c', c2);
+      const xs = [], ys = [];
+      let sumY = 0, sumXY = 0, maxY = 0;
+      for (let x = 0; x <= 100; x += 1) {
+        const y1 = Math.min(h1, Math.max(0, 1 - Math.abs(x - 25) / 25));
+        const y2 = Math.min(h2, Math.max(0, Math.min(1, (20 - Math.abs(x - c2)) / 8)));
+        const y = Math.max(y1, y2);
+        xs.push(x); ys.push(y);
+        sumY += y; sumXY += x * y;
+        if (y > maxY) maxY = y;
+      }
+      const coa = sumY > 0 ? sumXY / sumY : 50;
+      let acc = 0, boa = 50;
+      for (let i = 0; i < xs.length; i++) { acc += ys[i]; if (acc >= sumY / 2) { boa = xs[i]; break; } }
+      const maxXs = xs.filter((_, i) => Math.abs(ys[i] - maxY) < 1e-4);
+      const som = maxXs[0], lom = maxXs[maxXs.length - 1], mom = (som + lom) / 2;
+      Plotly.react(plotEl, [
+        { x: xs, y: ys, name: '合成輸出 μ(u)', fill: 'tozeroy', line: { color: '#38bdf8', width: 3 } },
+        { x: [coa, coa], y: [0, 1], name: `COA=${coa.toFixed(1)}`, line: { color: '#10b981', width: 2.5 } },
+        { x: [boa, boa], y: [0, 1], name: `BOA=${boa.toFixed(1)}`, line: { color: '#f59e0b', width: 2, dash: 'dash' } },
+        { x: [mom, mom], y: [0, 1], name: `MOM=${mom.toFixed(1)}`, line: { color: '#a855f7', width: 2, dash: 'dot' } }
+      ], { ...baseLayout, xaxis: { title: '輸出 u (0~100)' }, yaxis: { title: 'μ(u)', range: [-0.05, 1.1] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `<b>六大解模糊數值</b>：COA(重心法)=<b>${coa.toFixed(2)}</b> · BOA(面積平分)=<b>${boa.toFixed(1)}</b> · MOM(最大平均)=<b>${mom.toFixed(1)}</b> · SOM=<b>${som}</b> · LOM=<b>${lom}</b>。`;
+    } else if (chNum === 10) {
+      const road = getVal('ch19-in-10a', 'dry');
+      const lam = parseFloat(getVal('ch19-in-10b', 0.18));
+      setTxt('ch19-val-10b', lam.toFixed(2));
+      const peak = road === 'dry' ? 0.92 : road === 'wet' ? 0.55 : 0.22;
+      const optL = road === 'dry' ? 0.18 : road === 'wet' ? 0.14 : 0.10;
+      const f = (l) => peak * (2 * (l / optL) / (1 + Math.pow(l / optL, 2))) * (l > optL ? Math.max(0.45, 1 - 0.35 * (l - optL)) : 1);
+      const ls = [], mus = [];
+      for (let l = 0; l <= 1.0; l += 0.02) { ls.push(Number(l.toFixed(2))); mus.push(f(l)); }
+      Plotly.react(plotEl, [
+        { x: ls, y: mus, name: '摩擦係數 μ(λ)', line: { color: '#fb7185', width: 3 } },
+        { x: [lam], y: [f(lam)], name: '目前工作點', mode: 'markers', marker: { color: '#38bdf8', size: 12 } }
+      ], { ...baseLayout, xaxis: { title: '滑移率 λ' }, yaxis: { title: 'μ(λ)', range: [0, 1.05] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `ABS 滑移率 <b>λ = ${lam.toFixed(2)}</b> ➔ 制動摩擦係數 <b>μ ≈ ${f(lam).toFixed(2)}</b>（峰值在 λ=${optL}）。`;
+    } else if (chNum === 11) {
+      const wave = parseFloat(getVal('ch19-in-11a', 4.0));
+      const target = parseFloat(getVal('ch19-in-11b', 30));
+      setTxt('ch19-val-11a', wave.toFixed(1)); setTxt('ch19-val-11b', target);
+      const ts = [], headF = [], rudder = [];
+      for (let t = 0; t <= 40; t += 1) {
+        ts.push(t);
+        const h = target * (1 - Math.exp(-0.16 * t) * Math.cos(0.18 * t)) + (wave * 0.35) * Math.sin(0.6 * t) * Math.exp(-0.04 * t);
+        headF.push(Number(h.toFixed(2)));
+        rudder.push(Number(((target - h) * 0.7 - wave * 0.4 * Math.cos(0.6 * t)).toFixed(2)));
+      }
+      Plotly.react(plotEl, [
+        { x: ts, y: headF, name: '船舶實際航向 (deg)', line: { color: '#38bdf8', width: 3 } },
+        { x: ts, y: rudder, name: '模糊舵角指令 (deg)', line: { color: '#10b981', width: 2, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '時間 (秒)' }, yaxis: { title: '角度 (deg)' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `船舶自動舵 (Marine Autopilot)：目標航向 <b>${target}°</b>、海浪 ${wave} 級，模糊規則平滑抑振收斂。`;
+    } else if (chNum === 12) {
+      const x = parseFloat(getVal('ch19-in-12a', 3.5));
+      const p1 = parseFloat(getVal('ch19-in-12b', 0.8));
+      const p2 = parseFloat(getVal('ch19-in-12c', 1.8));
+      setTxt('ch19-val-12a', x.toFixed(1)); setTxt('ch19-val-12b', p1.toFixed(1)); setTxt('ch19-val-12c', p2.toFixed(1));
+      const xs = [], yTS = [], y1 = [], y2 = [];
+      for (let v = 0; v <= 10; v += 0.25) {
+        xs.push(v);
+        const w1 = 1 / (1 + Math.exp(1.2 * (v - 5)));
+        const w2 = 1 - w1;
+        const f1 = p1 * v + 1, f2 = p2 * v - 2;
+        y1.push(f1); y2.push(f2);
+        yTS.push(w1 * f1 + w2 * f2);
+      }
+      const w1x = 1 / (1 + Math.exp(1.2 * (x - 5))), w2x = 1 - w1x;
+      const outX = w1x * (p1 * x + 1) + w2x * (p2 * x - 2);
+      Plotly.react(plotEl, [
+        { x: xs, y: y1, name: `規則1後件 ${p1}x+1`, line: { color: '#38bdf8', width: 2, dash: 'dot' } },
+        { x: xs, y: y2, name: `規則2後件 ${p2}x-2`, line: { color: '#10b981', width: 2, dash: 'dot' } },
+        { x: xs, y: yTS, name: 'T-S 模糊混合輸出', line: { color: '#f59e0b', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '輸入 x' }, yaxis: { title: '輸出 y' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `在 <b>x = ${x}</b> 時：權重 w₁=${w1x.toFixed(2)}, w₂=${w2x.toFixed(2)} ➔ T-S 加權輸出 <b>y = ${outX.toFixed(2)}</b>。`;
+    } else if (chNum === 13) {
+      const irr = parseFloat(getVal('ch19-in-13a', 950));
+      const wind = parseFloat(getVal('ch19-in-13b', 2.5));
+      setTxt('ch19-val-13a', irr); setTxt('ch19-val-13b', wind.toFixed(1));
+      const cellTempBase = 25 + (irr / 1000) * 38 - wind * 2.1;
+      const sprayLevel = Math.min(100, Math.max(0, (cellTempBase - 38) * 3.5));
+      const tempDrop = (sprayLevel / 100) * 14;
+      const netGain = ((tempDrop * 0.45) - (sprayLevel * 0.015)).toFixed(2);
+      Plotly.react(plotEl, [{
+        x: ['無散熱電池溫度 (°C)', '模糊微霧冷卻後 (°C)', '冷卻強度 (%)'],
+        y: [cellTempBase, cellTempBase - tempDrop, sprayLevel],
+        type: 'bar',
+        marker: { color: ['#f43f5e', '#22d3ee', '#10b981'] }
+      }], { ...baseLayout, yaxis: { title: '數值 (°C / %)' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `日照 ${irr} W/m²、風速 ${wind} m/s：模糊調節噴霧強度 <b>${sprayLevel.toFixed(0)}%</b>，模組降溫 <b>${tempDrop.toFixed(1)}°C</b>，淨發電效率提升 <b>+${netGain}%</b>。`;
+    } else if (chNum === 14) {
+      const ke = parseFloat(getVal('ch19-in-14a', 1.2));
+      const kd = parseFloat(getVal('ch19-in-14b', 1.0));
+      const ku = parseFloat(getVal('ch19-in-14c', 1.1));
+      setTxt('ch19-val-14a', ke.toFixed(1)); setTxt('ch19-val-14b', kd.toFixed(1)); setTxt('ch19-val-14c', ku.toFixed(1));
+      const zeta = Math.min(1.4, Math.max(0.25, 0.45 * kd / Math.sqrt(ke * ku)));
+      const wn = 1.6 * Math.sqrt(ke * ku);
+      const ts = [], ys = [];
+      for (let t = 0; t <= 8; t += 0.1) {
+        ts.push(Number(t.toFixed(1)));
+        const y = zeta < 1
+          ? 1 - Math.exp(-zeta * wn * t) * (Math.cos(wn * Math.sqrt(1 - zeta * zeta) * t) + (zeta / Math.sqrt(1 - zeta * zeta)) * Math.sin(wn * Math.sqrt(1 - zeta * zeta) * t))
+          : 1 - Math.exp(-wn * t) * (1 + wn * t);
+        ys.push(y);
+      }
+      const os = zeta < 1 ? (Math.exp(-Math.PI * zeta / Math.sqrt(1 - zeta * zeta)) * 100).toFixed(1) : '0.0';
+      Plotly.react(plotEl, [
+        { x: [0, 8], y: [1, 1], name: '目標階躍 1.0', line: { color: '#64748b', width: 2, dash: 'dot' } },
+        { x: ts, y: ys, name: '系統暫態響應', line: { color: '#38bdf8', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '時間 (秒)' }, yaxis: { title: '輸出響應' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `等效阻尼比 <b>ζ ≈ ${zeta.toFixed(2)}</b> · 預估超越量 (Overshoot) = <b>${os}%</b>（提高 Kd 可有效抑制超越量）。`;
+    } else if (chNum === 15) {
+      const n = parseInt(getVal('ch19-in-15a', 7), 10);
+      const w = parseFloat(getVal('ch19-in-15b', 0.6));
+      setTxt('ch19-val-15a', n); setTxt('ch19-val-15b', w.toFixed(1));
+      const ts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+      const real = [120, 134, 128, 145, 160, 152, 168, 174, 165, 182];
+      const step = 70 / n;
+      const pred = real.map((v, idx) => idx === 0 ? v : Number((w * real[idx - 1] + (1 - w) * (Math.round(v / step) * step)).toFixed(1)));
+      Plotly.react(plotEl, [
+        { x: ts, y: real, name: '實際觀測序列', line: { color: '#38bdf8', width: 3 } },
+        { x: ts, y: pred, name: `FTS 預測 (${n} 語意區間)`, line: { color: '#818cf8', width: 3, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '期數 t' }, yaxis: { title: '指數' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `將論域分割為 <b>${n} 個語意區間</b>（寬度 ${step.toFixed(1)}），平滑權重 ${w}。`;
+    } else if (chNum === 16) {
+      const w1 = parseFloat(getVal('ch19-in-16a', 0.50));
+      const w2 = parseFloat(getVal('ch19-in-16b', 0.30));
+      const w3 = Math.max(0.05, Number((1 - w1 - w2).toFixed(2)));
+      const th = parseFloat(getVal('ch19-in-16c', 5.5));
+      setTxt('ch19-val-16a', w1.toFixed(2)); setTxt('ch19-val-16b', w2.toFixed(2)); setTxt('ch19-val-16c', th.toFixed(1));
+      // W o R 綜合評判: 3 指標 x 4 等級 [優, 良, 中, 差]
+      const R = [[0.6, 0.3, 0.1, 0.0], [0.2, 0.5, 0.2, 0.1], [0.4, 0.4, 0.2, 0.0]];
+      const W = [w1, w2, w3];
+      const B = [0, 1, 2, 3].map(j => Number((W[0] * R[0][j] + W[1] * R[1][j] + W[2] * R[2][j]).toFixed(3)));
+      const bSum = B.reduce((a, b) => a + b, 0) || 1;
+      const Bnorm = B.map(v => Number((v / bSum).toFixed(3)));
+      const score = (Bnorm[0] * 95 + Bnorm[1] * 80 + Bnorm[2] * 65 + Bnorm[3] * 45).toFixed(1);
+      Plotly.react(plotEl, [{
+        x: ['優 (95分)', '良 (80分)', '中 (65分)', '差 (45分)'],
+        y: Bnorm.map(v => v * 100),
+        type: 'bar',
+        marker: { color: ['#10b981', '#38bdf8', '#f59e0b', '#f43f5e'] }
+      }], { ...baseLayout, yaxis: { title: '評判佔比 (%)', range: [0, 100] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `正規化權重 W=[${w1.toFixed(2)}, ${w2.toFixed(2)}, ${w3.toFixed(2)}] ➔ 綜合評判 B=[${Bnorm.join(', ')}] ➔ 總分 <b>${score} 分</b>（${score >= 82 ? '等級：優' : '等級：良'}）。`;
+    } else if (chNum === 17) {
+      const m = parseFloat(getVal('ch19-in-17a', 2.0));
+      setTxt('ch19-val-17a', m.toFixed(1));
+      const p = 2 / (m - 1);
+      const u1s = fcmPts19.map(pt => {
+        const d1 = Math.max(1e-4, Math.hypot(pt[0] - fcmState19.v1[0], pt[1] - fcmState19.v1[1]));
+        const d2 = Math.max(1e-4, Math.hypot(pt[0] - fcmState19.v2[0], pt[1] - fcmState19.v2[1]));
+        return Number((1 / (1 + Math.pow(d1 / d2, p))).toFixed(2));
+      });
+      Plotly.react(plotEl, [
+        { x: fcmPts19.map(pt => pt[0]), y: fcmPts19.map(pt => pt[1]), mode: 'markers', name: '資料點 (依 u₁ 着色)', marker: { size: 11, color: u1s, colorscale: 'Portland', cmin: 0, cmax: 1 } },
+        { x: [fcmState19.v1[0], fcmState19.v2[0]], y: [fcmState19.v1[1], fcmState19.v2[1]], mode: 'markers+text', text: ['群心 V1', '群心 V2'], textposition: 'top center', name: '群中心', marker: { size: 16, symbol: 'star', color: ['#22d3ee', '#f43f5e'] } }
+      ], { ...baseLayout, xaxis: { title: '特徵 x₁', range: [0, 9.5] }, yaxis: { title: '特徵 x₂', range: [0, 9.5] } }, cfg);
+      const lastJ = fcmState19.historyJ.length ? fcmState19.historyJ[fcmState19.historyJ.length - 1] : '尚未迭代';
+      if (readoutEl) readoutEl.innerHTML = `第 <b>${fcmState19.iter}</b> 次迭代 · 目標函數 J<sub>m</sub> = <b>${lastJ}</b> · 群心 V1=(${fcmState19.v1[0].toFixed(2)}, ${fcmState19.v1[1].toFixed(2)})、V2=(${fcmState19.v2[0].toFixed(2)}, ${fcmState19.v2[1].toFixed(2)})。`;
+    } else if (chNum === 18) {
+      const eta = parseFloat(getVal('ch19-in-18a', 0.15));
+      const ep = parseInt(getVal('ch19-in-18b', 30), 10);
+      const xP = parseFloat(getVal('ch19-in-18c', 1.2));
+      setTxt('ch19-val-18a', eta.toFixed(2)); setTxt('ch19-val-18b', ep); setTxt('ch19-val-18c', xP.toFixed(2));
+      const xs = [], targetY = [], anfisY = [];
+      const errFactor = Math.exp(-eta * ep * 0.45);
+      for (let x = -3; x <= 3; x += 0.15) {
+        xs.push(Number(x.toFixed(2)));
+        const y = Math.sin(x) + 0.3 * Math.cos(2 * x);
+        targetY.push(y);
+        anfisY.push(y * (1 - 0.55 * errFactor) + 0.2 * errFactor * x * 0.3);
+      }
+      const w1 = Math.exp(-Math.pow(xP + 1, 2) / 2), w2 = Math.exp(-Math.pow(xP - 1, 2) / 2);
+      const wSum = w1 + w2, wb1 = w1 / wSum, wb2 = w2 / wSum;
+      const rmse = (0.42 * errFactor).toFixed(4);
+      Plotly.react(plotEl, [
+        { x: xs, y: targetY, name: '目標函數', line: { color: '#38bdf8', width: 2.5, dash: 'dash' } },
+        { x: xs, y: anfisY, name: `ANFIS 逼近 (Epoch ${ep})`, line: { color: '#a855f7', width: 3.5 } }
+      ], { ...baseLayout, xaxis: { title: '輸入 x' }, yaxis: { title: '輸出 y' } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `RMSE = <b>${rmse}</b> | 五層前向 (x*=${xP})：L1=[${w1.toFixed(2)}, ${w2.toFixed(2)}] ➔ L3正規化=[${wb1.toFixed(2)}, ${wb2.toFixed(2)}]。`;
+    } else if (chNum === 19) {
+      const mut = parseFloat(getVal('ch19-in-19a', 0.08));
+      const peakP = parseFloat(getVal('ch19-in-19b', 3.0));
+      const pvScale = parseFloat(getVal('ch19-in-19c', 1.0));
+      setTxt('ch19-val-19a', mut.toFixed(2)); setTxt('ch19-val-19b', peakP.toFixed(1)); setTxt('ch19-val-19c', pvScale.toFixed(1));
+      const hrs = [], soc = [], gaFit = [];
+      let curSoc = 45;
+      for (let h = 0; h < 24; h++) {
+        hrs.push(h);
+        const pv = (h >= 7 && h <= 17) ? pvScale * 40 * Math.sin((h - 7) * Math.PI / 10) : 0;
+        const isPeak = (h >= 18 && h <= 22);
+        const delta = isPeak ? -peakP * 3.8 : (pv > 15 ? pv * 0.28 : (h < 6 ? 4.5 : -2.0));
+        curSoc = Math.min(95, Math.max(15, curSoc + delta));
+        soc.push(Number(curSoc.toFixed(1)));
+        gaFit.push(Number((95 - 50 * Math.exp(-(0.12 - mut * 0.2) * (h + 1))).toFixed(1)));
+      }
+      Plotly.react(plotEl, [
+        { x: hrs, y: soc, name: '24h 儲能 SOC (%)', fill: 'tozeroy', line: { color: '#10b981', width: 3 } },
+        { x: hrs, y: gaFit, name: 'GA 最佳化適應度 (%)', line: { color: '#f59e0b', width: 2.5, dash: 'dash' } }
+      ], { ...baseLayout, xaxis: { title: '時間 (小時 0~23h) / GA 演化代數' }, yaxis: { title: 'SOC / 適應度 (%)', range: [0, 105] } }, cfg);
+      if (readoutEl) readoutEl.innerHTML = `日間光電 (×${pvScale}) 充電至高水位，夜間尖峰 (${peakP}x電價) 放電削峰，估計每日電費節省 <b>${(peakP * 11.5 * pvScale).toFixed(1)}%</b>。`;
+    }
+  }
+
   return {
     getChapterInteractiveHtml: getChapterInteractiveHtml,
     initChapterWidgets: initChapterWidgets,
@@ -31492,575 +32255,13 @@ window.FuzzyWidgets = (function () {
     updateFig27Widget: updateFig27Widget,
     updateOpsWidget: updateOpsWidget,
     // 全書 19 章統一互動視覺化實驗室
+    getLab19Meta: getLab19Meta,
     renderChapter19Lab: renderChapter19Lab,
-    updateChapter19Lab: updateChapter19Lab
+    updateChapter19Lab: updateChapter19Lab,
+    fcmStep19: fcmStep19,
+    fcmAuto19: fcmAuto19,
+    fcmReset19: fcmReset19
   };
-
-  // =========================================================================
-  // 全書 19 章統一互動視覺化模擬器 (Ch.01 ~ Ch.19)
-  // =========================================================================
-  function renderChapter19Lab(chNum, containerId) {
-    const el = document.getElementById(containerId);
-    if (!el) return;
-
-    const plotId = `ch19-lab-plot-${chNum}`;
-    const readoutId = `ch19-lab-readout-${chNum}`;
-
-    const controlsByCh = {
-      1: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">模糊曲線寬度 σ: <span id="ch19-val-1a" class="text-sky-300 font-bold">2.0</span>
-            <input id="ch19-in-1a" type="range" min="0.8" max="4.0" step="0.2" value="2.0" oninput="FuzzyWidgets.updateChapter19Lab(1)" class="w-full accent-sky-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">中心年齡 (歲): <span id="ch19-val-1b" class="text-sky-300 font-bold">6</span>
-            <input id="ch19-in-1b" type="range" min="3" max="10" step="0.5" value="6" oninput="FuzzyWidgets.updateChapter19Lab(1)" class="w-full accent-sky-400 mt-1">
-          </label>
-        </div>`,
-      2: `
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <label class="block text-xs text-slate-300">造型選擇:
-            <select id="ch19-in-2a" onchange="FuzzyWidgets.updateChapter19Lab(2)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
-              <option value="tri">三角形 (Triangular)</option>
-              <option value="trap">梯形 (Trapezoidal)</option>
-              <option value="gauss" selected>高斯鐘形 (Gaussian)</option>
-            </select>
-          </label>
-          <label class="block text-xs text-slate-300">中心點 c: <span id="ch19-val-2b" class="text-teal-300 font-bold">5.0</span>
-            <input id="ch19-in-2b" type="range" min="2" max="8" step="0.5" value="5" oninput="FuzzyWidgets.updateChapter19Lab(2)" class="w-full accent-teal-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">寬度參數 w: <span id="ch19-val-2c" class="text-teal-300 font-bold">2.0</span>
-            <input id="ch19-in-2c" type="range" min="0.5" max="4.0" step="0.25" value="2.0" oninput="FuzzyWidgets.updateChapter19Lab(2)" class="w-full accent-teal-400 mt-1">
-          </label>
-        </div>`,
-      3: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">α-截集水平門檻 α: <span id="ch19-val-3a" class="text-cyan-300 font-bold">0.50</span>
-            <input id="ch19-in-3a" type="range" min="0.05" max="0.95" step="0.05" value="0.50" oninput="FuzzyWidgets.updateChapter19Lab(3)" class="w-full accent-cyan-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">集合寬度 σ: <span id="ch19-val-3b" class="text-cyan-300 font-bold">2.2</span>
-            <input id="ch19-in-3b" type="range" min="1.0" max="4.0" step="0.2" value="2.2" oninput="FuzzyWidgets.updateChapter19Lab(3)" class="w-full accent-cyan-400 mt-1">
-          </label>
-        </div>`,
-      4: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">運算子類型:
-            <select id="ch19-in-4a" onchange="FuzzyWidgets.updateChapter19Lab(4)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
-              <option value="minmax" selected>標準交集/聯集 (min / max)</option>
-              <option value="prod">代數積 / 機率和 (a·b / a+b-ab)</option>
-              <option value="bounded">有界積 / 有界和</option>
-            </select>
-          </label>
-          <label class="block text-xs text-slate-300">集合 B 右移距離: <span id="ch19-val-4b" class="text-amber-300 font-bold">3.0</span>
-            <input id="ch19-in-4b" type="range" min="0" max="6" step="0.5" value="3.0" oninput="FuzzyWidgets.updateChapter19Lab(4)" class="w-full accent-amber-400 mt-1">
-          </label>
-        </div>`,
-      5: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">模糊數運算:
-            <select id="ch19-in-5a" onchange="FuzzyWidgets.updateChapter19Lab(5)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
-              <option value="add" selected>模糊加法 (A + B)</option>
-              <option value="sub">模糊減法 (A - B)</option>
-              <option value="mul">模糊乘法 (A × B)</option>
-            </select>
-          </label>
-          <label class="block text-xs text-slate-300">模糊數 B 中心點: <span id="ch19-val-5b" class="text-indigo-300 font-bold">3.0</span>
-            <input id="ch19-in-5b" type="range" min="1" max="6" step="0.5" value="3.0" oninput="FuzzyWidgets.updateChapter19Lab(5)" class="w-full accent-indigo-400 mt-1">
-          </label>
-        </div>`,
-      6: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">合成運算模式:
-            <select id="ch19-in-6a" onchange="FuzzyWidgets.updateChapter19Lab(6)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
-              <option value="maxmin" selected>Max-Min 合成</option>
-              <option value="maxprod">Max-Product 合成</option>
-            </select>
-          </label>
-          <label class="block text-xs text-slate-300">關係耦合強度 k: <span id="ch19-val-6b" class="text-indigo-300 font-bold">0.80</span>
-            <input id="ch19-in-6b" type="range" min="0.2" max="1.0" step="0.1" value="0.8" oninput="FuzzyWidgets.updateChapter19Lab(6)" class="w-full accent-indigo-400 mt-1">
-          </label>
-        </div>`,
-      7: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">初始擺角誤差 θ₀ (deg): <span id="ch19-val-7a" class="text-emerald-300 font-bold">15</span>
-            <input id="ch19-in-7a" type="range" min="5" max="30" step="1" value="15" oninput="FuzzyWidgets.updateChapter19Lab(7)" class="w-full accent-emerald-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">模糊推力增益 K_u: <span id="ch19-val-7b" class="text-emerald-300 font-bold">1.2</span>
-            <input id="ch19-in-7b" type="range" min="0.5" max="2.0" step="0.1" value="1.2" oninput="FuzzyWidgets.updateChapter19Lab(7)" class="w-full accent-emerald-400 mt-1">
-          </label>
-        </div>`,
-      8: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">初始室溫偏差 ΔT (°C): <span id="ch19-val-8a" class="text-cyan-300 font-bold">6.0</span>
-            <input id="ch19-in-8a" type="range" min="2" max="10" step="0.5" value="6.0" oninput="FuzzyWidgets.updateChapter19Lab(8)" class="w-full accent-cyan-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">模糊變頻響應增益: <span id="ch19-val-8b" class="text-cyan-300 font-bold">1.0</span>
-            <input id="ch19-in-8b" type="range" min="0.5" max="1.8" step="0.1" value="1.0" oninput="FuzzyWidgets.updateChapter19Lab(8)" class="w-full accent-cyan-400 mt-1">
-          </label>
-        </div>`,
-      9: `
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <label class="block text-xs text-slate-300">水質濁度 (%): <span id="ch19-val-9a" class="text-sky-300 font-bold">65</span>
-            <input id="ch19-in-9a" type="range" min="10" max="100" step="5" value="65" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-sky-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">濁度飽和時間 (分): <span id="ch19-val-9b" class="text-sky-300 font-bold">4.0</span>
-            <input id="ch19-in-9b" type="range" min="1" max="8" step="0.5" value="4.0" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-sky-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">衣物重量 (kg): <span id="ch19-val-9c" class="text-sky-300 font-bold">5.0</span>
-            <input id="ch19-in-9c" type="range" min="1" max="10" step="0.5" value="5.0" oninput="FuzzyWidgets.updateChapter19Lab(9)" class="w-full accent-sky-400 mt-1">
-          </label>
-        </div>`,
-      10: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">路面狀態:
-            <select id="ch19-in-10a" onchange="FuzzyWidgets.updateChapter19Lab(10)" class="w-full mt-1 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1.5 text-slate-200">
-              <option value="dry" selected>乾燥柏油 (Dry Asphalt)</option>
-              <option value="wet">濕滑路面 (Wet Road)</option>
-              <option value="ice">結冰路面 (Icy Road)</option>
-            </select>
-          </label>
-          <label class="block text-xs text-slate-300">目標滑移率 λ: <span id="ch19-val-10b" class="text-rose-300 font-bold">0.18</span>
-            <input id="ch19-in-10b" type="range" min="0.02" max="0.95" step="0.02" value="0.18" oninput="FuzzyWidgets.updateChapter19Lab(10)" class="w-full accent-rose-400 mt-1">
-          </label>
-        </div>`,
-      11: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">學習率 η: <span id="ch19-val-11a" class="text-violet-300 font-bold">0.15</span>
-            <input id="ch19-in-11a" type="range" min="0.05" max="0.40" step="0.05" value="0.15" oninput="FuzzyWidgets.updateChapter19Lab(11)" class="w-full accent-violet-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">訓練 Epoch 數: <span id="ch19-val-11b" class="text-violet-300 font-bold">30</span>
-            <input id="ch19-in-11b" type="range" min="5" max="60" step="5" value="30" oninput="FuzzyWidgets.updateChapter19Lab(11)" class="w-full accent-violet-400 mt-1">
-          </label>
-        </div>`,
-      12: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">INT 迭代增強次數: <span id="ch19-val-12a" class="text-amber-300 font-bold">2</span>
-            <input id="ch19-in-12a" type="range" min="1" max="5" step="1" value="2" oninput="FuzzyWidgets.updateChapter19Lab(12)" class="w-full accent-amber-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">渡越點門檻: <span id="ch19-val-12b" class="text-amber-300 font-bold">0.50</span>
-            <input id="ch19-in-12b" type="range" min="0.3" max="0.7" step="0.05" value="0.50" oninput="FuzzyWidgets.updateChapter19Lab(12)" class="w-full accent-amber-400 mt-1">
-          </label>
-        </div>`,
-      13: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">目標「高性能」要求中心: <span id="ch19-val-13a" class="text-rose-300 font-bold">7.5</span>
-            <input id="ch19-in-13a" type="range" min="5" max="9.5" step="0.5" value="7.5" oninput="FuzzyWidgets.updateChapter19Lab(13)" class="w-full accent-rose-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">限制「低成本」預算上限: <span id="ch19-val-13b" class="text-rose-300 font-bold">5.5</span>
-            <input id="ch19-in-13b" type="range" min="3" max="8" step="0.5" value="5.5" oninput="FuzzyWidgets.updateChapter19Lab(13)" class="w-full accent-rose-400 mt-1">
-          </label>
-        </div>`,
-      14: `
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <label class="block text-xs text-slate-300">體溫 (°C): <span id="ch19-val-14a" class="text-teal-300 font-bold">37.8</span>
-            <input id="ch19-in-14a" type="range" min="36.0" max="40.5" step="0.1" value="37.8" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-teal-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">心率 (bpm): <span id="ch19-val-14b" class="text-teal-300 font-bold">105</span>
-            <input id="ch19-in-14b" type="range" min="55" max="150" step="5" value="105" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-teal-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">血氧 SpO₂ (%): <span id="ch19-val-14c" class="text-teal-300 font-bold">94</span>
-            <input id="ch19-in-14c" type="range" min="82" max="100" step="1" value="94" oninput="FuzzyWidgets.updateChapter19Lab(14)" class="w-full accent-teal-400 mt-1">
-          </label>
-        </div>`,
-      15: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">論域語意區間數 n: <span id="ch19-val-15a" class="text-indigo-300 font-bold">7</span>
-            <input id="ch19-in-15a" type="range" min="3" max="12" step="1" value="7" oninput="FuzzyWidgets.updateChapter19Lab(15)" class="w-full accent-indigo-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">二階趨勢平滑權重: <span id="ch19-val-15b" class="text-indigo-300 font-bold">0.6</span>
-            <input id="ch19-in-15b" type="range" min="0.1" max="0.9" step="0.1" value="0.6" oninput="FuzzyWidgets.updateChapter19Lab(15)" class="w-full accent-indigo-400 mt-1">
-          </label>
-        </div>`,
-      16: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">模糊度指數 m: <span id="ch19-val-16a" class="text-cyan-300 font-bold">2.0</span>
-            <input id="ch19-in-16a" type="range" min="1.1" max="4.0" step="0.1" value="2.0" oninput="FuzzyWidgets.updateChapter19Lab(16)" class="w-full accent-cyan-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">兩群中心距離: <span id="ch19-val-16b" class="text-cyan-300 font-bold">4.0</span>
-            <input id="ch19-in-16b" type="range" min="1.5" max="6.0" step="0.5" value="4.0" oninput="FuzzyWidgets.updateChapter19Lab(16)" class="w-full accent-cyan-400 mt-1">
-          </label>
-        </div>`,
-      17: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">突變率 (Mutation Rate): <span id="ch19-val-17a" class="text-emerald-300 font-bold">0.08</span>
-            <input id="ch19-in-17a" type="range" min="0.01" max="0.30" step="0.01" value="0.08" oninput="FuzzyWidgets.updateChapter19Lab(17)" class="w-full accent-emerald-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">族群規模 (Population): <span id="ch19-val-17b" class="text-emerald-300 font-bold">40</span>
-            <input id="ch19-in-17b" type="range" min="10" max="100" step="10" value="40" oninput="FuzzyWidgets.updateChapter19Lab(17)" class="w-full accent-emerald-400 mt-1">
-          </label>
-        </div>`,
-      18: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">適應增益 γ: <span id="ch19-val-18a" class="text-violet-300 font-bold">1.2</span>
-            <input id="ch19-in-18a" type="range" min="0.2" max="2.5" step="0.1" value="1.2" oninput="FuzzyWidgets.updateChapter19Lab(18)" class="w-full accent-violet-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">外部負載干擾強度: <span id="ch19-val-18b" class="text-violet-300 font-bold">1.5</span>
-            <input id="ch19-in-18b" type="range" min="0.5" max="3.0" step="0.25" value="1.5" oninput="FuzzyWidgets.updateChapter19Lab(18)" class="w-full accent-violet-400 mt-1">
-          </label>
-        </div>`,
-      19: `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <label class="block text-xs text-slate-300">Type-2 不確定足跡寬度 (FOU): <span id="ch19-val-19a" class="text-sky-300 font-bold">0.25</span>
-            <input id="ch19-in-19a" type="range" min="0.05" max="0.45" step="0.05" value="0.25" oninput="FuzzyWidgets.updateChapter19Lab(19)" class="w-full accent-sky-400 mt-1">
-          </label>
-          <label class="block text-xs text-slate-300">專家意見分歧度: <span id="ch19-val-19b" class="text-sky-300 font-bold">0.8</span>
-            <input id="ch19-in-19b" type="range" min="0.2" max="1.8" step="0.2" value="0.8" oninput="FuzzyWidgets.updateChapter19Lab(19)" class="w-full accent-sky-400 mt-1">
-          </label>
-        </div>`
-    };
-
-    el.innerHTML = `
-      <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
-        ${controlsByCh[chNum] || ''}
-        <div id="${plotId}" class="w-full h-72 sm:h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
-        <div id="${readoutId}" class="text-xs sm:text-sm text-slate-300 bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 leading-relaxed"></div>
-      </div>
-    `;
-
-    updateChapter19Lab(chNum);
-  }
-
-  function updateChapter19Lab(chNum) {
-    if (!window.Plotly) return;
-    const plotEl = document.getElementById(`ch19-lab-plot-${chNum}`);
-    const readoutEl = document.getElementById(`ch19-lab-readout-${chNum}`);
-    if (!plotEl) return;
-
-    const baseLayout = {
-      paper_bgcolor: 'rgba(0,0,0,0)',
-      plot_bgcolor: 'rgba(15, 23, 42, 0.75)',
-      font: { color: '#e2e8f0', size: 11 },
-      margin: { t: 28, r: 18, b: 40, l: 48 },
-      legend: { orientation: 'h', y: 1.15, x: 0 }
-    };
-    const cfg = { responsive: true, displayModeBar: false };
-    const getVal = (id, def) => {
-      const node = document.getElementById(id);
-      return node ? node.value : def;
-    };
-    const setTxt = (id, v) => {
-      const node = document.getElementById(id);
-      if (node) node.textContent = v;
-    };
-
-    if (chNum === 1) {
-      const sig = parseFloat(getVal('ch19-in-1a', 2.0));
-      const c = parseFloat(getVal('ch19-in-1b', 6.0));
-      setTxt('ch19-val-1a', sig.toFixed(1));
-      setTxt('ch19-val-1b', c.toFixed(1));
-      const xs = [], crisp = [], fuzzy = [];
-      for (let x = 0; x <= 14; x += 0.25) {
-        xs.push(x);
-        crisp.push(x >= 3 && x <= 9 ? 1 : 0);
-        fuzzy.push(Math.exp(-Math.pow(x - c, 2) / (2 * sig * sig)));
-      }
-      Plotly.react(plotEl, [
-        { x: xs, y: crisp, name: '古典二分方波 (3~9歲)', line: { color: '#f43f5e', width: 2.5, dash: 'dash' } },
-        { x: xs, y: fuzzy, name: '模糊連續歸屬度', line: { color: '#38bdf8', width: 3.5 } }
-      ], { ...baseLayout, xaxis: { title: '年齡 (歲)' }, yaxis: { title: '歸屬度 μ(x)', range: [-0.05, 1.1] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `中心年齡 <b>${c} 歲</b>、寬度 <b>σ = ${sig}</b>：模糊集合以平滑曲線消除 2.9 歲與 3.0 歲之間的突變斷層。`;
-    } else if (chNum === 2) {
-      const shape = getVal('ch19-in-2a', 'gauss');
-      const c = parseFloat(getVal('ch19-in-2b', 5.0));
-      const w = parseFloat(getVal('ch19-in-2c', 2.0));
-      setTxt('ch19-val-2b', c.toFixed(1));
-      setTxt('ch19-val-2c', w.toFixed(2));
-      const xs = [], ys = [];
-      for (let x = 0; x <= 10; x += 0.1) {
-        xs.push(Number(x.toFixed(1)));
-        if (shape === 'tri') ys.push(Math.max(0, 1 - Math.abs(x - c) / w));
-        else if (shape === 'trap') ys.push(Math.max(0, Math.min(1, (w * 1.4 - Math.abs(x - c)) / (w * 0.7))));
-        else ys.push(Math.exp(-Math.pow(x - c, 2) / (2 * (w * 0.6) * (w * 0.6))));
-      }
-      Plotly.react(plotEl, [{ x: xs, y: ys, name: `歸屬函數 (${shape})`, fill: 'tozeroy', line: { color: '#2dd4bf', width: 3 } }],
-        { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'μ(x)', range: [-0.05, 1.1] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `Core 核心頂點位於 <b>x ≈ ${c}</b>；調整寬度 w 可控制支撐集 Support(A) 的涵蓋範圍。`;
-    } else if (chNum === 3) {
-      const alpha = parseFloat(getVal('ch19-in-3a', 0.5));
-      const sig = parseFloat(getVal('ch19-in-3b', 2.2));
-      setTxt('ch19-val-3a', alpha.toFixed(2));
-      setTxt('ch19-val-3b', sig.toFixed(1));
-      const xs = [], ys = [], cutY = [];
-      const halfW = sig * Math.sqrt(-2 * Math.log(alpha));
-      for (let x = 0; x <= 10; x += 0.1) {
-        xs.push(Number(x.toFixed(1)));
-        const y = Math.exp(-Math.pow(x - 5, 2) / (2 * sig * sig));
-        ys.push(y);
-        cutY.push(y >= alpha ? alpha : 0);
-      }
-      Plotly.react(plotEl, [
-        { x: xs, y: ys, name: '原模糊集合 A', line: { color: '#38bdf8', width: 3 } },
-        { x: xs, y: cutY, name: `α=${alpha.toFixed(2)} 截集區間`, fill: 'tozeroy', line: { color: '#22d3ee', width: 2, dash: 'dot' } },
-        { x: [0, 10], y: [alpha, alpha], name: '水平切線 α', line: { color: '#f59e0b', width: 2, dash: 'dash' } }
-      ], { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'μ(x)', range: [-0.05, 1.1] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `當 α = <b>${alpha.toFixed(2)}</b> 時，截出的明確區間為 <b>[${Math.max(0, 5 - halfW).toFixed(2)}, ${Math.min(10, 5 + halfW).toFixed(2)}]</b>。`;
-    } else if (chNum === 4) {
-      const mode = getVal('ch19-in-4a', 'minmax');
-      const shift = parseFloat(getVal('ch19-in-4b', 3.0));
-      setTxt('ch19-val-4b', shift.toFixed(1));
-      const xs = [], yA = [], yB = [], yInt = [], yUni = [];
-      for (let x = 0; x <= 10; x += 0.15) {
-        xs.push(Number(x.toFixed(2)));
-        const a = Math.exp(-Math.pow(x - 3.5, 2) / 3.2);
-        const b = Math.exp(-Math.pow(x - (3.5 + shift), 2) / 3.2);
-        yA.push(a); yB.push(b);
-        if (mode === 'minmax') { yInt.push(Math.min(a, b)); yUni.push(Math.max(a, b)); }
-        else if (mode === 'prod') { yInt.push(a * b); yUni.push(a + b - a * b); }
-        else { yInt.push(Math.max(0, a + b - 1)); yUni.push(Math.min(1, a + b)); }
-      }
-      Plotly.react(plotEl, [
-        { x: xs, y: yA, name: '集合 A', line: { color: '#38bdf8', width: 2, dash: 'dot' } },
-        { x: xs, y: yB, name: '集合 B', line: { color: '#a855f7', width: 2, dash: 'dot' } },
-        { x: xs, y: yInt, name: '模糊交集 A ∩ B', fill: 'tozeroy', line: { color: '#f59e0b', width: 3 } },
-        { x: xs, y: yUni, name: '模糊聯集 A ∪ B', line: { color: '#10b981', width: 2.5 } }
-      ], { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'μ(x)', range: [-0.05, 1.1] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `模式 <b>${mode}</b>：可觀察代數積與有界積的交集面積會比標準 min 更嚴格收斂。`;
-    } else if (chNum === 5) {
-      const op = getVal('ch19-in-5a', 'add');
-      const bCenter = parseFloat(getVal('ch19-in-5b', 3.0));
-      setTxt('ch19-val-5b', bCenter.toFixed(1));
-      const alphas = [0, 0.2, 0.4, 0.6, 0.8, 1.0];
-      const triPts = (c, w) => ({ x: [c - w, c, c + w], y: [0, 1, 0] });
-      const A = triPts(4, 1.5), B = triPts(bCenter, 1.0);
-      const resX = [], resY = [];
-      alphas.forEach(al => {
-        const aL = 4 - 1.5 * (1 - al), aR = 4 + 1.5 * (1 - al);
-        const bL = bCenter - 1.0 * (1 - al), bR = bCenter + 1.0 * (1 - al);
-        if (op === 'add') { resX.unshift(aL + bL); resY.unshift(al); resX.push(aR + bR); resY.push(al); }
-        else if (op === 'sub') { resX.unshift(aL - bR); resY.unshift(al); resX.push(aR - bL); resY.push(al); }
-        else { resX.unshift(aL * bL); resY.unshift(al); resX.push(aR * bR); resY.push(al); }
-      });
-      Plotly.react(plotEl, [
-        { x: A.x, y: A.y, name: 'A ≈ 4 (±1.5)', line: { color: '#38bdf8', width: 2, dash: 'dash' } },
-        { x: B.x, y: B.y, name: `B ≈ ${bCenter} (±1.0)`, line: { color: '#a855f7', width: 2, dash: 'dash' } },
-        { x: resX, y: resY, name: `運算結果 (${op})`, fill: 'tozeroy', line: { color: '#10b981', width: 3.5 } }
-      ], { ...baseLayout, xaxis: { title: '數值' }, yaxis: { title: 'α 水平', range: [-0.05, 1.1] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `注意無論加法或減法，模糊不確定性寬度都會疊加擴散（如 $|A| + |B|$）。`;
-    } else if (chNum === 6) {
-      const mode = getVal('ch19-in-6a', 'maxmin');
-      const k = parseFloat(getVal('ch19-in-6b', 0.8));
-      setTxt('ch19-val-6b', k.toFixed(2));
-      const R = [[0.9 * k, 0.4, 0.2], [0.5, 0.8 * k, 0.6], [0.2, 0.5, 0.95 * k]];
-      const S = [[0.8, 0.3, 0.1], [0.4, 0.9 * k, 0.5], [0.1, 0.4, 0.85]];
-      const T = [0, 1, 2].map(i => [0, 1, 2].map(j => {
-        const vals = [0, 1, 2].map(m => mode === 'maxmin' ? Math.min(R[i][m], S[m][j]) : R[i][m] * S[m][j]);
-        return Number(Math.max(...vals).toFixed(2));
-      }));
-      Plotly.react(plotEl, [{
-        z: T, x: ['z1', 'z2', 'z3'], y: ['x1', 'x2', 'x3'], type: 'heatmap',
-        colorscale: 'Viridis', zmin: 0, zmax: 1
-      }], { ...baseLayout, title: `合成結果 R ∘ S (${mode})` }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `合成矩陣對角線強度：<b>[${T[0][0]}, ${T[1][1]}, ${T[2][2]}]</b>。Max-Min 保留瓶頸最大值，Max-Product 使弱鏈結衰減更明顯。`;
-    } else if (chNum === 7) {
-      const th0 = parseFloat(getVal('ch19-in-7a', 15));
-      const ku = parseFloat(getVal('ch19-in-7b', 1.2));
-      setTxt('ch19-val-7a', th0); setTxt('ch19-val-7b', ku.toFixed(1));
-      const ts = [], thF = [], thP = [];
-      for (let t = 0; t <= 5; t += 0.1) {
-        ts.push(Number(t.toFixed(1)));
-        thF.push(th0 * Math.exp(-ku * 1.1 * t) * Math.cos(2.4 * t));
-        thP.push(th0 * Math.exp(-0.55 * t) * Math.cos(3.8 * t));
-      }
-      Plotly.react(plotEl, [
-        { x: ts, y: thF, name: '模糊控制器擺角響應', line: { color: '#10b981', width: 3.5 } },
-        { x: ts, y: thP, name: '傳統線性控制器響應', line: { color: '#f43f5e', width: 2, dash: 'dash' } }
-      ], { ...baseLayout, xaxis: { title: '時間 (秒)' }, yaxis: { title: '擺角 θ (deg)' } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `初始傾角 <b>${th0}°</b>、推力增益 <b>${ku}</b>：模糊控制能快速消除過衝並穩定收斂至垂直平衡點 0°。`;
-    } else if (chNum === 8) {
-      const dT = parseFloat(getVal('ch19-in-8a', 6.0));
-      const gain = parseFloat(getVal('ch19-in-8b', 1.0));
-      setTxt('ch19-val-8a', dT.toFixed(1)); setTxt('ch19-val-8b', gain.toFixed(1));
-      const ts = [], fuzzyT = [], onoffT = [];
-      for (let t = 0; t <= 30; t += 0.5) {
-        ts.push(t);
-        fuzzyT.push(25 + dT * Math.exp(-0.18 * gain * t));
-        onoffT.push(25 + dT * Math.exp(-0.12 * t) + (t > 10 ? 0.9 * Math.sin(0.8 * t) : 0));
-      }
-      Plotly.react(plotEl, [
-        { x: ts, y: fuzzyT, name: '模糊變頻溫控 (平穩節能)', line: { color: '#22d3ee', width: 3.5 } },
-        { x: ts, y: onoffT, name: '傳統定頻開關控制 (震盪)', line: { color: '#f43f5e', width: 2, dash: 'dash' } }
-      ], { ...baseLayout, xaxis: { title: '時間 (分)' }, yaxis: { title: '室內溫度 (°C)' } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `設定目標 <b>25°C</b>（初始室溫 ${(25 + dT).toFixed(1)}°C）：模糊變頻在逼近目標時自動降頻，消除定頻冷氣反覆啟停的 ±1°C 震盪。`;
-    } else if (chNum === 9) {
-      const turb = parseFloat(getVal('ch19-in-9a', 65));
-      const satT = parseFloat(getVal('ch19-in-9b', 4.0));
-      const wt = parseFloat(getVal('ch19-in-9c', 5.0));
-      setTxt('ch19-val-9a', turb); setTxt('ch19-val-9b', satT.toFixed(1)); setTxt('ch19-val-9c', wt.toFixed(1));
-      const ts = [], curve = [];
-      for (let t = 0; t <= 10; t += 0.5) {
-        ts.push(t);
-        curve.push(100 - turb * (1 - Math.exp(-t / (satT * 0.45))));
-      }
-      const washTime = (6 + (turb / 100) * 10 + (satT / 8) * 5 + (wt / 10) * 4).toFixed(1);
-      Plotly.react(plotEl, [{ x: ts, y: curve, name: '洗滌水透光率變化 (%)', fill: 'tozeroy', line: { color: '#38bdf8', width: 3 } }],
-        { ...baseLayout, xaxis: { title: '感測時間 (分)' }, yaxis: { title: '透光率 (%)', range: [0, 105] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `推論建議最佳洗滌時間：<b>${washTime} 分鐘</b>（依據濁度 ${turb}%、飽和時間 ${satT}分、衣重 ${wt}kg）。`;
-    } else if (chNum === 10) {
-      const road = getVal('ch19-in-10a', 'dry');
-      const lam = parseFloat(getVal('ch19-in-10b', 0.18));
-      setTxt('ch19-val-10b', lam.toFixed(2));
-      const peak = road === 'dry' ? 0.92 : road === 'wet' ? 0.55 : 0.22;
-      const optL = road === 'dry' ? 0.18 : road === 'wet' ? 0.14 : 0.10;
-      const f = (l) => peak * (2 * (l / optL) / (1 + Math.pow(l / optL, 2))) * (l > optL ? Math.max(0.45, 1 - 0.35 * (l - optL)) : 1);
-      const ls = [], mus = [];
-      for (let l = 0; l <= 1.0; l += 0.02) { ls.push(Number(l.toFixed(2))); mus.push(f(l)); }
-      Plotly.react(plotEl, [
-        { x: ls, y: mus, name: '路面摩擦係數 μ(λ)', line: { color: '#fb7185', width: 3 } },
-        { x: [lam], y: [f(lam)], name: '目前工作點', mode: 'markers', marker: { color: '#38bdf8', size: 12 } }
-      ], { ...baseLayout, xaxis: { title: '滑移率 λ' }, yaxis: { title: '附著摩擦係數 μ', range: [0, 1.05] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `當前滑移率 <b>λ = ${lam.toFixed(2)}</b>，對應摩擦係數 <b>μ ≈ ${f(lam).toFixed(2)}</b>（該路面最佳峰值約於 λ = ${optL}）。`;
-    } else if (chNum === 11) {
-      const eta = parseFloat(getVal('ch19-in-11a', 0.15));
-      const ep = parseInt(getVal('ch19-in-11b', 30), 10);
-      setTxt('ch19-val-11a', eta.toFixed(2)); setTxt('ch19-val-11b', ep);
-      const xs = [], targetY = [], anfisY = [];
-      const errFactor = Math.exp(-eta * ep * 0.45);
-      for (let x = -3; x <= 3; x += 0.15) {
-        xs.push(Number(x.toFixed(2)));
-        const y = Math.sin(x) + 0.3 * Math.cos(2 * x);
-        targetY.push(y);
-        anfisY.push(y * (1 - 0.55 * errFactor) + 0.2 * errFactor * x * 0.3);
-      }
-      Plotly.react(plotEl, [
-        { x: xs, y: targetY, name: '目標非線性函數', line: { color: '#38bdf8', width: 2.5, dash: 'dash' } },
-        { x: xs, y: anfisY, name: `ANFIS 擬合曲線 (Epoch ${ep})`, line: { color: '#a855f7', width: 3.5 } }
-      ], { ...baseLayout, xaxis: { title: '輸入 x' }, yaxis: { title: '輸出 y' } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `混合學習法經 <b>${ep} Epochs</b>（學習率 η = ${eta}），逼近誤差殘差比例已收斂至 <b>${(errFactor * 100).toFixed(1)}%</b>。`;
-    } else if (chNum === 12) {
-      const iters = parseInt(getVal('ch19-in-12a', 2), 10);
-      const cross = parseFloat(getVal('ch19-in-12b', 0.5));
-      setTxt('ch19-val-12a', iters); setTxt('ch19-val-12b', cross.toFixed(2));
-      const xs = [], ys = [];
-      for (let g = 0; g <= 1; g += 0.02) {
-        xs.push(Number(g.toFixed(2)));
-        let u = g;
-        for (let k = 0; k < iters; k++) {
-          u = u <= cross ? Math.pow(u / cross, 2) * cross : 1 - Math.pow((1 - u) / (1 - cross), 2) * (1 - cross);
-        }
-        ys.push(u);
-      }
-      Plotly.react(plotEl, [
-        { x: [0, 1], y: [0, 1], name: '原始線性映射', line: { color: '#64748b', width: 2, dash: 'dot' } },
-        { x: xs, y: ys, name: `INT 增強 (${iters} 次)`, line: { color: '#f59e0b', width: 3.5 } }
-      ], { ...baseLayout, xaxis: { title: '原始正規化灰階' }, yaxis: { title: '增強後灰階 μ\'' } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `經過 <b>${iters} 次</b>模糊 INT 強化，低於 ${cross} 的暗部更暗、高於 ${cross} 的亮部更亮，邊界對比大幅提升。`;
-    } else if (chNum === 13) {
-      const gC = parseFloat(getVal('ch19-in-13a', 7.5));
-      const cC = parseFloat(getVal('ch19-in-13b', 5.5));
-      setTxt('ch19-val-13a', gC.toFixed(1)); setTxt('ch19-val-13b', cC.toFixed(1));
-      const xs = [], gY = [], cY = [], dY = [];
-      let bestX = 0, bestV = -1;
-      for (let x = 1; x <= 10; x += 0.15) {
-        xs.push(Number(x.toFixed(2)));
-        const g = 1 / (1 + Math.exp(-1.5 * (x - (gC - 1.5))));
-        const c = 1 / (1 + Math.exp(1.5 * (x - cC)));
-        const d = Math.min(g, c);
-        gY.push(g); cY.push(c); dY.push(d);
-        if (d > bestV) { bestV = d; bestX = x; }
-      }
-      Plotly.react(plotEl, [
-        { x: xs, y: gY, name: '模糊目標 G (高性能)', line: { color: '#38bdf8', width: 2.5 } },
-        { x: xs, y: cY, name: '模糊限制 C (低成本)', line: { color: '#f43f5e', width: 2.5 } },
-        { x: xs, y: dY, name: '決策交集 D = G ∩ C', fill: 'tozeroy', line: { color: '#10b981', width: 3.5 } }
-      ], { ...baseLayout, xaxis: { title: '方案等級 x' }, yaxis: { title: '滿足度 μ(x)', range: [0, 1.08] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `Bellman-Zadeh 最佳折衷方案：<b>x* ≈ ${bestX.toFixed(2)}</b>，最大綜合滿足度 <b>μ_D(x*) = ${bestV.toFixed(2)}</b>。`;
-    } else if (chNum === 14) {
-      const temp = parseFloat(getVal('ch19-in-14a', 37.8));
-      const hr = parseFloat(getVal('ch19-in-14b', 105));
-      const spo2 = parseFloat(getVal('ch19-in-14c', 94));
-      setTxt('ch19-val-14a', temp.toFixed(1)); setTxt('ch19-val-14b', hr); setTxt('ch19-val-14c', spo2);
-      const rTemp = Math.min(1, Math.max(0, (temp - 37.2) / 2.2));
-      const rHr = Math.min(1, Math.max(0, (hr - 90) / 45));
-      const rSpo2 = Math.min(1, Math.max(0, (97 - spo2) / 10));
-      const total = Math.min(100, Math.round((0.35 * rTemp + 0.3 * rHr + 0.35 * rSpo2) * 100));
-      Plotly.react(plotEl, [{
-        x: ['體溫異常度', '心率異常度', '低血氧異常度'],
-        y: [rTemp * 100, rHr * 100, rSpo2 * 100],
-        type: 'bar',
-        marker: { color: ['#f59e0b', '#fb7185', '#38bdf8'] }
-      }], { ...baseLayout, yaxis: { title: '模糊警示強度 (%)', range: [0, 105] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `ICU 綜合模糊風險指數：<b>${total} / 100</b>（${total >= 60 ? '⚠️ 高風險需立即處置' : total >= 30 ? '⚡ 中度風險持續監測' : '✅ 生理狀態平穩'}）。`;
-    } else if (chNum === 15) {
-      const n = parseInt(getVal('ch19-in-15a', 7), 10);
-      const w = parseFloat(getVal('ch19-in-15b', 0.6));
-      setTxt('ch19-val-15a', n); setTxt('ch19-val-15b', w.toFixed(1));
-      const ts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-      const real = [120, 134, 128, 145, 160, 152, 168, 174, 165, 182];
-      const step = 70 / n;
-      const pred = real.map((v, idx) => idx === 0 ? v : Number((w * real[idx - 1] + (1 - w) * (Math.round(v / step) * step)).toFixed(1)));
-      Plotly.react(plotEl, [
-        { x: ts, y: real, name: '實際觀測序列', line: { color: '#38bdf8', width: 3 } },
-        { x: ts, y: pred, name: `FTS 預測 (${n} 語意區間)`, line: { color: '#818cf8', width: 3, dash: 'dash' } }
-      ], { ...baseLayout, xaxis: { title: '期數 t' }, yaxis: { title: '指數數值' } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `將論域切分為 <b>${n} 個語意區間</b>（每區間寬約 ${step.toFixed(1)}），區間數越多解析度越高但規則數也隨之增加。`;
-    } else if (chNum === 16) {
-      const m = parseFloat(getVal('ch19-in-16a', 2.0));
-      const dist = parseFloat(getVal('ch19-in-16b', 4.0));
-      setTxt('ch19-val-16a', m.toFixed(1)); setTxt('ch19-val-16b', dist.toFixed(1));
-      const xs = [], u1 = [], u2 = [];
-      const c1 = -dist / 2, c2 = dist / 2;
-      const p = 2 / (m - 1);
-      for (let x = -5; x <= 5; x += 0.15) {
-        xs.push(Number(x.toFixed(2)));
-        const d1 = Math.max(0.05, Math.abs(x - c1)), d2 = Math.max(0.05, Math.abs(x - c2));
-        const val1 = 1 / (1 + Math.pow(d1 / d2, p));
-        u1.push(val1); u2.push(1 - val1);
-      }
-      Plotly.react(plotEl, [
-        { x: xs, y: u1, name: `群組 1 歸屬度 (中心 ${c1.toFixed(1)})`, line: { color: '#22d3ee', width: 3 } },
-        { x: xs, y: u2, name: `群組 2 歸屬度 (中心 ${c2.toFixed(1)})`, line: { color: '#f43f5e', width: 3 } }
-      ], { ...baseLayout, xaxis: { title: '特徵軸 x' }, yaxis: { title: 'FCM 歸屬度 u_ij', range: [-0.05, 1.1] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `模糊指數 <b>m = ${m.toFixed(1)}</b>：越接近 1.1 邊界越陡峭（似 K-Means）；越大則交界過渡帶越平緩。`;
-    } else if (chNum === 17) {
-      const mut = parseFloat(getVal('ch19-in-17a', 0.08));
-      const pop = parseInt(getVal('ch19-in-17b', 40), 10);
-      setTxt('ch19-val-17a', mut.toFixed(2)); setTxt('ch19-val-17b', pop);
-      const gens = [], bestFit = [], avgFit = [];
-      const speed = 0.06 + (pop / 100) * 0.05 - mut * 0.08;
-      for (let g = 1; g <= 40; g++) {
-        gens.push(g);
-        const b = 98 - 55 * Math.exp(-Math.max(0.03, speed) * g);
-        bestFit.push(Number(b.toFixed(1)));
-        avgFit.push(Number((b - 12 * Math.exp(-0.04 * g) - mut * 15).toFixed(1)));
-      }
-      Plotly.react(plotEl, [
-        { x: gens, y: bestFit, name: '最佳染色體適應度', line: { color: '#10b981', width: 3.5 } },
-        { x: gens, y: avgFit, name: '族群平均適應度', line: { color: '#64748b', width: 2, dash: 'dash' } }
-      ], { ...baseLayout, xaxis: { title: '演化世代 (Generation)' }, yaxis: { title: '適應度 (Fitness)', range: [20, 102] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `族群規模 <b>${pop}</b>、突變率 <b>${mut}</b>：第 40 代最佳適應度達到 <b>${bestFit[39]}</b>。`;
-    } else if (chNum === 18) {
-      const gamma = parseFloat(getVal('ch19-in-18a', 1.2));
-      const dist = parseFloat(getVal('ch19-in-18b', 1.5));
-      setTxt('ch19-val-18a', gamma.toFixed(1)); setTxt('ch19-val-18b', dist.toFixed(2));
-      const ts = [], errAdapt = [], errFixed = [];
-      for (let t = 0; t <= 10; t += 0.2) {
-        ts.push(Number(t.toFixed(1)));
-        const shock = t >= 3 ? dist * Math.exp(-1.1 * gamma * (t - 3)) : 0;
-        errAdapt.push(Number((0.8 * Math.exp(-0.9 * t) + shock).toFixed(3)));
-        errFixed.push(Number((0.8 * Math.exp(-0.9 * t) + (t >= 3 ? dist * 0.65 : 0)).toFixed(3)));
-      }
-      Plotly.react(plotEl, [
-        { x: ts, y: errAdapt, name: '自適應模糊控制追蹤誤差', line: { color: '#a855f7', width: 3.5 } },
-        { x: ts, y: errFixed, name: '固定參數模糊控制誤差', line: { color: '#f43f5e', width: 2.5, dash: 'dash' } }
-      ], { ...baseLayout, xaxis: { title: '時間 (秒，t=3s 負載突變)' }, yaxis: { title: '追蹤誤差 |e(t)|' } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `在 <b>t = 3s</b> 發生負載干擾後，自適應律 (γ=${gamma}) 依 Lyapunov 穩定性快速調整權重使誤差重新歸零。`;
-    } else if (chNum === 19) {
-      const fou = parseFloat(getVal('ch19-in-19a', 0.25));
-      const div = parseFloat(getVal('ch19-in-19b', 0.8));
-      setTxt('ch19-val-19a', fou.toFixed(2)); setTxt('ch19-val-19b', div.toFixed(1));
-      const xs = [], upper = [], lower = [];
-      for (let x = 0; x <= 10; x += 0.2) {
-        xs.push(Number(x.toFixed(1)));
-        const base = Math.exp(-Math.pow(x - 5, 2) / (3.2 * div));
-        upper.push(Math.min(1, base + fou * 0.5));
-        lower.push(Math.max(0, base - fou * 0.7));
-      }
-      Plotly.react(plotEl, [
-        { x: xs, y: upper, name: '上歸屬函數 UMF', line: { color: '#38bdf8', width: 2.5 } },
-        { x: xs, y: lower, name: '下歸屬函數 LMF', fill: 'tonexty', fillcolor: 'rgba(56, 189, 248, 0.22)', line: { color: '#0284c7', width: 2.5 } }
-      ], { ...baseLayout, xaxis: { title: '論域 x' }, yaxis: { title: 'Type-2 FOU 區間', range: [-0.05, 1.1] } }, cfg);
-      if (readoutEl) readoutEl.innerHTML = `淺藍色陰影即為 <b>不確定足跡 (FOU)</b>，寬度 ${fou.toFixed(2)}，容納多位專家對語意定義的分歧與感測雜訊。`;
-    }
-  }
 })();
 
 </script>
@@ -35439,7 +35640,7 @@ window.WebFISStudio = (function () {
     <!-- ===================================================================== -->
     <section id="tab-panel-lab" class="hidden space-y-8">
 
-      <!-- 實驗室總樞紐 Banner 橫幅與章節切換導覽列 -->
+      <!-- 實驗室總樞紐 Banner 橫幅與全書 19 章專屬篩選標籤列 -->
       <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-sky-500/30 relative overflow-hidden">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div class="space-y-3">
@@ -35448,109 +35649,54 @@ window.WebFISStudio = (function () {
                 <span>🎛️ Interactive Simulation Hub</span>
               </span>
               <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
-                <span>⚡ 全書 7 大章節 • 21 座多維度視覺化互動實驗室全數在線</span>
+                <span>⚡ 全書 19 章全覆蓋 · 課本案例、圖形與數學計算互動實驗室</span>
               </span>
             </div>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              全平台 Fuzzy 互動實驗總樞紐 (Interactive Simulation Hub)
+              全平台 Fuzzy 互動實驗總樞紐 (Ch.01 ~ Ch.19)
             </h2>
             <p class="text-sm sm:text-base text-slate-300 max-w-3xl leading-relaxed">
-              平台除提供核心「冷氣模糊溫控與重心法解模糊 (Mamdani Defuzzification)」外，更完整收錄了 Chapter 01 ～ 07 全章節專屬的 20 座互動實驗室（隸屬度函數塑形、笛卡兒積熱點矩陣、二維非線性 3D 控制曲面、擴展原理映射、Bellman-Zadeh 對稱決策、FCM 柔性分群、ANFIS 類神經萬能逼近等）。點選下方標籤即可切換旗艦實驗室或直達各章節專屬模擬器！
+              全面對齊《認識 Fuzzy》原書第 1 章到第 19 章！除了核心「Mamdani 冷氣溫控旗艦實驗室」外，點選下方任一章節標籤即可直接操作該章專屬的數學計算器與 Plotly 動態圖形模擬器（與伴讀地圖完全共用同一套組件）。
             </p>
           </div>
 
           <!-- 右側實驗室總覽數據卡 -->
           <div class="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shrink-0 text-center space-y-1.5 min-w-[190px]">
-            <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">實驗室總數量</div>
-            <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 font-mono">21 <span class="text-sm text-slate-400 font-normal">座</span></div>
-            <div class="text-xs text-emerald-400 font-medium">覆蓋全書 7 大章節</div>
+            <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">互動工具總數量</div>
+            <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400 font-mono"><span id="lab-total-tools-count">24</span> <span class="text-sm text-slate-400 font-normal">座</span></div>
+            <div class="text-xs text-emerald-400 font-medium">覆蓋原書全 19 章</div>
           </div>
         </div>
 
-        <!-- 8 大導覽切換按鈕列 (Capsule Tabs) + Web FIS Studio 直達鈕 -->
-        <div class="flex flex-wrap items-center justify-between gap-3 pt-6 mt-6 border-t border-slate-800/80">
-          <div class="flex flex-wrap items-center gap-2">
-            <button id="lab-tab-btn-flagship" onclick="switchLabHubTab('flagship')"
-              class="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/25">
-              <span>⭐</span>
-              <span>旗艦實驗室：冷氣模糊溫控 (Mamdani)</span>
-            </button>
-            <button id="lab-tab-btn-fuzzy_sets" onclick="switchLabHubTab('fuzzy_sets')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
-              <span>🌱</span>
-              <span>Ch.01 緒論與集合基礎 (3座)</span>
-            </button>
-            <button id="lab-tab-btn-fuzzy_relations_inference" onclick="switchLabHubTab('fuzzy_relations_inference')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
-              <span>⚡</span>
-              <span>Ch.02 模糊關係與推論 (3座)</span>
-            </button>
-            <button id="lab-tab-btn-fuzzy_control_applications" onclick="switchLabHubTab('fuzzy_control_applications')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
-              <span>🎛️</span>
-              <span>Ch.03 模糊控制與三維曲面 (4座)</span>
-            </button>
-            <button id="lab-tab-btn-fuzzy_numbers_extension" onclick="switchLabHubTab('fuzzy_numbers_extension')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
-              <span>📈</span>
-              <span>Ch.04 擴展原理與模糊數 (2座)</span>
-            </button>
-            <button id="lab-tab-btn-fuzzy_decision_evaluation" onclick="switchLabHubTab('fuzzy_decision_evaluation')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
-              <span>🎯</span>
-              <span>Ch.05 模糊決策與綜合評判 (2座)</span>
-            </button>
-            <button id="lab-tab-btn-fuzzy_clustering_pattern" onclick="switchLabHubTab('fuzzy_clustering_pattern')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
-              <span>🌲</span>
-              <span>Ch.06 模糊分群與識別 (2座)</span>
-            </button>
-            <button id="lab-tab-btn-advanced_fuzzy_neuro" onclick="switchLabHubTab('advanced_fuzzy_neuro')"
-              class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800">
-              <span>🧠</span>
-              <span>Ch.07 類神經模糊 ANFIS (2座)</span>
-            </button>
+        <!-- 19 章完整專屬篩選標籤列 + Web FIS Studio 直達鈕 -->
+        <div class="space-y-4 pt-6 mt-6 border-t border-slate-800/80">
+          <div id="lab-19-filter-buttons" class="flex flex-wrap items-center gap-2">
+            <!-- 由 JS 動態生成 旗艦實驗室 + Ch.01 ~ Ch.19 完整按鈕 -->
           </div>
 
-          <div class="flex flex-wrap items-center gap-2 shrink-0">
-            <span class="text-xs text-amber-300 font-semibold hidden lg:inline">🚀 高階工程模型直達：</span>
-            <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('marine_autopilot'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='marine_autopilot'; }, 80);"
-              class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
-              <span>🚢</span><span>船舶自動舵</span>
-            </button>
-            <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('solar_pv_cooling'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='solar_pv_cooling'; }, 80);"
-              class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
-              <span>☀️</span><span>光電散熱</span>
-            </button>
-            <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('bess_dispatch'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='bess_dispatch'; }, 80);"
-              class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
-              <span>🔋</span><span>儲能調度</span>
-            </button>
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/60">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="text-xs text-amber-300 font-semibold">🚀 高階工程模型直達 Web FIS Studio：</span>
+              <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('marine_autopilot'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='marine_autopilot'; }, 80);"
+                class="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                <span>🚢</span><span>船舶自動舵</span>
+              </button>
+              <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('solar_pv_cooling'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='solar_pv_cooling'; }, 80);"
+                class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                <span>☀️</span><span>光電散熱</span>
+              </button>
+              <button onclick="switchTab('fis'); setTimeout(() => { WebFISStudio.loadPreset('bess_dispatch'); const sel = document.getElementById('fis-preset-select'); if (sel) sel.value='bess_dispatch'; }, 80);"
+                class="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition flex items-center gap-1 shadow-sm">
+                <span>🔋</span><span>儲能調度</span>
+              </button>
+            </div>
             <button onclick="switchTab('fis')"
               class="px-3.5 py-1.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-slate-950 shadow-md shadow-amber-500/25">
               <span>🛠️</span>
-              <span>進入工坊 →</span>
+              <span>進入 Web FIS Studio 工坊 →</span>
             </button>
           </div>
         </div>
-      </div>
-
-      <!-- 0. 全書 19 章專屬模擬器快速切換與檢視器 (Ch.01 ~ Ch.19) -->
-      <div class="glass-panel rounded-3xl p-6 border border-indigo-500/25 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <span class="text-xs font-bold uppercase tracking-widest text-indigo-400">All 19 Chapters Interactive Simulators</span>
-            <h3 class="text-lg sm:text-xl font-bold text-white mt-0.5">《認識 Fuzzy》全書 19 章模擬器直達選單</h3>
-          </div>
-          <div class="flex items-center gap-2.5">
-            <select id="lab-ch19-select" onchange="selectLab19Chapter(Number(this.value))" class="bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-slate-200 font-semibold">
-            </select>
-            <button id="lab-ch19-goto-btn" onclick="jumpToChapter19FromLab()" class="px-3.5 py-2 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 text-xs sm:text-sm font-bold transition shrink-0">
-              📖 前往該章導讀 →
-            </button>
-          </div>
-        </div>
-        <div id="lab-ch19-unified-stage"></div>
       </div>
 
       <!-- 1. 旗艦實驗室容器：原冷氣機溫控系統 (Mamdani COG/MOM) -->
@@ -36139,7 +36285,7 @@ window.WebFISStudio = (function () {
 
       try { loadRoadmapProgress(); } catch (e) { console.error(e); }
       try { initQuizChapterFilterOptions(); } catch (e) { console.error(e); }
-      try { initLab19Select(); } catch (e) { console.error(e); }
+      try { renderLab19FilterButtons(); } catch (e) { console.error(e); }
       try { renderRoadmap(); } catch (e) { console.error(e); }
       try { renderChapterNav(); } catch (e) { console.error(e); }
       try { renderChapterContent(activeChapter19Num); } catch (e) { console.error(e); }
@@ -36326,18 +36472,8 @@ window.WebFISStudio = (function () {
         } else if (normalizedTab === 'lab') {
           setTimeout(() => {
             try {
-              if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
-                FuzzyWidgets.renderChapter19Lab(activeLab19Chapter, 'lab-ch19-unified-stage');
-              }
-              if (currentLabHubTab === 'flagship') {
-                updateLabSimulation();
-                if (window.Plotly && window.Plotly.Plots) {
-                  window.Plotly.Plots.resize('plot-input-mf');
-                  window.Plotly.Plots.resize('plot-output-defuzz');
-                }
-              } else {
-                renderLabChapterView(currentLabHubTab);
-              }
+              renderLab19FilterButtons();
+              switchLabHubTab(currentLabHubTab || 'flagship');
             } catch (e) { console.warn(e); }
           }, 60);
         } else if (normalizedTab === 'fis') {
@@ -37009,7 +37145,7 @@ window.WebFISStudio = (function () {
               <h3 class="text-xl sm:text-2xl font-bold text-white mt-0.5">${ch.labConfig ? ch.labConfig.title : '本章互動視覺化驗證'}</h3>
               <p class="text-sm text-slate-400 mt-0.5">${ch.labConfig ? ch.labConfig.subtitle : ''}</p>
             </div>
-            <button onclick="activeLab19Chapter=${ch.ch}; switchTab('lab');"
+            <button onclick="activeLab19Chapter=${ch.ch}; currentLabHubTab=${ch.ch}; switchTab('lab');"
               class="px-3.5 py-2 rounded-xl bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-xs font-bold transition">
               🎛️ 在完整實驗室開啟 →
             </button>
@@ -37131,24 +37267,71 @@ window.WebFISStudio = (function () {
       renderQuizzes();
     }
 
-    function initLab19Select() {
-      const sel = document.getElementById('lab-ch19-select');
-      const list = window.CHAPTERS_19_DATA || [];
-      if (!sel || !list.length) return;
-      sel.innerHTML = list.map(ch => `<option value="${ch.ch}">${ch.code}：${ch.title.replace(/^第 \d+ 章：/, '')}</option>`).join('');
-      sel.value = String(activeLab19Chapter);
-    }
+    function renderLab19FilterButtons() {
+      const container = document.getElementById('lab-19-filter-buttons');
+      if (!container) return;
 
-    function selectLab19Chapter(chNum) {
-      activeLab19Chapter = Number(chNum) || 1;
-      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
-        FuzzyWidgets.renderChapter19Lab(activeLab19Chapter, 'lab-ch19-unified-stage');
+      const meta = (window.FuzzyWidgets && typeof FuzzyWidgets.getLab19Meta === 'function')
+        ? FuzzyWidgets.getLab19Meta()
+        : {};
+      const list = window.CHAPTERS_19_DATA || [];
+
+      let totalTools = 1; // 包含旗艦 Mamdani 冷氣溫控實驗室
+      const chapterBtns = [];
+
+      for (let chNum = 1; chNum <= 19; chNum++) {
+        const m = meta[chNum];
+        const chObj = list.find(c => Number(c.ch) === chNum);
+        const shortTitle = (m && m.shortTitle)
+          ? m.shortTitle
+          : (chObj ? chObj.title.replace(/^第 \d+ 章：/, '').slice(0, 10) : `第 ${chNum} 章`);
+        const count = (m && m.count) ? Number(m.count) : 1;
+        totalTools += count;
+
+        const code = `Ch.${String(chNum).padStart(2, '0')}`;
+        const isActive = Number(currentLabHubTab) === chNum;
+        const cls = isActive
+          ? 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-1.5 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/25'
+          : 'px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800';
+
+        chapterBtns.push(`
+          <button id="lab-tab-btn-${chNum}" onclick="switchLabHubTab(${chNum})" class="${cls}">
+            <span class="font-mono font-bold text-sky-300 ${isActive ? 'text-white' : ''}">${code}</span>
+            <span>${shortTitle}</span>
+            <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold ${isActive ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'}">(${count})</span>
+          </button>
+        `);
+      }
+
+      const isFlagship = currentLabHubTab === 'flagship' || !currentLabHubTab;
+      const flagshipCls = isFlagship
+        ? 'px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/25'
+        : 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800';
+
+      container.innerHTML = `
+        <button id="lab-tab-btn-flagship" onclick="switchLabHubTab('flagship')" class="${flagshipCls}">
+          <span>⭐</span>
+          <span>旗艦實驗室：冷氣模糊溫控 (Mamdani)</span>
+        </button>
+        ${chapterBtns.join('')}
+      `;
+
+      const countEl = document.getElementById('lab-total-tools-count');
+      if (countEl) {
+        countEl.textContent = `${totalTools} 座互動實驗室`;
       }
     }
 
-    function jumpToChapter19FromLab() {
+    function selectLab19Chapter(chNum) {
+      const n = Number(chNum) || 1;
+      activeLab19Chapter = n;
+      switchLabHubTab(n);
+    }
+
+    function jumpToChapter19FromLab(chNum) {
+      const target = Number(chNum) || activeLab19Chapter || 1;
       switchTab('roadmap');
-      selectChapter19(activeLab19Chapter, true);
+      selectChapter19(target, true);
     }
 
     function renderQuizzes() {
@@ -37696,23 +37879,36 @@ window.WebFISStudio = (function () {
     };
 
     function switchLabHubTab(tabKey) {
-      currentLabHubTab = tabKey;
-      const allTabs = ['flagship', 'fuzzy_sets', 'fuzzy_relations_inference', 'fuzzy_control_applications', 'fuzzy_numbers_extension', 'fuzzy_decision_evaluation', 'fuzzy_clustering_pattern', 'advanced_fuzzy_neuro'];
-
-      allTabs.forEach(k => {
-        const btn = document.getElementById(`lab-tab-btn-${k}`);
-        if (!btn) return;
-        if (k === tabKey) {
-          btn.className = 'px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-600 text-white shadow-md shadow-sky-500/25';
+      const legacyToCh = {
+        fuzzy_sets: 2,
+        fuzzy_numbers_extension: 4,
+        fuzzy_relations_inference: 5,
+        fuzzy_control_applications: 10,
+        fuzzy_decision_evaluation: 16,
+        fuzzy_clustering_pattern: 17,
+        advanced_fuzzy_neuro: 18
+      };
+      let normalizedKey = tabKey;
+      if (tabKey !== 'flagship') {
+        if (legacyToCh[tabKey]) {
+          normalizedKey = legacyToCh[tabKey];
         } else {
-          btn.className = 'px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition flex items-center gap-1.5 bg-slate-900 text-slate-300 hover:bg-slate-800 hover:text-white border border-slate-800';
+          const parsed = Number(tabKey);
+          normalizedKey = (parsed >= 1 && parsed <= 19) ? parsed : 'flagship';
         }
-      });
+      }
+
+      currentLabHubTab = normalizedKey;
+      if (typeof normalizedKey === 'number') {
+        activeLab19Chapter = normalizedKey;
+      }
+
+      renderLab19FilterButtons();
 
       const flagshipContainer = document.getElementById('lab-flagship-container');
       const chapterContainer = document.getElementById('lab-chapter-container');
 
-      if (tabKey === 'flagship') {
+      if (normalizedKey === 'flagship') {
         if (flagshipContainer) flagshipContainer.classList.remove('hidden');
         if (chapterContainer) chapterContainer.classList.add('hidden');
         setTimeout(() => {
@@ -37728,72 +37924,55 @@ window.WebFISStudio = (function () {
         if (flagshipContainer) flagshipContainer.classList.add('hidden');
         if (chapterContainer) {
           chapterContainer.classList.remove('hidden');
-          renderLabChapterView(tabKey);
+          renderLabChapterView(normalizedKey);
         }
       }
     }
 
-    function renderLabChapterView(chapterId) {
+    function renderLabChapterView(chNumInput) {
       const container = document.getElementById('lab-chapter-container');
       if (!container) return;
 
-      const info = LAB_CHAPTER_INFO[chapterId];
-      if (!info) return;
-
-      const col = info.color;
-      const simCardsHtml = info.simulators.map((s, idx) => `
-        <div class="refined-card p-6 border-l-4 border-l-${col}-400 space-y-4 hover:border-${col}-400/80 transition">
-          <div class="flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-              <span class="text-2xl">${s.icon}</span>
-              <span class="px-2.5 py-1 rounded-lg bg-${col}-500/15 border border-${col}-500/30 text-${col}-300 text-xs font-mono font-bold">
-                ${s.badge}
-              </span>
-            </div>
-            <span class="text-xs text-slate-400 font-mono">Simulator 0${idx + 1}</span>
-          </div>
-          <h4 class="text-lg sm:text-xl font-bold text-white">${s.name}</h4>
-          <p class="text-sm sm:text-base text-slate-300 leading-relaxed">${s.desc}</p>
-        </div>
-      `).join('');
+      const chNum = Math.min(19, Math.max(1, Number(chNumInput) || 1));
+      const metaMap = (window.FuzzyWidgets && typeof FuzzyWidgets.getLab19Meta === 'function')
+        ? FuzzyWidgets.getLab19Meta()
+        : {};
+      const meta = metaMap[chNum] || {};
+      const chList = window.CHAPTERS_19_DATA || [];
+      const chData = chList.find(c => Number(c.ch) === chNum) || {};
+      const code = `Ch.${String(chNum).padStart(2, '0')}`;
+      const chTitle = chData.title ? chData.title.replace(/^第 \d+ 章：/, '') : (meta.shortTitle || `第 ${chNum} 章`);
+      const pageRange = chData.pageRange ? `課本 P.${chData.pageRange}` : '《認識 Fuzzy》原書對照';
+      const toolCount = meta.count || 1;
 
       container.innerHTML = `
-        <div class="glass-panel rounded-3xl p-7 sm:p-9 border border-${col}-500/30 space-y-7">
-          <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-800">
+        <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-sky-500/30 space-y-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800">
             <div class="space-y-2">
-              <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-${col}-400">
-                <span>📍 專屬章節實驗室</span>
-                <span>•</span>
-                <span>Chapter ${info.number}</span>
-                <span>•</span>
-                <span class="text-emerald-400">${info.count}</span>
+              <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+                <span class="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  📘 原書第 ${chNum} 章 · 課本案例/圖形對照
+                </span>
+                <span class="px-2.5 py-1 rounded-full bg-slate-900 text-sky-300 border border-slate-800 font-mono">${code}</span>
+                <span class="px-2.5 py-1 rounded-full bg-slate-900 text-slate-300 border border-slate-800">${pageRange}</span>
+                <span class="px-2.5 py-1 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-500/30">共 ${toolCount} 項互動模擬</span>
               </div>
-              <h3 class="text-2xl sm:text-3xl font-extrabold text-white">${info.title}</h3>
-              <p class="text-slate-300 text-sm sm:text-base max-w-2xl">${info.subtitle}</p>
+              <h3 class="text-xl sm:text-2xl font-extrabold text-white">${chData.icon || '🎛️'} ${code}：${chTitle}</h3>
+              <p class="text-slate-300 text-sm">${meta.title || (chData.labConfig ? chData.labConfig.subtitle : '調整下方參數與滑桿，即時觀察數學計算步驟與圖形變化。')}</p>
             </div>
-            <button onclick="jumpToChapterLab('${chapterId}')"
-              class="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-${col}-500 to-${col === 'amber' ? 'orange' : col === 'sky' ? 'indigo' : col === 'rose' ? 'pink' : col === 'cyan' ? 'blue' : 'purple'}-600 hover:opacity-95 text-white font-bold text-base shadow-xl shadow-${col}-500/25 transition flex items-center justify-center gap-2.5 shrink-0">
-              <span>🚀 立即進入本章【模組 3】實機操作 →</span>
+            <button onclick="jumpToChapter19FromLab(${chNum})"
+              class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-sky-300 border border-sky-500/35 font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 shrink-0">
+              <span>📖 前往第 ${chNum} 章伴讀地圖 →</span>
             </button>
           </div>
 
-          <div class="grid grid-cols-1 ${info.simulators.length > 2 ? 'md:grid-cols-2' : 'md:grid-cols-2'} gap-6">
-            ${simCardsHtml}
-          </div>
-
-          <div class="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-wrap items-center justify-between gap-4">
-            <div class="text-sm text-slate-300 flex items-center gap-2">
-              <span>💡</span>
-              <span>所有模擬器均已掛載於該章節之【模組 3：多維度模擬圖專區】，支援滑桿互動、動態重繪與逐步數學公式即時反饋！</span>
-            </div>
-            <button onclick="jumpToChapterLab('${chapterId}')"
-              class="text-xs sm:text-sm px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-${col}-300 border border-${col}-500/30 font-semibold transition">
-              前往本章模組 3 操作 →
-            </button>
-          </div>
+          <div id="lab-19-active-widget"></div>
         </div>
       `;
 
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
+        FuzzyWidgets.renderChapter19Lab(chNum, 'lab-19-active-widget');
+      }
       safeTypesetMath([container]);
     }
 
