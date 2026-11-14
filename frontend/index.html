@@ -1784,6 +1784,8 @@
               ${p.book_examples.map(ex => `<li>${formatRichText(ex)}</li>`).join('')}
             </ul>` : ''}
           ${p.page_id === '2-9' ? `<div id="book-page-2-9-simulator" class="pt-2"></div>` : ''}
+          ${p.page_id === '2-10' ? `<div id="book-page-2-10-simulator" class="pt-2"></div>` : ''}
+          ${p.page_id === '2-11' ? `<div id="book-page-2-11-simulator" class="pt-2"></div>` : ''}
         </div>
       `).join('');
 
@@ -1908,6 +1910,12 @@
 
       if (window.FuzzyWidgets && typeof FuzzyWidgets.renderNearCSimulator === 'function' && document.getElementById('book-page-2-9-simulator')) {
         setTimeout(() => FuzzyWidgets.renderNearCSimulator('book-page-2-9-simulator', { prefix: 'p29', showFormulas: false }), 30);
+      }
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderShapeShifterSimulator === 'function' && document.getElementById('book-page-2-10-simulator')) {
+        setTimeout(() => FuzzyWidgets.renderShapeShifterSimulator('book-page-2-10-simulator', { prefix: 'p210' }), 35);
+      }
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderAlphaCutLabSimulator === 'function' && document.getElementById('book-page-2-11-simulator')) {
+        setTimeout(() => FuzzyWidgets.renderAlphaCutLabSimulator('book-page-2-11-simulator', { prefix: 'p211' }), 40);
       }
       if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
         setTimeout(() => FuzzyWidgets.renderChapter19Lab(ch.ch, 'ch19-interactive-lab-holder'), 40);

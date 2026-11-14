@@ -8568,7 +8568,7 @@ window.FuzzyWidgets = (function () {
   // =========================================================================
   const LAB_19_META = {
     1:  { shortTitle: '緒論與概念對比', count: 1, badge: '原書第 1 章 · 課本圖 1.1 高個子/室溫 Crisp vs. Fuzzy', title: 'Ch.01 二值邏輯 (Crisp) vs. 模糊集合 (Fuzzy) 對比滑桿' },
-    2:  { shortTitle: '圖 2.7 對比 & α-cut', count: 2, badge: '原書第 2 章 · 圖 2.7「靠近 c 之實數」四函數對比 & 圖 2.9 α-cut 切片', title: 'Ch.02 接近目標數 c 之四種連續歸屬函數對比模擬器 ＋ α-cut 互動切片' },
+    2:  { shortTitle: '圖 2.7/2.8 & α-cut', count: 3, badge: '原書第 2 章 · 圖 2.7 四函數對比 · 圖 2.8 參數塑形 · α-Cut 切片實驗室', title: 'Ch.02 三大互動模擬器：圖 2.7 靠近 c 函數對比 ＋ 圖 2.8 參數塑形器 ＋ α-Cut 切片實驗室' },
     3:  { shortTitle: '模糊集合運算', count: 1, badge: '原書第 3 章 · 標準 Min/Max & Sugeno/Yager 參數補集', title: 'Ch.03 交集、聯集、補集與參數化運算動態疊圖' },
     4:  { shortTitle: '擴展原理與模糊數', count: 2, badge: '原書第 4 章 · 模糊數加減乘除 & y=f(x) 映射', title: 'Ch.04 模糊數四則計算器 (A⊕B, A⊖B, A⊗B, A⊘B) ＋ 函數映射' },
     5:  { shortTitle: '模糊關係矩陣', count: 1, badge: '原書第 5 章 · 卡迪興乘積與關係強度熱力圖', title: 'Ch.05 模糊關係矩陣 R(X×Y) 互動編輯與 2D 熱力圖' },
@@ -8913,24 +8913,20 @@ window.FuzzyWidgets = (function () {
     };
 
     if (chNum === 2) {
-      const nearCHolderId = `${containerId}-near-c-sim`;
-      const nearCPrefix = 'lab2_' + String(containerId).replace(/[^a-zA-Z0-9]/g, '');
+      const cleanId = String(containerId).replace(/[^a-zA-Z0-9]/g, '');
+      const simAId = `${containerId}-sim-a`;
+      const simBId = `${containerId}-sim-b`;
+      const simCId = `${containerId}-sim-c`;
       el.innerHTML = `
         <div class="space-y-6">
-          <div id="${nearCHolderId}"></div>
-          <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
-              <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">原書第 2 章 · 圖 2.9 α-cut 水平切片</span>
-              <span class="text-xs text-slate-400 font-semibold">單一歸屬函數造型與 α-截集區間計算器</span>
-            </div>
-            ${controlsByCh[2] || ''}
-            <div id="${plotId}" class="w-full h-72 sm:h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
-            <div id="${readoutId}" class="text-xs sm:text-sm text-slate-300 bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 leading-relaxed"></div>
-          </div>
+          <div id="${simAId}"></div>
+          <div id="${simBId}"></div>
+          <div id="${simCId}"></div>
         </div>
       `;
-      renderNearCSimulator(nearCHolderId, { prefix: nearCPrefix, showFormulas: true });
-      updateChapter19Lab(2);
+      renderNearCSimulator(simAId, { prefix: 'lab2a_' + cleanId, showFormulas: true });
+      renderShapeShifterSimulator(simBId, { prefix: 'lab2b_' + cleanId });
+      renderAlphaCutLabSimulator(simCId, { prefix: 'lab2c_' + cleanId });
       return;
     }
 
@@ -9768,6 +9764,639 @@ window.FuzzyWidgets = (function () {
     }
   }
 
+  // =========================================================================
+  // 模擬器 B（圖 2.8）：標準化歸屬函數參數塑形器 (Tri / Trap / Gauss / G-Bell)
+  // =========================================================================
+  const shapeBStateMap = {};
+  const shapeBMathTimers = {};
+
+  function getShapeBState(prefix) {
+    if (!shapeBStateMap[prefix]) {
+      shapeBStateMap[prefix] = {
+        type: 'tri', // 'tri' | 'trap' | 'gauss' | 'gbell'
+        tri:   { a: 2.0, b: 5.0, c: 8.0 },
+        trap:  { a: 1.5, b: 3.5, c: 6.5, d: 8.5 },
+        gauss: { c: 5.0, sigma: 1.4 },
+        gbell: { a: 1.8, b: 2.5, c: 5.0 }
+      };
+    }
+    return shapeBStateMap[prefix];
+  }
+
+  function renderShapeShifterSimulator(containerId, options) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const opts = options || {};
+    const prefix = opts.prefix || ('shapeb_' + String(containerId).replace(/[^a-zA-Z0-9_-]/g, ''));
+    const st = getShapeBState(prefix);
+
+    const types = [
+      { id: 'tri', label: '三角形 tri(x; a,b,c)' },
+      { id: 'trap', label: '梯形 trap(x; a,b,c,d)' },
+      { id: 'gauss', label: '高斯 gauss(x; c,σ)' },
+      { id: 'gbell', label: '廣義鐘形 gbell(x; a,b,c)' }
+    ];
+
+    const btnsHtml = types.map(t => `
+      <button type="button" id="${prefix}-btn-${t.id}" onclick="FuzzyWidgets.setShapeBType('${prefix}', '${t.id}')"
+        class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${st.type === t.id ? 'bg-teal-500 text-slate-950 border-teal-400 shadow-sm' : 'bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800'}">
+        ${t.label}
+      </button>
+    `).join('');
+
+    el.innerHTML = `
+      <div class="bg-slate-900/85 border border-teal-500/30 rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-teal-500/15 border border-teal-500/30 text-teal-300 text-xs font-bold">模擬器 B · 圖 2.8</span>
+            <h4 class="text-sm sm:text-base font-bold text-white">標準化歸屬函數參數塑形器（Triangular / Trapezoidal / Gaussian / G-Bell）</h4>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-2">${btnsHtml}</div>
+        <div id="${prefix}-controls" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+        <div id="${prefix}-plot" class="w-full h-80 sm:h-96 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+        <div id="${prefix}-badges" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"></div>
+        <div id="${prefix}-formula" class="bg-slate-950/85 border border-teal-500/25 rounded-xl px-4 py-3 text-teal-200 text-xs sm:text-sm overflow-x-auto"></div>
+      </div>
+    `;
+
+    renderShapeBControls(prefix);
+    updateShapeBSimulator(prefix);
+  }
+
+  function renderShapeBControls(prefix) {
+    const st = getShapeBState(prefix);
+    const ctrlEl = document.getElementById(`${prefix}-controls`);
+    if (!ctrlEl) return;
+
+    const sliderCard = (key, label, min, max, step, val, color) => `
+      <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 space-y-1.5">
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-bold text-${color}-300">${label}</span>
+          <span id="${prefix}-val-${key}" class="font-mono font-bold text-white">${Number(val).toFixed(1)}</span>
+        </div>
+        <input id="${prefix}-in-${key}" type="range" min="${min}" max="${max}" step="${step}" value="${val}"
+          oninput="FuzzyWidgets.onShapeBSlider('${prefix}', '${key}', this.value)"
+          class="w-full accent-${color}-400">
+      </div>
+    `;
+
+    if (st.type === 'tri') {
+      const p = st.tri;
+      ctrlEl.innerHTML =
+        sliderCard('a', '左腳點 a (a ≤ b)', 0, 9.5, 0.1, p.a, 'sky') +
+        sliderCard('b', '頂點 b (a ≤ b ≤ c)', 0.2, 9.8, 0.1, p.b, 'teal') +
+        sliderCard('c', '右腳點 c (b ≤ c)', 0.5, 10, 0.1, p.c, 'emerald');
+    } else if (st.type === 'trap') {
+      const p = st.trap;
+      ctrlEl.innerHTML =
+        sliderCard('a', '左腳點 a (a ≤ b)', 0, 9.0, 0.1, p.a, 'sky') +
+        sliderCard('b', '左肩點 b (a ≤ b ≤ c)', 0.2, 9.4, 0.1, p.b, 'teal') +
+        sliderCard('c', '右肩點 c (b ≤ c ≤ d)', 0.5, 9.7, 0.1, p.c, 'emerald') +
+        sliderCard('d', '右腳點 d (c ≤ d)', 1.0, 10, 0.1, p.d, 'amber');
+    } else if (st.type === 'gauss') {
+      const p = st.gauss;
+      ctrlEl.innerHTML =
+        sliderCard('c', '中心點 c', 1.0, 9.0, 0.1, p.c, 'teal') +
+        sliderCard('sigma', '標準差 σ（寬度）', 0.3, 3.0, 0.1, p.sigma, 'amber');
+    } else {
+      const p = st.gbell;
+      ctrlEl.innerHTML =
+        sliderCard('a', '半寬 a（μ=0.5 距中心）', 0.4, 3.5, 0.1, p.a, 'sky') +
+        sliderCard('b', '斜率參數 b', 0.5, 6.0, 0.1, p.b, 'amber') +
+        sliderCard('c', '中心點 c', 1.0, 9.0, 0.1, p.c, 'teal');
+    }
+  }
+
+  function setShapeBType(prefix, newType) {
+    const st = getShapeBState(prefix);
+    st.type = newType;
+    ['tri', 'trap', 'gauss', 'gbell'].forEach(t => {
+      const btn = document.getElementById(`${prefix}-btn-${t}`);
+      if (!btn) return;
+      if (t === newType) {
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-teal-500 text-slate-950 border-teal-400 shadow-sm';
+      } else {
+        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800';
+      }
+    });
+    renderShapeBControls(prefix);
+    updateShapeBSimulator(prefix);
+  }
+
+  function onShapeBSlider(prefix, key, rawVal) {
+    const st = getShapeBState(prefix);
+    const v = parseFloat(rawVal);
+    if (isNaN(v)) return;
+
+    if (st.type === 'tri') {
+      const p = st.tri;
+      p[key] = v;
+      if (key === 'a') {
+        if (p.a > p.b) p.b = p.a;
+        if (p.b > p.c) p.c = p.b;
+      } else if (key === 'b') {
+        p.b = Math.max(p.a, Math.min(p.c, p.b));
+      } else if (key === 'c') {
+        if (p.c < p.b) p.b = p.c;
+        if (p.b < p.a) p.a = p.b;
+      }
+      ['a', 'b', 'c'].forEach(k => {
+        const inp = document.getElementById(`${prefix}-in-${k}`);
+        const lbl = document.getElementById(`${prefix}-val-${k}`);
+        if (inp) inp.value = p[k];
+        if (lbl) lbl.textContent = p[k].toFixed(1);
+      });
+    } else if (st.type === 'trap') {
+      const p = st.trap;
+      p[key] = v;
+      if (key === 'a') {
+        if (p.a > p.b) p.b = p.a;
+        if (p.b > p.c) p.c = p.b;
+        if (p.c > p.d) p.d = p.c;
+      } else if (key === 'b') {
+        p.b = Math.max(p.a, p.b);
+        if (p.b > p.c) p.c = p.b;
+        if (p.c > p.d) p.d = p.c;
+      } else if (key === 'c') {
+        p.c = Math.min(p.d, p.c);
+        if (p.c < p.b) p.b = p.c;
+        if (p.b < p.a) p.a = p.b;
+      } else if (key === 'd') {
+        if (p.d < p.c) p.c = p.d;
+        if (p.c < p.b) p.b = p.c;
+        if (p.b < p.a) p.a = p.b;
+      }
+      ['a', 'b', 'c', 'd'].forEach(k => {
+        const inp = document.getElementById(`${prefix}-in-${k}`);
+        const lbl = document.getElementById(`${prefix}-val-${k}`);
+        if (inp) inp.value = p[k];
+        if (lbl) lbl.textContent = p[k].toFixed(1);
+      });
+    } else if (st.type === 'gauss') {
+      st.gauss[key] = v;
+      const lbl = document.getElementById(`${prefix}-val-${key}`);
+      if (lbl) lbl.textContent = v.toFixed(1);
+    } else {
+      st.gbell[key] = v;
+      const lbl = document.getElementById(`${prefix}-val-${key}`);
+      if (lbl) lbl.textContent = v.toFixed(1);
+    }
+
+    updateShapeBSimulator(prefix);
+  }
+
+  function updateShapeBSimulator(prefix) {
+    const st = getShapeBState(prefix);
+    const xs = [], ys = [];
+    const evalFn = (x) => {
+      if (st.type === 'tri') {
+        const { a, b, c } = st.tri;
+        if (x <= a || x >= c) return 0;
+        if (x === b) return 1;
+        if (x < b) return (b === a) ? 1 : (x - a) / (b - a);
+        return (c === b) ? 1 : (c - x) / (c - b);
+      } else if (st.type === 'trap') {
+        const { a, b, c, d } = st.trap;
+        if (x <= a || x >= d) return 0;
+        if (x >= b && x <= c) return 1;
+        if (x < b) return (b === a) ? 1 : (x - a) / (b - a);
+        return (d === c) ? 1 : (d - x) / (d - c);
+      } else if (st.type === 'gauss') {
+        const { c, sigma } = st.gauss;
+        return Math.exp(-Math.pow(x - c, 2) / (2 * sigma * sigma));
+      } else {
+        const { a, b, c } = st.gbell;
+        return 1 / (1 + Math.pow(Math.abs((x - c) / a), 2 * b));
+      }
+    };
+
+    for (let i = 0; i <= 400; i++) {
+      const xv = (i / 400) * 10;
+      xs.push(Number(xv.toFixed(3)));
+      ys.push(evalFn(xv));
+    }
+
+    // 計算幾何特徵：Core, Support, Crossover (μ=0.5)
+    let coreText = '', supportText = '', crossL = 0, crossR = 0;
+    const traces = [
+      { x: xs, y: ys, name: '歸屬函數 μ(x)', fill: 'tozeroy', fillcolor: 'rgba(45, 212, 191, 0.16)', line: { color: '#2dd4bf', width: 3 } },
+      { x: [0, 10], y: [0.5, 0.5], name: 'μ = 0.5 交越參考線', mode: 'lines', line: { color: '#f59e0b', width: 1.5, dash: 'dash' } }
+    ];
+
+    if (st.type === 'tri') {
+      const { a, b, c } = st.tri;
+      crossL = (a + b) / 2;
+      crossR = (b + c) / 2;
+      coreText = `{ ${b.toFixed(1)} }`;
+      supportText = `(${a.toFixed(1)}, ${c.toFixed(1)})`;
+      traces.push({ x: [b], y: [1], name: `Core: x=${b.toFixed(1)}`, mode: 'markers+text', text: [`Core (${b.toFixed(1)})`], textposition: 'top center', textfont: { color: '#34d399', size: 11 }, marker: { color: '#34d399', size: 10, symbol: 'diamond' } });
+      traces.push({ x: [a, c], y: [0, 0], name: `Support: (${a.toFixed(1)}, ${c.toFixed(1)})`, mode: 'lines+markers', line: { color: '#38bdf8', width: 4 }, marker: { color: '#38bdf8', size: 8, symbol: 'circle-open' } });
+    } else if (st.type === 'trap') {
+      const { a, b, c, d } = st.trap;
+      crossL = (a + b) / 2;
+      crossR = (c + d) / 2;
+      coreText = `[${b.toFixed(1)}, ${c.toFixed(1)}]`;
+      supportText = `(${a.toFixed(1)}, ${d.toFixed(1)})`;
+      traces.push({ x: [b, c], y: [1, 1], name: `Core 平台: [${b.toFixed(1)}, ${c.toFixed(1)}]`, mode: 'lines+markers', line: { color: '#34d399', width: 5 }, marker: { color: '#34d399', size: 8 } });
+      traces.push({ x: [a, d], y: [0, 0], name: `Support 跨距: (${a.toFixed(1)}, ${d.toFixed(1)})`, mode: 'lines+markers', line: { color: '#38bdf8', width: 4 }, marker: { color: '#38bdf8', size: 8, symbol: 'circle-open' } });
+    } else if (st.type === 'gauss') {
+      const { c, sigma } = st.gauss;
+      const half = sigma * Math.sqrt(2 * Math.LN2);
+      crossL = c - half;
+      crossR = c + half;
+      coreText = `{ ${c.toFixed(1)} }`;
+      supportText = '(-∞, +∞)（全實數軸漸近 > 0）';
+      traces.push({ x: [c], y: [1], name: `Core: x=${c.toFixed(1)}`, mode: 'markers+text', text: [`Core (${c.toFixed(1)})`], textposition: 'top center', textfont: { color: '#34d399', size: 11 }, marker: { color: '#34d399', size: 10, symbol: 'diamond' } });
+      traces.push({ x: [0, 10], y: [0.008, 0.008], name: 'Support: (-∞, +∞)', mode: 'lines', line: { color: '#38bdf8', width: 2.5, dash: 'dot' } });
+    } else {
+      const { a, b, c } = st.gbell;
+      crossL = c - a;
+      crossR = c + a;
+      coreText = `{ ${c.toFixed(1)} }`;
+      supportText = '(-∞, +∞)（全實數軸漸近 > 0）';
+      traces.push({ x: [c], y: [1], name: `Core: x=${c.toFixed(1)}`, mode: 'markers+text', text: [`Core (${c.toFixed(1)})`], textposition: 'top center', textfont: { color: '#34d399', size: 11 }, marker: { color: '#34d399', size: 10, symbol: 'diamond' } });
+      traces.push({ x: [0, 10], y: [0.008, 0.008], name: 'Support: (-∞, +∞)', mode: 'lines', line: { color: '#38bdf8', width: 2.5, dash: 'dot' } });
+    }
+
+    traces.push({
+      x: [crossL, crossR],
+      y: [0.5, 0.5],
+      name: `交越點 (${crossL.toFixed(2)}, ${crossR.toFixed(2)})`,
+      mode: 'markers+text',
+      text: [crossL.toFixed(2), crossR.toFixed(2)],
+      textposition: ['bottom left', 'bottom right'],
+      textfont: { color: '#fbbf24', size: 11 },
+      marker: { color: '#f59e0b', size: 9, line: { color: '#0f172a', width: 1.5 } }
+    });
+
+    const plotEl = document.getElementById(`${prefix}-plot`);
+    if (plotEl && window.Plotly) {
+      Plotly.react(plotEl, traces, {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(15, 23, 42, 0.78)',
+        font: { color: '#e2e8f0', size: 11 },
+        margin: { t: 34, r: 18, b: 42, l: 48 },
+        legend: { orientation: 'h', y: 1.15, x: 0 },
+        xaxis: { title: '論域 x ∈ [0, 10]', range: [0, 10], gridcolor: 'rgba(148, 163, 184, 0.14)' },
+        yaxis: { title: '歸屬度 μ(x)', range: [-0.06, 1.14], gridcolor: 'rgba(148, 163, 184, 0.14)' }
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    const badgesEl = document.getElementById(`${prefix}-badges`);
+    if (badgesEl) {
+      badgesEl.innerHTML = `
+        <div class="bg-slate-950/80 border border-emerald-500/30 rounded-xl px-3.5 py-2.5 text-xs">
+          <div class="text-emerald-300 font-bold">Core 核心 (μ = 1)</div>
+          <div class="font-mono text-white font-bold mt-0.5">${coreText}</div>
+        </div>
+        <div class="bg-slate-950/80 border border-sky-500/30 rounded-xl px-3.5 py-2.5 text-xs">
+          <div class="text-sky-300 font-bold">Support 支撐集 (μ &gt; 0)</div>
+          <div class="font-mono text-white font-bold mt-0.5">${supportText}</div>
+        </div>
+        <div class="bg-slate-950/80 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-xs">
+          <div class="text-amber-300 font-bold">Crossover 交越點 (μ = 0.5)</div>
+          <div class="font-mono text-white font-bold mt-0.5">x = ${crossL.toFixed(2)}, ${crossR.toFixed(2)}</div>
+        </div>
+      `;
+    }
+
+    const formulaEl = document.getElementById(`${prefix}-formula`);
+    if (formulaEl) {
+      let tex = '';
+      if (st.type === 'tri') {
+        const { a, b, c } = st.tri;
+        tex = `$$\\text{tri}(x; ${a.toFixed(1)}, ${b.toFixed(1)}, ${c.toFixed(1)}) = \\max\\left(\\min\\left(\\frac{x - ${a.toFixed(1)}}{${Math.max(0.01, b - a).toFixed(1)}},\\; \\frac{${c.toFixed(1)} - x}{${Math.max(0.01, c - b).toFixed(1)}}\\right),\\; 0\\right)$$`;
+      } else if (st.type === 'trap') {
+        const { a, b, c, d } = st.trap;
+        tex = `$$\\text{trap}(x; ${a.toFixed(1)}, ${b.toFixed(1)}, ${c.toFixed(1)}, ${d.toFixed(1)}) = \\max\\left(\\min\\left(\\frac{x - ${a.toFixed(1)}}{${Math.max(0.01, b - a).toFixed(1)}},\\; 1,\\; \\frac{${d.toFixed(1)} - x}{${Math.max(0.01, d - c).toFixed(1)}}\\right),\\; 0\\right)$$`;
+      } else if (st.type === 'gauss') {
+        const { c, sigma } = st.gauss;
+        tex = `$$\\text{gauss}(x; ${c.toFixed(1)}, ${sigma.toFixed(1)}) = \\exp\\left(-\\frac{(x - ${c.toFixed(1)})^2}{2 \\times ${sigma.toFixed(1)}^2}\\right)$$`;
+      } else {
+        const { a, b, c } = st.gbell;
+        tex = `$$\\text{gbell}(x; ${a.toFixed(1)}, ${b.toFixed(1)}, ${c.toFixed(1)}) = \\frac{1}{1 + \\left|\\frac{x - ${c.toFixed(1)}}{${a.toFixed(1)}}\\right|^{${(2 * b).toFixed(1)}}}$$`;
+      }
+      formulaEl.innerHTML = tex;
+      if (shapeBMathTimers[prefix]) clearTimeout(shapeBMathTimers[prefix]);
+      shapeBMathTimers[prefix] = setTimeout(() => {
+        if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+          if (typeof window.MathJax.typesetClear === 'function') window.MathJax.typesetClear([formulaEl]);
+          window.MathJax.typesetPromise([formulaEl]).catch(() => {});
+        }
+      }, 70);
+    }
+  }
+
+  // =========================================================================
+  // 模擬器 C（第 2 章核心概念）：α-Cut 與支撐集/核心互動切片實驗室
+  // =========================================================================
+  const alphaCStateMap = {};
+
+  function getAlphaCState(prefix) {
+    if (!alphaCStateMap[prefix]) {
+      alphaCStateMap[prefix] = {
+        alpha: 0.60,
+        strong: false, // false: >= α, true: > α
+        shape: 'trap'  // 'trap' | 'gauss' | 'bimodal'
+      };
+    }
+    return alphaCStateMap[prefix];
+  }
+
+  function evalAlphaCShape(x, shape) {
+    if (shape === 'trap') {
+      // trap(x; 2.4, 4.4, 5.6, 7.6) -> at α=0.6: [3.60, 6.40]
+      if (x <= 2.4 || x >= 7.6) return 0;
+      if (x >= 4.4 && x <= 5.6) return 1;
+      if (x < 4.4) return (x - 2.4) / 2.0;
+      return (7.6 - x) / 2.0;
+    } else if (shape === 'gauss') {
+      return Math.exp(-Math.pow(x - 5.0, 2) / (2 * 1.5 * 1.5));
+    } else {
+      // 雙峰非凸模糊集: tri(0.5, 2.0, 3.5) + tri(5.0, 7.0, 9.0) + 0.3 bridge
+      // at α=0.6: [1.40, 2.60] ∪ [6.20, 7.80]
+      const t1 = Math.max(0, 1 - Math.abs(x - 2.0) / 1.5);
+      const t2 = Math.max(0, 1 - Math.abs(x - 7.0) / 2.0);
+      let br = 0;
+      if (x > 2.5 && x < 6.0) {
+        if (x >= 3.5 && x <= 5.0) br = 0.3;
+        else if (x < 3.5) br = 0.3 * (x - 2.5);
+        else br = 0.3 * (6.0 - x);
+      }
+      return Math.max(t1, t2, br);
+    }
+  }
+
+  function solveAlphaCIntervals(shape, alpha, strong) {
+    if (strong && alpha >= 1.0) return { intervals: [], unbounded: false, wholeUniverse: false };
+    if (!strong && alpha <= 0.0) return { intervals: [[0, 10]], unbounded: shape === 'gauss', wholeUniverse: true };
+
+    if (shape === 'gauss') {
+      if (alpha === 0 && strong) return { intervals: [[0, 10]], unbounded: true, wholeUniverse: false };
+      if (alpha >= 1.0) return { intervals: [[5.0, 5.0]], unbounded: false, wholeUniverse: false };
+      const half = 1.5 * Math.sqrt(-2 * Math.log(alpha));
+      return { intervals: [[Math.max(0, 5 - half), Math.min(10, 5 + half)]], unbounded: false, wholeUniverse: false };
+    }
+
+    // 掃描分段線性交點 (dx = 0.002) 並線性內插以取得精確端點
+    const N = 5000;
+    const intervals = [];
+    let inSeg = false;
+    let segStart = 0;
+    const eps = strong ? 1e-9 : -1e-9;
+
+    let prevX = 0;
+    let prevY = evalAlphaCShape(0, shape);
+    let prevIn = strong ? (prevY > alpha + 1e-12) : (prevY >= alpha - 1e-12);
+    if (prevIn) { inSeg = true; segStart = 0; }
+
+    for (let i = 1; i <= N; i++) {
+      const x = (i / N) * 10;
+      const y = evalAlphaCShape(x, shape);
+      const curIn = strong ? (y > alpha + 1e-12) : (y >= alpha - 1e-12);
+
+      if (!prevIn && curIn) {
+        const denom = y - prevY;
+        const t = Math.abs(denom) > 1e-12 ? (alpha - prevY) / denom : 0;
+        segStart = prevX + Math.max(0, Math.min(1, t)) * (x - prevX);
+        inSeg = true;
+      } else if (prevIn && !curIn && inSeg) {
+        const denom = y - prevY;
+        const t = Math.abs(denom) > 1e-12 ? (alpha - prevY) / denom : 0;
+        const segEnd = prevX + Math.max(0, Math.min(1, t)) * (x - prevX);
+        intervals.push([segStart, segEnd]);
+        inSeg = false;
+      }
+      prevX = x; prevY = y; prevIn = curIn;
+    }
+    if (inSeg) intervals.push([segStart, 10]);
+
+    // 若單點核心 (e.g. bimodal α=1.0) 寬度極小，補捉局部極大值點
+    if (intervals.length === 0 && !strong && alpha === 1.0 && shape === 'bimodal') {
+      intervals.push([2.0, 2.0], [7.0, 7.0]);
+    }
+    return { intervals, unbounded: false, wholeUniverse: false };
+  }
+
+  function renderAlphaCutLabSimulator(containerId, options) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const opts = options || {};
+    const prefix = opts.prefix || ('alphac_' + String(containerId).replace(/[^a-zA-Z0-9_-]/g, ''));
+    const st = getAlphaCState(prefix);
+
+    el.innerHTML = `
+      <div class="bg-slate-900/85 border border-amber-500/30 rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">模擬器 C · 第 2 章核心</span>
+            <h4 class="text-sm sm:text-base font-bold text-white">$\\alpha$-Cut（$\\alpha$-截集）與支撐集 / 核心互動切片實驗室</h4>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="FuzzyWidgets.setAlphaCPreset('${prefix}', 0.0, true)"
+              class="px-2.5 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 border border-sky-500/35 text-xs font-bold transition">
+              Support 支撐集 (α &gt; 0)
+            </button>
+            <button type="button" onclick="FuzzyWidgets.setAlphaCPreset('${prefix}', 0.5, false)"
+              class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/35 text-xs font-bold transition">
+              Crossover 交越點 (α = 0.5)
+            </button>
+            <button type="button" onclick="FuzzyWidgets.setAlphaCPreset('${prefix}', 1.0, false)"
+              class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-500/35 text-xs font-bold transition">
+              Core 核心 (α = 1.0)
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-amber-300">水平切片高度 α ∈ [0, 1]：</span>
+              <span id="${prefix}-alpha-val" class="font-mono font-bold text-white">${st.alpha.toFixed(2)}</span>
+            </div>
+            <input id="${prefix}-alpha" type="range" min="0" max="1" step="0.05" value="${st.alpha}"
+              oninput="FuzzyWidgets.updateAlphaCSimulator('${prefix}')"
+              class="w-full accent-amber-400">
+          </div>
+
+          <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 space-y-1.5">
+            <div class="text-xs font-bold text-slate-300">截集類型切換：</div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button type="button" id="${prefix}-mode-weak" onclick="FuzzyWidgets.setAlphaCMode('${prefix}', false)"
+                class="px-2 py-1.5 rounded-lg text-xs font-bold border transition ${!st.strong ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-300 border-slate-700'}">
+                一般 (μ ≥ α)
+              </button>
+              <button type="button" id="${prefix}-mode-strong" onclick="FuzzyWidgets.setAlphaCMode('${prefix}', true)"
+                class="px-2 py-1.5 rounded-lg text-xs font-bold border transition ${st.strong ? 'bg-rose-500 text-white border-rose-400' : 'bg-slate-900 text-slate-300 border-slate-700'}">
+                強截集 (μ &gt; α)
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 space-y-1.5">
+            <label for="${prefix}-shape" class="block text-xs font-bold text-slate-300">模糊集合形狀選擇：</label>
+            <select id="${prefix}-shape" onchange="FuzzyWidgets.onAlphaCShapeChange('${prefix}', this.value)"
+              class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 font-semibold">
+              <option value="trap" ${st.shape === 'trap' ? 'selected' : ''}>單峰梯形 (Unimodal Trapezoid)</option>
+              <option value="gauss" ${st.shape === 'gauss' ? 'selected' : ''}>單峰高斯 (Unimodal Gaussian)</option>
+              <option value="bimodal" ${st.shape === 'bimodal' ? 'selected' : ''}>雙峰非凸模糊集 (Bimodal Non-convex)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="${prefix}-plot" class="w-full h-80 sm:h-96 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+        <div id="${prefix}-readout" class="bg-slate-950/85 border border-amber-500/30 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 space-y-1.5"></div>
+      </div>
+    `;
+
+    updateAlphaCSimulator(prefix);
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([el]).catch(() => {});
+    }
+  }
+
+  function setAlphaCPreset(prefix, alphaVal, isStrong) {
+    const st = getAlphaCState(prefix);
+    st.alpha = alphaVal;
+    st.strong = !!isStrong;
+    const inp = document.getElementById(`${prefix}-alpha`);
+    if (inp) inp.value = alphaVal;
+    setAlphaCMode(prefix, st.strong);
+  }
+
+  function setAlphaCMode(prefix, isStrong) {
+    const st = getAlphaCState(prefix);
+    st.strong = !!isStrong;
+    const wBtn = document.getElementById(`${prefix}-mode-weak`);
+    const sBtn = document.getElementById(`${prefix}-mode-strong`);
+    if (wBtn && sBtn) {
+      wBtn.className = `px-2 py-1.5 rounded-lg text-xs font-bold border transition ${!st.strong ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
+      sBtn.className = `px-2 py-1.5 rounded-lg text-xs font-bold border transition ${st.strong ? 'bg-rose-500 text-white border-rose-400' : 'bg-slate-900 text-slate-300 border-slate-700'}`;
+    }
+    updateAlphaCSimulator(prefix);
+  }
+
+  function onAlphaCShapeChange(prefix, shapeVal) {
+    const st = getAlphaCState(prefix);
+    st.shape = shapeVal;
+    updateAlphaCSimulator(prefix);
+  }
+
+  function updateAlphaCSimulator(prefix) {
+    const st = getAlphaCState(prefix);
+    const alphaInp = document.getElementById(`${prefix}-alpha`);
+    if (alphaInp) st.alpha = parseFloat(alphaInp.value);
+    const alphaLbl = document.getElementById(`${prefix}-alpha-val`);
+    if (alphaLbl) alphaLbl.textContent = st.alpha.toFixed(2);
+
+    const xs = [], ys = [], yFloor = [], yCeil = [];
+    for (let i = 0; i <= 500; i++) {
+      const x = (i / 500) * 10;
+      const y = evalAlphaCShape(x, st.shape);
+      xs.push(Number(x.toFixed(3)));
+      ys.push(y);
+      const inCut = st.strong ? (y > st.alpha + 1e-9) : (y >= st.alpha - 1e-9);
+      yFloor.push(inCut ? st.alpha : null);
+      yCeil.push(inCut ? y : null);
+    }
+
+    const solved = solveAlphaCIntervals(st.shape, st.alpha, st.strong);
+    const symMarker = st.strong ? 'circle-open' : 'circle';
+    const projColor = st.strong ? '#f43f5e' : '#10b981';
+
+    const traces = [
+      { x: xs, y: yFloor, mode: 'lines', line: { width: 0 }, showlegend: false, hoverinfo: 'skip', connectgaps: false },
+      { x: xs, y: yCeil, name: '高於 α 切片面積', mode: 'lines', line: { width: 0 }, fill: 'tonexty', fillcolor: 'rgba(245, 158, 11, 0.25)', connectgaps: false, hoverinfo: 'skip' },
+      { x: xs, y: ys, name: '歸屬函數 μ_A(x)', mode: 'lines', line: { color: '#38bdf8', width: 3 } },
+      { x: [0, 10], y: [st.alpha, st.alpha], name: `切割線 y = ${st.alpha.toFixed(2)}`, mode: 'lines', line: { color: '#f59e0b', width: 2.2, dash: 'dash' } }
+    ];
+
+    // 在 X 軸上繪製投影區間與垂直虛線
+    solved.intervals.forEach((seg, idx) => {
+      const [L, R] = seg;
+      traces.push({
+        x: [L, R],
+        y: [0, 0],
+        name: idx === 0 ? (st.strong ? '強 α-截集開區間 ( , )' : '一般 α-截集閉區間 [ , ]') : '',
+        showlegend: idx === 0,
+        mode: 'lines+markers',
+        line: { color: projColor, width: 6 },
+        marker: { color: st.strong ? '#0f172a' : projColor, size: 10, symbol: symMarker, line: { color: projColor, width: 2.5 } }
+      });
+      if (st.alpha > 0 && !solved.wholeUniverse) {
+        traces.push({
+          x: [L, L, null, R, R],
+          y: [st.alpha, 0, null, st.alpha, 0],
+          mode: 'lines',
+          showlegend: false,
+          hoverinfo: 'skip',
+          line: { color: projColor, width: 1.3, dash: 'dot' }
+        });
+      }
+    });
+
+    const plotEl = document.getElementById(`${prefix}-plot`);
+    if (plotEl && window.Plotly) {
+      Plotly.react(plotEl, traces, {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(15, 23, 42, 0.78)',
+        font: { color: '#e2e8f0', size: 11 },
+        margin: { t: 32, r: 18, b: 42, l: 48 },
+        legend: { orientation: 'h', y: 1.15, x: 0 },
+        xaxis: { title: '論域 x ∈ [0, 10]（X 軸粗線段為普通集合投影）', range: [0, 10], gridcolor: 'rgba(148, 163, 184, 0.14)' },
+        yaxis: { title: '歸屬度 μ_A(x)', range: [-0.08, 1.12], gridcolor: 'rgba(148, 163, 184, 0.14)' }
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    const readoutEl = document.getElementById(`${prefix}-readout`);
+    if (readoutEl) {
+      const aStr = st.alpha.toFixed(2);
+      const symLabel = st.strong ? `A_{${aStr}+}` : `A_{${aStr}}`;
+      const condLabel = st.strong ? `μ_A(x) &gt; ${aStr}` : `μ_A(x) ≥ ${aStr}`;
+      let intervalStr = '';
+      let totalLen = 0;
+
+      if (solved.intervals.length === 0) {
+        intervalStr = '∅（空集合）';
+      } else if (solved.wholeUniverse) {
+        intervalStr = st.shape === 'gauss' ? '(-∞, +∞) = X（全體論域）' : '[0.00, 10.00] = X（全體論域）';
+        totalLen = 10;
+      } else if (solved.unbounded) {
+        intervalStr = '(-∞, +∞)（高斯函數全實數軸皆 &gt; 0）';
+        totalLen = Infinity;
+      } else {
+        const lBrk = st.strong ? '(' : '[';
+        const rBrk = st.strong ? ')' : ']';
+        intervalStr = solved.intervals.map(([L, R]) => {
+          totalLen += (R - L);
+          if (Math.abs(R - L) < 1e-4 && !st.strong) return `{${L.toFixed(2)}}`;
+          return `${lBrk}${L.toFixed(2)}, ${R.toFixed(2)}${rBrk}`;
+        }).join(' ∪ ');
+      }
+
+      const lenText = totalLen === Infinity ? '∞' : totalLen.toFixed(2);
+      const convexNote = solved.intervals.length > 1
+        ? `<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/35 text-xs font-bold">⚠️ 非凸模糊集：截集分裂為 ${solved.intervals.length} 段聯集</span>`
+        : `<span class="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-bold">✓ 單一連通區間</span>`;
+
+      readoutEl.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <span class="text-amber-300 font-bold">解析切片結果（${condLabel}）：</span>
+            <span class="font-mono font-extrabold text-white text-sm sm:text-base ml-1">${symLabel} = ${intervalStr}</span>
+          </div>
+          ${convexNote}
+        </div>
+        <div class="text-xs text-slate-400 flex flex-wrap gap-4">
+          <span>區間總長度：<b class="text-slate-200 font-mono">${lenText}</b></span>
+          <span>端點型態：<b class="text-slate-200">${st.strong ? '開區間 ( , ) — 空心圓端點' : '閉區間 [ , ] — 實心圓端點'}</b></span>
+        </div>
+      `;
+    }
+  }
+
   return {
     getChapterInteractiveHtml: getChapterInteractiveHtml,
     initChapterWidgets: initChapterWidgets,
@@ -9858,6 +10487,15 @@ window.FuzzyWidgets = (function () {
     onNearCCChange: onNearCCChange,
     resetNearCCenter: resetNearCCenter,
     resetNearCAll: resetNearCAll,
+    renderShapeShifterSimulator: renderShapeShifterSimulator,
+    setShapeBType: setShapeBType,
+    onShapeBSlider: onShapeBSlider,
+    updateShapeBSimulator: updateShapeBSimulator,
+    renderAlphaCutLabSimulator: renderAlphaCutLabSimulator,
+    setAlphaCPreset: setAlphaCPreset,
+    setAlphaCMode: setAlphaCMode,
+    onAlphaCShapeChange: onAlphaCShapeChange,
+    updateAlphaCSimulator: updateAlphaCSimulator,
     fcmStep19: fcmStep19,
     fcmAuto19: fcmAuto19,
     fcmReset19: fcmReset19
