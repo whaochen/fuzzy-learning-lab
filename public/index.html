@@ -31415,7 +31415,7 @@ window.FuzzyWidgets = (function () {
   // =========================================================================
   const LAB_19_META = {
     1:  { shortTitle: '緒論與概念對比', count: 1, badge: '原書第 1 章 · 課本圖 1.1 高個子/室溫 Crisp vs. Fuzzy', title: 'Ch.01 二值邏輯 (Crisp) vs. 模糊集合 (Fuzzy) 對比滑桿' },
-    2:  { shortTitle: '模糊集合與 α-cut', count: 2, badge: '原書第 2 章 · 課本圖 2.7 造型 & 圖 2.9 α-截集切片', title: 'Ch.02 歸屬函數即時塑形圖 ＋ α-cut 互動切片計算器' },
+    2:  { shortTitle: '圖 2.7 對比 & α-cut', count: 2, badge: '原書第 2 章 · 圖 2.7「靠近 c 之實數」四函數對比 & 圖 2.9 α-cut 切片', title: 'Ch.02 接近目標數 c 之四種連續歸屬函數對比模擬器 ＋ α-cut 互動切片' },
     3:  { shortTitle: '模糊集合運算', count: 1, badge: '原書第 3 章 · 標準 Min/Max & Sugeno/Yager 參數補集', title: 'Ch.03 交集、聯集、補集與參數化運算動態疊圖' },
     4:  { shortTitle: '擴展原理與模糊數', count: 2, badge: '原書第 4 章 · 模糊數加減乘除 & y=f(x) 映射', title: 'Ch.04 模糊數四則計算器 (A⊕B, A⊖B, A⊗B, A⊘B) ＋ 函數映射' },
     5:  { shortTitle: '模糊關係矩陣', count: 1, badge: '原書第 5 章 · 卡迪興乘積與關係強度熱力圖', title: 'Ch.05 模糊關係矩陣 R(X×Y) 互動編輯與 2D 熱力圖' },
@@ -31758,6 +31758,28 @@ window.FuzzyWidgets = (function () {
           </label>
         </div>`
     };
+
+    if (chNum === 2) {
+      const nearCHolderId = `${containerId}-near-c-sim`;
+      const nearCPrefix = 'lab2_' + String(containerId).replace(/[^a-zA-Z0-9]/g, '');
+      el.innerHTML = `
+        <div class="space-y-6">
+          <div id="${nearCHolderId}"></div>
+          <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800/80">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">原書第 2 章 · 圖 2.9 α-cut 水平切片</span>
+              <span class="text-xs text-slate-400 font-semibold">單一歸屬函數造型與 α-截集區間計算器</span>
+            </div>
+            ${controlsByCh[2] || ''}
+            <div id="${plotId}" class="w-full h-72 sm:h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+            <div id="${readoutId}" class="text-xs sm:text-sm text-slate-300 bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 leading-relaxed"></div>
+          </div>
+        </div>
+      `;
+      renderNearCSimulator(nearCHolderId, { prefix: nearCPrefix, showFormulas: true });
+      updateChapter19Lab(2);
+      return;
+    }
 
     el.innerHTML = `
       <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 space-y-4">
@@ -32173,6 +32195,426 @@ window.FuzzyWidgets = (function () {
     }
   }
 
+  // =========================================================================
+  // 圖 2.7 升級版：接近目標數 c 之四種連續歸屬函數對比模擬器 (A1 ~ A4)
+  // =========================================================================
+  const nearCStateMap = {};
+
+  function getNearCState(prefix) {
+    if (!nearCStateMap[prefix]) {
+      nearCStateMap[prefix] = {
+        c: 5.0,
+        p1: 1.0,
+        p2: 1.0,
+        p3: 1.0,
+        p4: 1.0,
+        xProbe: 5.4,
+        showA1: true,
+        showA2: true,
+        showA3: true,
+        showA4: true
+      };
+    }
+    return nearCStateMap[prefix];
+  }
+
+  function evalNearCFuncs(x, c, p1, p2, p3, p4) {
+    const d = Math.abs(x - c);
+    const a1 = Math.max(0, 1 - d / p1);
+    const a2 = 1 / (1 + p2 * Math.pow(x - c, 2));
+    const a3 = Math.exp(-Math.abs(p3 * (x - c)));
+    const a4 = (d <= 1 / p4) ? (1 + Math.cos(p4 * Math.PI * (x - c))) / 2 : 0;
+    return { a1, a2, a3, a4 };
+  }
+
+  function renderNearCSimulator(containerId, options) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const opts = options || {};
+    const prefix = opts.prefix || ('nearc_' + String(containerId).replace(/[^a-zA-Z0-9_-]/g, ''));
+    const showFormulas = opts.showFormulas !== false;
+    const st = getNearCState(prefix);
+
+    const formulasHtml = showFormulas ? `
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5 text-xs">
+        <div class="bg-slate-950/75 border border-sky-500/25 rounded-xl px-3.5 py-2.5 text-sky-200 overflow-x-auto">
+          <div class="font-bold text-sky-300 mb-1">$A_1(x)$ 三角形歸屬函數（$p_1$ 半寬）：</div>
+          $$A_1(x) = \\begin{cases} 1 - \\frac{|x - c|}{p_1}, & |x - c| \\le p_1 \\\\ 0, & \\text{其他} \\end{cases}$$
+        </div>
+        <div class="bg-slate-950/75 border border-amber-500/25 rounded-xl px-3.5 py-2.5 text-amber-200 overflow-x-auto">
+          <div class="font-bold text-amber-300 mb-1">$A_2(x)$ 柯西鐘形有理分式（$p_2$ 斜率）：</div>
+          $$A_2(x) = \\frac{1}{1 + p_2(x - c)^2}$$
+        </div>
+        <div class="bg-slate-950/75 border border-rose-500/25 rounded-xl px-3.5 py-2.5 text-rose-200 overflow-x-auto">
+          <div class="font-bold text-rose-300 mb-1">$A_3(x)$ 指數尖峰型（$p_3$ 衰減率）：</div>
+          $$A_3(x) = \\exp\\{-|p_3(x - c)|\\}$$
+        </div>
+        <div class="bg-slate-950/75 border border-emerald-500/25 rounded-xl px-3.5 py-2.5 text-emerald-200 overflow-x-auto">
+          <div class="font-bold text-emerald-300 mb-1">$A_4(x)$ 餘弦半波鐘形（$p_4$ 頻率）：</div>
+          $$A_4(x) = \\begin{cases} \\frac{1 + \\cos(p_4 \\pi (x - c))}{2}, & x \\in [c - \\frac{1}{p_4}, c + \\frac{1}{p_4}] \\\\ 0, & \\text{其他} \\end{cases}$$
+        </div>
+      </div>
+    ` : '';
+
+    el.innerHTML = `
+      <div class="bg-slate-900/85 border border-sky-500/30 rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold">互動模擬器 · 圖 2.7</span>
+            <h4 class="text-sm sm:text-base font-bold text-white">接近目標數 $c$ 之四種連續歸屬函數對比模擬器（$A_1 \\sim A_4$）</h4>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="FuzzyWidgets.resetNearCCenter('${prefix}')"
+              class="px-3 py-1.5 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 text-sky-200 border border-sky-500/35 text-xs font-bold transition">
+              ↺ 重設為課本預設值 c=5
+            </button>
+            <button type="button" onclick="FuzzyWidgets.resetNearCAll('${prefix}')"
+              class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-semibold transition">
+              全部重設
+            </button>
+          </div>
+        </div>
+
+        ${formulasHtml}
+
+        <!-- 目標中心變數 c 控制列 -->
+        <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3.5 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="text-xs sm:text-sm font-bold text-sky-300">🎯 目標中心變數 $c$（論域區間 $[c-4, c+4]$）：</span>
+              <span id="${prefix}-range-badge" class="text-xs font-mono px-2 py-0.5 rounded bg-slate-900 text-slate-300 border border-slate-800">[${(st.c - 4).toFixed(1)}, ${(st.c + 4).toFixed(1)}]</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <label for="${prefix}-c-num" class="text-xs text-slate-400">數值輸入：</label>
+              <input id="${prefix}-c-num" type="number" min="-20" max="100" step="0.5" value="${st.c}"
+                onchange="FuzzyWidgets.onNearCCChange('${prefix}', this.value)"
+                oninput="FuzzyWidgets.onNearCCChange('${prefix}', this.value)"
+                class="w-24 bg-slate-900 border border-sky-500/40 rounded-lg px-2.5 py-1 text-sm font-mono font-bold text-sky-200 text-center focus:outline-none focus:border-sky-400">
+            </div>
+          </div>
+          <input id="${prefix}-c-range" type="range" min="-20" max="100" step="0.5" value="${st.c}"
+            oninput="FuzzyWidgets.onNearCCChange('${prefix}', this.value)"
+            class="w-full accent-sky-400">
+          <div class="flex justify-between text-[11px] font-mono text-slate-500">
+            <span>-20</span><span>0</span><span>5 (課本預設)</span><span>50</span><span>100</span>
+          </div>
+        </div>
+
+        <!-- 四個形狀參數 p1~p4 滑桿 + 曲線顯示開關 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div class="bg-slate-950/70 border border-sky-500/25 rounded-xl p-3 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-1.5 text-xs font-bold text-sky-300 cursor-pointer">
+                <input id="${prefix}-chk-a1" type="checkbox" ${st.showA1 ? 'checked' : ''} onchange="FuzzyWidgets.updateNearCSimulator('${prefix}')" class="accent-sky-400 rounded">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+                <span>$A_1$ 三角形</span>
+              </label>
+              <span id="${prefix}-p1-val" class="text-xs font-mono font-bold text-sky-200">${st.p1.toFixed(1)}</span>
+            </div>
+            <div class="text-[11px] text-slate-400">半寬 $p_1$：</div>
+            <input id="${prefix}-p1" type="range" min="0.2" max="4.0" step="0.1" value="${st.p1}"
+              oninput="FuzzyWidgets.updateNearCSimulator('${prefix}')" class="w-full accent-sky-400">
+          </div>
+
+          <div class="bg-slate-950/70 border border-amber-500/25 rounded-xl p-3 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-1.5 text-xs font-bold text-amber-300 cursor-pointer">
+                <input id="${prefix}-chk-a2" type="checkbox" ${st.showA2 ? 'checked' : ''} onchange="FuzzyWidgets.updateNearCSimulator('${prefix}')" class="accent-amber-400 rounded">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                <span>$A_2$ 柯西鐘形</span>
+              </label>
+              <span id="${prefix}-p2-val" class="text-xs font-mono font-bold text-amber-200">${st.p2.toFixed(1)}</span>
+            </div>
+            <div class="text-[11px] text-slate-400">斜率 $p_2$：</div>
+            <input id="${prefix}-p2" type="range" min="0.1" max="5.0" step="0.1" value="${st.p2}"
+              oninput="FuzzyWidgets.updateNearCSimulator('${prefix}')" class="w-full accent-amber-400">
+          </div>
+
+          <div class="bg-slate-950/70 border border-rose-500/25 rounded-xl p-3 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-1.5 text-xs font-bold text-rose-300 cursor-pointer">
+                <input id="${prefix}-chk-a3" type="checkbox" ${st.showA3 ? 'checked' : ''} onchange="FuzzyWidgets.updateNearCSimulator('${prefix}')" class="accent-rose-400 rounded">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-rose-400"></span>
+                <span>$A_3$ 指數尖峰</span>
+              </label>
+              <span id="${prefix}-p3-val" class="text-xs font-mono font-bold text-rose-200">${st.p3.toFixed(1)}</span>
+            </div>
+            <div class="text-[11px] text-slate-400">衰減率 $p_3$：</div>
+            <input id="${prefix}-p3" type="range" min="0.1" max="5.0" step="0.1" value="${st.p3}"
+              oninput="FuzzyWidgets.updateNearCSimulator('${prefix}')" class="w-full accent-rose-400">
+          </div>
+
+          <div class="bg-slate-950/70 border border-emerald-500/25 rounded-xl p-3 space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-1.5 text-xs font-bold text-emerald-300 cursor-pointer">
+                <input id="${prefix}-chk-a4" type="checkbox" ${st.showA4 ? 'checked' : ''} onchange="FuzzyWidgets.updateNearCSimulator('${prefix}')" class="accent-emerald-400 rounded">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                <span>$A_4$ 餘弦半波</span>
+              </label>
+              <span id="${prefix}-p4-val" class="text-xs font-mono font-bold text-emerald-200">${st.p4.toFixed(1)}</span>
+            </div>
+            <div class="text-[11px] text-slate-400">頻率 $p_4$：</div>
+            <input id="${prefix}-p4" type="range" min="0.2" max="4.0" step="0.1" value="${st.p4}"
+              oninput="FuzzyWidgets.updateNearCSimulator('${prefix}')" class="w-full accent-emerald-400">
+          </div>
+        </div>
+
+        <!-- 測試輸入值 x 即時探針滑桿 -->
+        <div class="bg-slate-950/75 border border-indigo-500/30 rounded-xl p-3.5 space-y-1.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <span class="text-xs sm:text-sm font-bold text-indigo-300">📍 測試輸入值 $x$（即時垂直虛線探針）：</span>
+            <div class="flex items-center gap-2 text-xs font-mono">
+              <span class="px-2.5 py-0.5 rounded-md bg-indigo-500/20 text-indigo-200 border border-indigo-500/35 font-bold">x = <span id="${prefix}-x-val">${st.xProbe.toFixed(2)}</span></span>
+              <span class="px-2 py-0.5 rounded-md bg-slate-900 text-slate-300 border border-slate-800">|x - c| = <span id="${prefix}-diff-val">${Math.abs(st.xProbe - st.c).toFixed(2)}</span></span>
+            </div>
+          </div>
+          <input id="${prefix}-x-probe" type="range" min="${(st.c - 4).toFixed(2)}" max="${(st.c + 4).toFixed(2)}" step="0.05" value="${st.xProbe}"
+            oninput="FuzzyWidgets.updateNearCSimulator('${prefix}')"
+            class="w-full accent-indigo-400">
+        </div>
+
+        <!-- Plotly 四曲線疊加圖表 -->
+        <div id="${prefix}-plot" class="w-full h-80 sm:h-96 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+
+        <!-- 圖表下方：四個函數精確歸屬度與代入算式對照 -->
+        <div id="${prefix}-readout" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+      </div>
+    `;
+
+    updateNearCSimulator(prefix);
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([el]).catch(() => {});
+    }
+  }
+
+  function onNearCCChange(prefix, rawVal) {
+    const st = getNearCState(prefix);
+    let newC = parseFloat(rawVal);
+    if (isNaN(newC)) return;
+    newC = Math.max(-20, Math.min(100, newC));
+    const delta = newC - st.c;
+    st.c = newC;
+    st.xProbe = Math.max(newC - 4, Math.min(newC + 4, Number((st.xProbe + delta).toFixed(2))));
+
+    const cRangeEl = document.getElementById(`${prefix}-c-range`);
+    const cNumEl = document.getElementById(`${prefix}-c-num`);
+    const xEl = document.getElementById(`${prefix}-x-probe`);
+    const badgeEl = document.getElementById(`${prefix}-range-badge`);
+    if (cRangeEl && Number(cRangeEl.value) !== newC) cRangeEl.value = newC;
+    if (cNumEl && Number(cNumEl.value) !== newC) cNumEl.value = newC;
+    if (xEl) {
+      xEl.min = (newC - 4).toFixed(2);
+      xEl.max = (newC + 4).toFixed(2);
+      xEl.value = st.xProbe;
+    }
+    if (badgeEl) badgeEl.textContent = `[${(newC - 4).toFixed(1)}, ${(newC + 4).toFixed(1)}]`;
+
+    updateNearCSimulator(prefix);
+  }
+
+  function resetNearCCenter(prefix) {
+    const st = getNearCState(prefix);
+    st.c = 5.0;
+    st.xProbe = 5.4;
+    const cRangeEl = document.getElementById(`${prefix}-c-range`);
+    const cNumEl = document.getElementById(`${prefix}-c-num`);
+    const xEl = document.getElementById(`${prefix}-x-probe`);
+    const badgeEl = document.getElementById(`${prefix}-range-badge`);
+    if (cRangeEl) cRangeEl.value = 5;
+    if (cNumEl) cNumEl.value = 5;
+    if (xEl) {
+      xEl.min = '1.00';
+      xEl.max = '9.00';
+      xEl.value = 5.4;
+    }
+    if (badgeEl) badgeEl.textContent = '[1.0, 9.0]';
+    updateNearCSimulator(prefix);
+  }
+
+  function resetNearCAll(prefix) {
+    const st = getNearCState(prefix);
+    st.c = 5.0;
+    st.p1 = 1.0; st.p2 = 1.0; st.p3 = 1.0; st.p4 = 1.0;
+    st.xProbe = 5.4;
+    st.showA1 = true; st.showA2 = true; st.showA3 = true; st.showA4 = true;
+
+    const setVal = (id, v) => { const n = document.getElementById(id); if (n) n.value = v; };
+    const setChk = (id, v) => { const n = document.getElementById(id); if (n) n.checked = v; };
+    setVal(`${prefix}-c-range`, 5);
+    setVal(`${prefix}-c-num`, 5);
+    setVal(`${prefix}-p1`, 1.0);
+    setVal(`${prefix}-p2`, 1.0);
+    setVal(`${prefix}-p3`, 1.0);
+    setVal(`${prefix}-p4`, 1.0);
+    setChk(`${prefix}-chk-a1`, true);
+    setChk(`${prefix}-chk-a2`, true);
+    setChk(`${prefix}-chk-a3`, true);
+    setChk(`${prefix}-chk-a4`, true);
+    const xEl = document.getElementById(`${prefix}-x-probe`);
+    if (xEl) {
+      xEl.min = '1.00';
+      xEl.max = '9.00';
+      xEl.value = 5.4;
+    }
+    const badgeEl = document.getElementById(`${prefix}-range-badge`);
+    if (badgeEl) badgeEl.textContent = '[1.0, 9.0]';
+    updateNearCSimulator(prefix);
+  }
+
+  function updateNearCSimulator(prefix) {
+    const st = getNearCState(prefix);
+    const getNum = (id, def) => {
+      const n = document.getElementById(id);
+      if (!n) return def;
+      const v = parseFloat(n.value);
+      return isNaN(v) ? def : v;
+    };
+    const getChk = (id, def) => {
+      const n = document.getElementById(id);
+      return n ? !!n.checked : def;
+    };
+    const setTxt = (id, txt) => {
+      const n = document.getElementById(id);
+      if (n) n.textContent = txt;
+    };
+
+    st.p1 = getNum(`${prefix}-p1`, st.p1);
+    st.p2 = getNum(`${prefix}-p2`, st.p2);
+    st.p3 = getNum(`${prefix}-p3`, st.p3);
+    st.p4 = getNum(`${prefix}-p4`, st.p4);
+    st.xProbe = getNum(`${prefix}-x-probe`, st.xProbe);
+    st.showA1 = getChk(`${prefix}-chk-a1`, st.showA1);
+    st.showA2 = getChk(`${prefix}-chk-a2`, st.showA2);
+    st.showA3 = getChk(`${prefix}-chk-a3`, st.showA3);
+    st.showA4 = getChk(`${prefix}-chk-a4`, st.showA4);
+
+    setTxt(`${prefix}-p1-val`, st.p1.toFixed(1));
+    setTxt(`${prefix}-p2-val`, st.p2.toFixed(1));
+    setTxt(`${prefix}-p3-val`, st.p3.toFixed(1));
+    setTxt(`${prefix}-p4-val`, st.p4.toFixed(1));
+    setTxt(`${prefix}-x-val`, st.xProbe.toFixed(2));
+    setTxt(`${prefix}-diff-val`, Math.abs(st.xProbe - st.c).toFixed(2));
+
+    const xMin = st.c - 4;
+    const xMax = st.c + 4;
+    const xs = [], y1 = [], y2 = [], y3 = [], y4 = [];
+    for (let i = 0; i <= 400; i++) {
+      const xv = xMin + (i / 400) * 8;
+      xs.push(Number(xv.toFixed(4)));
+      const res = evalNearCFuncs(xv, st.c, st.p1, st.p2, st.p3, st.p4);
+      y1.push(res.a1);
+      y2.push(res.a2);
+      y3.push(res.a3);
+      y4.push(res.a4);
+    }
+
+    const probeVals = evalNearCFuncs(st.xProbe, st.c, st.p1, st.p2, st.p3, st.p4);
+    const traces = [];
+
+    if (st.showA1) {
+      traces.push({ x: xs, y: y1, name: `A₁(x) 三角形 (p₁=${st.p1.toFixed(1)})`, mode: 'lines', line: { color: '#38bdf8', width: 2.8 } });
+    }
+    if (st.showA2) {
+      traces.push({ x: xs, y: y2, name: `A₂(x) 柯西鐘形 (p₂=${st.p2.toFixed(1)})`, mode: 'lines', line: { color: '#f59e0b', width: 2.8 } });
+    }
+    if (st.showA3) {
+      traces.push({ x: xs, y: y3, name: `A₃(x) 指數尖峰 (p₃=${st.p3.toFixed(1)})`, mode: 'lines', line: { color: '#f43f5e', width: 2.8 } });
+    }
+    if (st.showA4) {
+      traces.push({ x: xs, y: y4, name: `A₄(x) 餘弦半波 (p₄=${st.p4.toFixed(1)})`, mode: 'lines', line: { color: '#10b981', width: 2.8 } });
+    }
+
+    // 垂直虛線探針
+    traces.push({
+      x: [st.xProbe, st.xProbe],
+      y: [0, 1.05],
+      name: `探針 x = ${st.xProbe.toFixed(2)}`,
+      mode: 'lines',
+      line: { color: '#e2e8f0', width: 1.8, dash: 'dash' },
+      hoverinfo: 'skip'
+    });
+
+    // 四個交點標記
+    const markerX = [], markerY = [], markerColors = [], markerTexts = [];
+    if (st.showA1) { markerX.push(st.xProbe); markerY.push(probeVals.a1); markerColors.push('#38bdf8'); markerTexts.push(`A₁=${probeVals.a1.toFixed(4)}`); }
+    if (st.showA2) { markerX.push(st.xProbe); markerY.push(probeVals.a2); markerColors.push('#f59e0b'); markerTexts.push(`A₂=${probeVals.a2.toFixed(4)}`); }
+    if (st.showA3) { markerX.push(st.xProbe); markerY.push(probeVals.a3); markerColors.push('#f43f5e'); markerTexts.push(`A₃=${probeVals.a3.toFixed(4)}`); }
+    if (st.showA4) { markerX.push(st.xProbe); markerY.push(probeVals.a4); markerColors.push('#10b981'); markerTexts.push(`A₄=${probeVals.a4.toFixed(4)}`); }
+
+    if (markerX.length > 0) {
+      traces.push({
+        x: markerX,
+        y: markerY,
+        text: markerTexts,
+        mode: 'markers',
+        showlegend: false,
+        hovertemplate: '%{text}<extra></extra>',
+        marker: { color: markerColors, size: 10, line: { color: '#0f172a', width: 1.5 } }
+      });
+    }
+
+    const plotEl = document.getElementById(`${prefix}-plot`);
+    if (plotEl && window.Plotly) {
+      Plotly.react(plotEl, traces, {
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(15, 23, 42, 0.78)',
+        font: { color: '#e2e8f0', size: 11 },
+        margin: { t: 32, r: 18, b: 44, l: 48 },
+        legend: { orientation: 'h', y: 1.15, x: 0 },
+        xaxis: {
+          title: `實數論域 x ∈ [${xMin.toFixed(1)}, ${xMax.toFixed(1)}]（目標中心 c = ${st.c.toFixed(1)}）`,
+          range: [xMin, xMax],
+          gridcolor: 'rgba(148, 163, 184, 0.14)',
+          zerolinecolor: 'rgba(148, 163, 184, 0.25)'
+        },
+        yaxis: {
+          title: '歸屬度 Aᵢ(x)',
+          range: [-0.04, 1.1],
+          gridcolor: 'rgba(148, 163, 184, 0.14)',
+          zerolinecolor: 'rgba(148, 163, 184, 0.25)'
+        }
+      }, { responsive: true, displayModeBar: false });
+    }
+
+    const readoutEl = document.getElementById(`${prefix}-readout`);
+    if (readoutEl) {
+      const cStr = st.c.toFixed(1);
+      const xStr = st.xProbe.toFixed(2);
+      const diff = Math.abs(st.xProbe - st.c);
+      const diffStr = diff.toFixed(2);
+      const invP4 = 1 / st.p4;
+
+      const eq1 = diff <= st.p1
+        ? `max(0, 1 - |${xStr} - ${cStr}| / ${st.p1.toFixed(1)}) = 1 - ${diffStr} / ${st.p1.toFixed(1)} = ${probeVals.a1.toFixed(4)}`
+        : `|${xStr} - ${cStr}| = ${diffStr} > p₁ (${st.p1.toFixed(1)}) ⇒ 0.0000`;
+      const eq2 = `1 / (1 + ${st.p2.toFixed(1)} × (${xStr} - ${cStr})²) = 1 / (1 + ${(st.p2 * diff * diff).toFixed(4)}) = ${probeVals.a2.toFixed(4)}`;
+      const eq3 = `exp(-|${st.p3.toFixed(1)} × (${xStr} - ${cStr})|) = exp(-${(st.p3 * diff).toFixed(4)}) = ${probeVals.a3.toFixed(4)}`;
+      const eq4 = diff <= invP4
+        ? `(1 + cos(${st.p4.toFixed(1)}π × (${xStr} - ${cStr}))) / 2 = (1 + cos(${(st.p4 * (st.xProbe - st.c)).toFixed(2)}π)) / 2 = ${probeVals.a4.toFixed(4)}`
+        : `|${xStr} - ${cStr}| = ${diffStr} > 1/p₄ (${invP4.toFixed(2)}) ⇒ 0.0000`;
+
+      const cards = [
+        { key: 'A₁', name: '三角形', shown: st.showA1, val: probeVals.a1, eq: eq1, border: 'border-sky-500/35', text: 'text-sky-300', dot: 'bg-sky-400' },
+        { key: 'A₂', name: '柯西鐘形', shown: st.showA2, val: probeVals.a2, eq: eq2, border: 'border-amber-500/35', text: 'text-amber-300', dot: 'bg-amber-400' },
+        { key: 'A₃', name: '指數尖峰', shown: st.showA3, val: probeVals.a3, eq: eq3, border: 'border-rose-500/35', text: 'text-rose-300', dot: 'bg-rose-400' },
+        { key: 'A₄', name: '餘弦半波', shown: st.showA4, val: probeVals.a4, eq: eq4, border: 'border-emerald-500/35', text: 'text-emerald-300', dot: 'bg-emerald-400' }
+      ];
+
+      readoutEl.innerHTML = cards.map(card => `
+        <div class="bg-slate-950/85 border ${card.border} rounded-xl p-3 space-y-1 ${card.shown ? '' : 'opacity-50'}">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-xs font-bold ${card.text}">
+              <span class="inline-block w-2.5 h-2.5 rounded-full ${card.dot}"></span>
+              <span>${card.key}(${xStr}) · ${card.name}${card.shown ? '' : '（已隱藏）'}</span>
+            </div>
+            <span class="font-mono text-sm font-extrabold text-white">${card.val.toFixed(4)}</span>
+          </div>
+          <div class="text-[11px] sm:text-xs font-mono text-slate-300 break-all">${card.eq}</div>
+        </div>
+      `).join('');
+    }
+  }
+
   return {
     getChapterInteractiveHtml: getChapterInteractiveHtml,
     initChapterWidgets: initChapterWidgets,
@@ -32258,6 +32700,11 @@ window.FuzzyWidgets = (function () {
     getLab19Meta: getLab19Meta,
     renderChapter19Lab: renderChapter19Lab,
     updateChapter19Lab: updateChapter19Lab,
+    renderNearCSimulator: renderNearCSimulator,
+    updateNearCSimulator: updateNearCSimulator,
+    onNearCCChange: onNearCCChange,
+    resetNearCCenter: resetNearCCenter,
+    resetNearCAll: resetNearCAll,
     fcmStep19: fcmStep19,
     fcmAuto19: fcmAuto19,
     fcmReset19: fcmReset19
@@ -37052,6 +37499,7 @@ window.WebFISStudio = (function () {
             <ul class="text-xs sm:text-sm text-amber-200/90 bg-amber-950/25 border border-amber-500/20 rounded-xl p-3.5 space-y-1 list-disc list-inside">
               ${p.book_examples.map(ex => `<li>${formatRichText(ex)}</li>`).join('')}
             </ul>` : ''}
+          ${p.page_id === '2-9' ? `<div id="book-page-2-9-simulator" class="pt-2"></div>` : ''}
         </div>
       `).join('');
 
@@ -37174,6 +37622,9 @@ window.WebFISStudio = (function () {
         </div>
       `;
 
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderNearCSimulator === 'function' && document.getElementById('book-page-2-9-simulator')) {
+        setTimeout(() => FuzzyWidgets.renderNearCSimulator('book-page-2-9-simulator', { prefix: 'p29', showFormulas: false }), 30);
+      }
       if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
         setTimeout(() => FuzzyWidgets.renderChapter19Lab(ch.ch, 'ch19-interactive-lab-holder'), 40);
       }

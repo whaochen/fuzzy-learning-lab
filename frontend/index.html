@@ -1783,6 +1783,7 @@
             <ul class="text-xs sm:text-sm text-amber-200/90 bg-amber-950/25 border border-amber-500/20 rounded-xl p-3.5 space-y-1 list-disc list-inside">
               ${p.book_examples.map(ex => `<li>${formatRichText(ex)}</li>`).join('')}
             </ul>` : ''}
+          ${p.page_id === '2-9' ? `<div id="book-page-2-9-simulator" class="pt-2"></div>` : ''}
         </div>
       `).join('');
 
@@ -1905,6 +1906,9 @@
         </div>
       `;
 
+      if (window.FuzzyWidgets && typeof FuzzyWidgets.renderNearCSimulator === 'function' && document.getElementById('book-page-2-9-simulator')) {
+        setTimeout(() => FuzzyWidgets.renderNearCSimulator('book-page-2-9-simulator', { prefix: 'p29', showFormulas: false }), 30);
+      }
       if (window.FuzzyWidgets && typeof FuzzyWidgets.renderChapter19Lab === 'function') {
         setTimeout(() => FuzzyWidgets.renderChapter19Lab(ch.ch, 'ch19-interactive-lab-holder'), 40);
       }
