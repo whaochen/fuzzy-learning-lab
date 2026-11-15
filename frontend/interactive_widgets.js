@@ -8568,7 +8568,7 @@ window.FuzzyWidgets = (function () {
   // =========================================================================
   const LAB_19_META = {
     1:  { shortTitle: '緒論與概念對比', count: 1, badge: '原書第 1 章 · 課本圖 1.1 高個子/室溫 Crisp vs. Fuzzy', title: 'Ch.01 二值邏輯 (Crisp) vs. 模糊集合 (Fuzzy) 對比滑桿' },
-    2:  { shortTitle: '圖 2.7/2.8 & α-cut', count: 3, badge: '原書第 2 章 · 圖 2.7 四函數對比 · 圖 2.8 參數塑形 · α-Cut 切片實驗室', title: 'Ch.02 三大互動模擬器：圖 2.7 靠近 c 函數對比 ＋ 圖 2.8 參數塑形器 ＋ α-Cut 切片實驗室' },
+    2:  { shortTitle: '圖 2.7/2.8 & α-cut', count: 3, badge: '原書第 2 章 · 圖 2.7 四函數對比 · 圖 2.8 年齡語意變數分割 · α-Cut 切片實驗室', title: 'Ch.02 三大互動模擬器：圖 2.7 靠近 c 函數對比 ＋ 圖 2.8 年齡語意變數模糊分割 ＋ α-Cut 切片實驗室' },
     3:  { shortTitle: '模糊集合運算', count: 1, badge: '原書第 3 章 · 標準 Min/Max & Sugeno/Yager 參數補集', title: 'Ch.03 交集、聯集、補集與參數化運算動態疊圖' },
     4:  { shortTitle: '擴展原理與模糊數', count: 2, badge: '原書第 4 章 · 模糊數加減乘除 & y=f(x) 映射', title: 'Ch.04 模糊數四則計算器 (A⊕B, A⊖B, A⊗B, A⊘B) ＋ 函數映射' },
     5:  { shortTitle: '模糊關係矩陣', count: 1, badge: '原書第 5 章 · 卡迪興乘積與關係強度熱力圖', title: 'Ch.05 模糊關係矩陣 R(X×Y) 互動編輯與 2D 熱力圖' },
@@ -8925,7 +8925,7 @@ window.FuzzyWidgets = (function () {
         </div>
       `;
       renderNearCSimulator(simAId, { prefix: 'lab2a_' + cleanId, showFormulas: true });
-      renderShapeShifterSimulator(simBId, { prefix: 'lab2b_' + cleanId });
+      renderFig28LinguisticSimulator(simBId, { prefix: 'lab2b_' + cleanId });
       renderAlphaCutLabSimulator(simCId, { prefix: 'lab2c_' + cleanId });
       return;
     }
@@ -9765,42 +9765,135 @@ window.FuzzyWidgets = (function () {
   }
 
   // =========================================================================
-  // 模擬器 B（圖 2.8）：標準化歸屬函數參數塑形器 (Tri / Trap / Gauss / G-Bell)
+  // 模擬器 B（圖 2.8）：年齡語意變數模糊分割 (A1 年輕人 / A2 中年人 / A3 老年人)
   // =========================================================================
-  const shapeBStateMap = {};
-  const shapeBMathTimers = {};
+  const FIG28_PRESETS = {
+    age: {
+      id: 'age',
+      btnLabel: '圖 2.8 原書案例：年齡 (0~100 歲)',
+      varLabel: '年齡',
+      unit: '歲',
+      xMin: 0,
+      xMax: 100,
+      step: 1,
+      defaultT1: 20,
+      defaultT2: 40,
+      defaultT3: 60,
+      defaultX: 28,
+      extraRefs: [80],
+      sets: [
+        { key: 'A1', name: 'A₁ 年輕人', short: '年輕人', texSym: 'A_1', color: '#38bdf8', textCls: 'text-sky-300', barCls: 'bg-sky-400', borderCls: 'border-sky-500/35' },
+        { key: 'A2', name: 'A₂ 中年人', short: '中年人', texSym: 'A_2', color: '#34d399', textCls: 'text-emerald-300', barCls: 'bg-emerald-400', borderCls: 'border-emerald-500/35' },
+        { key: 'A3', name: 'A₃ 老年人', short: '老年人', texSym: 'A_3', color: '#f59e0b', textCls: 'text-amber-300', barCls: 'bg-amber-400', borderCls: 'border-amber-500/35' }
+      ]
+    },
+    room_temp: {
+      id: 'room_temp',
+      btnLabel: '室溫（冷 / 適中 / 熱）',
+      varLabel: '室溫',
+      unit: '°C',
+      xMin: 0,
+      xMax: 40,
+      step: 1,
+      defaultT1: 16,
+      defaultT2: 24,
+      defaultT3: 32,
+      defaultX: 20,
+      extraRefs: [],
+      sets: [
+        { key: 'A1', name: 'A₁ 冷 (Cold)', short: '冷', texSym: 'A_1', color: '#38bdf8', textCls: 'text-sky-300', barCls: 'bg-sky-400', borderCls: 'border-sky-500/35' },
+        { key: 'A2', name: 'A₂ 適中 (Comfortable)', short: '適中', texSym: 'A_2', color: '#34d399', textCls: 'text-emerald-300', barCls: 'bg-emerald-400', borderCls: 'border-emerald-500/35' },
+        { key: 'A3', name: 'A₃ 熱 (Hot)', short: '熱', texSym: 'A_3', color: '#f59e0b', textCls: 'text-amber-300', barCls: 'bg-amber-400', borderCls: 'border-amber-500/35' }
+      ]
+    },
+    car_speed: {
+      id: 'car_speed',
+      btnLabel: '車速（慢 / 中 / 快）',
+      varLabel: '車速',
+      unit: 'km/h',
+      xMin: 0,
+      xMax: 120,
+      step: 1,
+      defaultT1: 30,
+      defaultT2: 60,
+      defaultT3: 90,
+      defaultX: 45,
+      extraRefs: [],
+      sets: [
+        { key: 'A1', name: 'A₁ 慢 (Slow)', short: '慢', texSym: 'A_1', color: '#38bdf8', textCls: 'text-sky-300', barCls: 'bg-sky-400', borderCls: 'border-sky-500/35' },
+        { key: 'A2', name: 'A₂ 中 (Medium)', short: '中', texSym: 'A_2', color: '#34d399', textCls: 'text-emerald-300', barCls: 'bg-emerald-400', borderCls: 'border-emerald-500/35' },
+        { key: 'A3', name: 'A₃ 快 (Fast)', short: '快', texSym: 'A_3', color: '#f59e0b', textCls: 'text-amber-300', barCls: 'bg-amber-400', borderCls: 'border-amber-500/35' }
+      ]
+    }
+  };
 
-  function getShapeBState(prefix) {
-    if (!shapeBStateMap[prefix]) {
-      shapeBStateMap[prefix] = {
-        type: 'tri', // 'tri' | 'trap' | 'gauss' | 'gbell'
-        tri:   { a: 2.0, b: 5.0, c: 8.0 },
-        trap:  { a: 1.5, b: 3.5, c: 6.5, d: 8.5 },
-        gauss: { c: 5.0, sigma: 1.4 },
-        gbell: { a: 1.8, b: 2.5, c: 5.0 }
+  const fig28StateMap = {};
+  const fig28MathTimers = {};
+
+  function getFig28State(prefix) {
+    if (!fig28StateMap[prefix]) {
+      const p = FIG28_PRESETS.age;
+      fig28StateMap[prefix] = {
+        presetId: p.id,
+        t1: p.defaultT1,
+        t2: p.defaultT2,
+        t3: p.defaultT3,
+        x: p.defaultX
       };
     }
-    return shapeBStateMap[prefix];
+    return fig28StateMap[prefix];
   }
 
-  function renderShapeShifterSimulator(containerId, options) {
+  function evalFig28Memberships(x, t1, t2, t3) {
+    let mu1 = 0;
+    if (x <= t1) mu1 = 1;
+    else if (x < t2) mu1 = (t2 - x) / (t2 - t1);
+    else mu1 = 0;
+
+    let mu2 = 0;
+    if (x <= t1 || x >= t3) mu2 = 0;
+    else if (x <= t2) mu2 = (x - t1) / (t2 - t1);
+    else mu2 = (t3 - x) / (t3 - t2);
+
+    let mu3 = 0;
+    if (x <= t2) mu3 = 0;
+    else if (x < t3) mu3 = (x - t2) / (t3 - t2);
+    else mu3 = 1;
+
+    return [mu1, mu2, mu3];
+  }
+
+  function formatFig28FormulaTex(idx, x, t1, t2, t3, muVal, texSym) {
+    const xStr = Number.isInteger(x) ? String(x) : x.toFixed(1);
+    const valStr = muVal.toFixed(2);
+    if (idx === 0) {
+      if (x <= t1) return `$$\\mu_{${texSym}}(${xStr}) = 1.00 \\quad (${xStr} \\le ${t1})$$`;
+      if (x < t2) return `$$\\mu_{${texSym}}(${xStr}) = \\frac{${t2} - ${xStr}}{${t2} - ${t1}} = \\frac{${t2 - x}}{${t2 - t1}} = ${valStr}$$`;
+      return `$$\\mu_{${texSym}}(${xStr}) = 0.00 \\quad (${xStr} \\ge ${t2})$$`;
+    }
+    if (idx === 1) {
+      if (x <= t1) return `$$\\mu_{${texSym}}(${xStr}) = 0.00 \\quad (${xStr} \\le ${t1})$$`;
+      if (x <= t2) return `$$\\mu_{${texSym}}(${xStr}) = \\frac{${xStr} - ${t1}}{${t2} - ${t1}} = \\frac{${x - t1}}{${t2 - t1}} = ${valStr}$$`;
+      if (x < t3) return `$$\\mu_{${texSym}}(${xStr}) = \\frac{${t3} - ${xStr}}{${t3} - ${t2}} = \\frac{${t3 - x}}{${t3 - t2}} = ${valStr}$$`;
+      return `$$\\mu_{${texSym}}(${xStr}) = 0.00 \\quad (${xStr} \\ge ${t3})$$`;
+    }
+    if (x <= t2) return `$$\\mu_{${texSym}}(${xStr}) = 0.00 \\quad (${xStr} \\le ${t2})$$`;
+    if (x < t3) return `$$\\mu_{${texSym}}(${xStr}) = \\frac{${xStr} - ${t2}}{${t3} - ${t2}} = \\frac{${x - t2}}{${t3 - t2}} = ${valStr}$$`;
+    return `$$\\mu_{${texSym}}(${xStr}) = 1.00 \\quad (${xStr} \\ge ${t3})$$`;
+  }
+
+  function renderFig28LinguisticSimulator(containerId, options) {
     const el = document.getElementById(containerId);
     if (!el) return;
     const opts = options || {};
-    const prefix = opts.prefix || ('shapeb_' + String(containerId).replace(/[^a-zA-Z0-9_-]/g, ''));
-    const st = getShapeBState(prefix);
+    const prefix = opts.prefix || ('fig28_' + String(containerId).replace(/[^a-zA-Z0-9_-]/g, ''));
+    const st = getFig28State(prefix);
+    const preset = FIG28_PRESETS[st.presetId] || FIG28_PRESETS.age;
 
-    const types = [
-      { id: 'tri', label: '三角形 tri(x; a,b,c)' },
-      { id: 'trap', label: '梯形 trap(x; a,b,c,d)' },
-      { id: 'gauss', label: '高斯 gauss(x; c,σ)' },
-      { id: 'gbell', label: '廣義鐘形 gbell(x; a,b,c)' }
-    ];
-
-    const btnsHtml = types.map(t => `
-      <button type="button" id="${prefix}-btn-${t.id}" onclick="FuzzyWidgets.setShapeBType('${prefix}', '${t.id}')"
-        class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${st.type === t.id ? 'bg-teal-500 text-slate-950 border-teal-400 shadow-sm' : 'bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800'}">
-        ${t.label}
+    const presetBtnsHtml = Object.values(FIG28_PRESETS).map(p => `
+      <button type="button" id="${prefix}-preset-${p.id}" onclick="FuzzyWidgets.setFig28Preset('${prefix}', '${p.id}')"
+        class="px-3 py-1.5 rounded-xl text-xs font-bold border transition ${st.presetId === p.id ? 'bg-teal-500 text-slate-950 border-teal-400 shadow-sm' : 'bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800'}">
+        ${p.btnLabel}
       </button>
     `).join('');
 
@@ -9809,227 +9902,220 @@ window.FuzzyWidgets = (function () {
         <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
           <div class="flex flex-wrap items-center gap-2">
             <span class="px-2.5 py-1 rounded-lg bg-teal-500/15 border border-teal-500/30 text-teal-300 text-xs font-bold">模擬器 B · 圖 2.8</span>
-            <h4 class="text-sm sm:text-base font-bold text-white">標準化歸屬函數參數塑形器（Triangular / Trapezoidal / Gaussian / G-Bell）</h4>
+            <h4 class="text-sm sm:text-base font-bold text-white">語意變數模糊分割（年齡 A₁ 年輕人 / A₂ 中年人 / A₃ 老年人）</h4>
           </div>
+          <button type="button" onclick="FuzzyWidgets.resetFig28Simulator('${prefix}')"
+            class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition">
+            重置原書圖 2.8
+          </button>
         </div>
 
-        <div class="flex flex-wrap gap-2">${btnsHtml}</div>
-        <div id="${prefix}-controls" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-xs text-slate-400 font-semibold mr-1">語意案例切換：</span>
+          ${presetBtnsHtml}
+        </div>
+
+        <div id="${prefix}-controls" class="space-y-3"></div>
         <div id="${prefix}-plot" class="w-full h-80 sm:h-96 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
-        <div id="${prefix}-badges" class="grid grid-cols-1 sm:grid-cols-3 gap-2.5"></div>
-        <div id="${prefix}-formula" class="bg-slate-950/85 border border-teal-500/25 rounded-xl px-4 py-3 text-teal-200 text-xs sm:text-sm overflow-x-auto"></div>
+        <div id="${prefix}-readout" class="space-y-3"></div>
       </div>
     `;
 
-    renderShapeBControls(prefix);
-    updateShapeBSimulator(prefix);
+    renderFig28Controls(prefix);
+    updateFig28Simulator(prefix);
   }
 
-  function renderShapeBControls(prefix) {
-    const st = getShapeBState(prefix);
+  function renderFig28Controls(prefix) {
+    const st = getFig28State(prefix);
+    const preset = FIG28_PRESETS[st.presetId] || FIG28_PRESETS.age;
     const ctrlEl = document.getElementById(`${prefix}-controls`);
     if (!ctrlEl) return;
 
-    const sliderCard = (key, label, min, max, step, val, color) => `
-      <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 space-y-1.5">
-        <div class="flex items-center justify-between text-xs">
-          <span class="font-bold text-${color}-300">${label}</span>
-          <span id="${prefix}-val-${key}" class="font-mono font-bold text-white">${Number(val).toFixed(1)}</span>
+    const minGap = preset.step;
+    ctrlEl.innerHTML = `
+      <div class="bg-gradient-to-r from-slate-950/90 to-slate-900/90 border border-teal-500/40 rounded-xl p-3.5 space-y-2">
+        <div class="flex items-center justify-between text-xs sm:text-sm">
+          <span class="font-bold text-teal-300">🔍 輸入${preset.varLabel}探針 x（即時計算三集合歸屬度）</span>
+          <span id="${prefix}-val-x" class="font-mono font-bold text-white text-sm sm:text-base">${st.x} ${preset.unit}</span>
         </div>
-        <input id="${prefix}-in-${key}" type="range" min="${min}" max="${max}" step="${step}" value="${val}"
-          oninput="FuzzyWidgets.onShapeBSlider('${prefix}', '${key}', this.value)"
-          class="w-full accent-${color}-400">
+        <input id="${prefix}-in-x" type="range" min="${preset.xMin}" max="${preset.xMax}" step="${preset.step}" value="${st.x}"
+          oninput="FuzzyWidgets.onFig28Probe('${prefix}', this.value)"
+          class="w-full accent-teal-400">
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-sky-300">轉折點 t₁（A₁ 右肩 / A₂ 左腳）</span>
+            <span id="${prefix}-val-t1" class="font-mono font-bold text-white">${st.t1} ${preset.unit}</span>
+          </div>
+          <input id="${prefix}-in-t1" type="range" min="${preset.xMin + minGap}" max="${preset.xMax - 3 * minGap}" step="${preset.step}" value="${st.t1}"
+            oninput="FuzzyWidgets.onFig28Threshold('${prefix}', 't1', this.value)"
+            class="w-full accent-sky-400">
+        </div>
+        <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-emerald-300">轉折點 t₂（A₂ 頂點 / A₁,A₃ 腳）</span>
+            <span id="${prefix}-val-t2" class="font-mono font-bold text-white">${st.t2} ${preset.unit}</span>
+          </div>
+          <input id="${prefix}-in-t2" type="range" min="${preset.xMin + 2 * minGap}" max="${preset.xMax - 2 * minGap}" step="${preset.step}" value="${st.t2}"
+            oninput="FuzzyWidgets.onFig28Threshold('${prefix}', 't2', this.value)"
+            class="w-full accent-emerald-400">
+        </div>
+        <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 space-y-1.5">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-amber-300">轉折點 t₃（A₂ 右腳 / A₃ 左肩）</span>
+            <span id="${prefix}-val-t3" class="font-mono font-bold text-white">${st.t3} ${preset.unit}</span>
+          </div>
+          <input id="${prefix}-in-t3" type="range" min="${preset.xMin + 3 * minGap}" max="${preset.xMax - minGap}" step="${preset.step}" value="${st.t3}"
+            oninput="FuzzyWidgets.onFig28Threshold('${prefix}', 't3', this.value)"
+            class="w-full accent-amber-400">
+        </div>
       </div>
     `;
-
-    if (st.type === 'tri') {
-      const p = st.tri;
-      ctrlEl.innerHTML =
-        sliderCard('a', '左腳點 a (a ≤ b)', 0, 9.5, 0.1, p.a, 'sky') +
-        sliderCard('b', '頂點 b (a ≤ b ≤ c)', 0.2, 9.8, 0.1, p.b, 'teal') +
-        sliderCard('c', '右腳點 c (b ≤ c)', 0.5, 10, 0.1, p.c, 'emerald');
-    } else if (st.type === 'trap') {
-      const p = st.trap;
-      ctrlEl.innerHTML =
-        sliderCard('a', '左腳點 a (a ≤ b)', 0, 9.0, 0.1, p.a, 'sky') +
-        sliderCard('b', '左肩點 b (a ≤ b ≤ c)', 0.2, 9.4, 0.1, p.b, 'teal') +
-        sliderCard('c', '右肩點 c (b ≤ c ≤ d)', 0.5, 9.7, 0.1, p.c, 'emerald') +
-        sliderCard('d', '右腳點 d (c ≤ d)', 1.0, 10, 0.1, p.d, 'amber');
-    } else if (st.type === 'gauss') {
-      const p = st.gauss;
-      ctrlEl.innerHTML =
-        sliderCard('c', '中心點 c', 1.0, 9.0, 0.1, p.c, 'teal') +
-        sliderCard('sigma', '標準差 σ（寬度）', 0.3, 3.0, 0.1, p.sigma, 'amber');
-    } else {
-      const p = st.gbell;
-      ctrlEl.innerHTML =
-        sliderCard('a', '半寬 a（μ=0.5 距中心）', 0.4, 3.5, 0.1, p.a, 'sky') +
-        sliderCard('b', '斜率參數 b', 0.5, 6.0, 0.1, p.b, 'amber') +
-        sliderCard('c', '中心點 c', 1.0, 9.0, 0.1, p.c, 'teal');
-    }
   }
 
-  function setShapeBType(prefix, newType) {
-    const st = getShapeBState(prefix);
-    st.type = newType;
-    ['tri', 'trap', 'gauss', 'gbell'].forEach(t => {
-      const btn = document.getElementById(`${prefix}-btn-${t}`);
+  function setFig28Preset(prefix, presetId) {
+    const preset = FIG28_PRESETS[presetId] || FIG28_PRESETS.age;
+    const st = getFig28State(prefix);
+    st.presetId = preset.id;
+    st.t1 = preset.defaultT1;
+    st.t2 = preset.defaultT2;
+    st.t3 = preset.defaultT3;
+    st.x = preset.defaultX;
+
+    Object.keys(FIG28_PRESETS).forEach(pid => {
+      const btn = document.getElementById(`${prefix}-preset-${pid}`);
       if (!btn) return;
-      if (t === newType) {
-        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-teal-500 text-slate-950 border-teal-400 shadow-sm';
-      } else {
-        btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800';
-      }
+      btn.className = pid === preset.id
+        ? 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-teal-500 text-slate-950 border-teal-400 shadow-sm'
+        : 'px-3 py-1.5 rounded-xl text-xs font-bold border transition bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800';
     });
-    renderShapeBControls(prefix);
-    updateShapeBSimulator(prefix);
+
+    renderFig28Controls(prefix);
+    updateFig28Simulator(prefix);
   }
 
-  function onShapeBSlider(prefix, key, rawVal) {
-    const st = getShapeBState(prefix);
+  function resetFig28Simulator(prefix) {
+    setFig28Preset(prefix, 'age');
+  }
+
+  function onFig28Probe(prefix, rawVal) {
+    const st = getFig28State(prefix);
+    const preset = FIG28_PRESETS[st.presetId] || FIG28_PRESETS.age;
+    const v = parseFloat(rawVal);
+    if (isNaN(v)) return;
+    st.x = Math.max(preset.xMin, Math.min(preset.xMax, v));
+    const lbl = document.getElementById(`${prefix}-val-x`);
+    if (lbl) lbl.textContent = `${st.x} ${preset.unit}`;
+    updateFig28Simulator(prefix);
+  }
+
+  function onFig28Threshold(prefix, key, rawVal) {
+    const st = getFig28State(prefix);
+    const preset = FIG28_PRESETS[st.presetId] || FIG28_PRESETS.age;
+    const minGap = preset.step;
     const v = parseFloat(rawVal);
     if (isNaN(v)) return;
 
-    if (st.type === 'tri') {
-      const p = st.tri;
-      p[key] = v;
-      if (key === 'a') {
-        if (p.a > p.b) p.b = p.a;
-        if (p.b > p.c) p.c = p.b;
-      } else if (key === 'b') {
-        p.b = Math.max(p.a, Math.min(p.c, p.b));
-      } else if (key === 'c') {
-        if (p.c < p.b) p.b = p.c;
-        if (p.b < p.a) p.a = p.b;
-      }
-      ['a', 'b', 'c'].forEach(k => {
-        const inp = document.getElementById(`${prefix}-in-${k}`);
-        const lbl = document.getElementById(`${prefix}-val-${k}`);
-        if (inp) inp.value = p[k];
-        if (lbl) lbl.textContent = p[k].toFixed(1);
-      });
-    } else if (st.type === 'trap') {
-      const p = st.trap;
-      p[key] = v;
-      if (key === 'a') {
-        if (p.a > p.b) p.b = p.a;
-        if (p.b > p.c) p.c = p.b;
-        if (p.c > p.d) p.d = p.c;
-      } else if (key === 'b') {
-        p.b = Math.max(p.a, p.b);
-        if (p.b > p.c) p.c = p.b;
-        if (p.c > p.d) p.d = p.c;
-      } else if (key === 'c') {
-        p.c = Math.min(p.d, p.c);
-        if (p.c < p.b) p.b = p.c;
-        if (p.b < p.a) p.a = p.b;
-      } else if (key === 'd') {
-        if (p.d < p.c) p.c = p.d;
-        if (p.c < p.b) p.b = p.c;
-        if (p.b < p.a) p.a = p.b;
-      }
-      ['a', 'b', 'c', 'd'].forEach(k => {
-        const inp = document.getElementById(`${prefix}-in-${k}`);
-        const lbl = document.getElementById(`${prefix}-val-${k}`);
-        if (inp) inp.value = p[k];
-        if (lbl) lbl.textContent = p[k].toFixed(1);
-      });
-    } else if (st.type === 'gauss') {
-      st.gauss[key] = v;
-      const lbl = document.getElementById(`${prefix}-val-${key}`);
-      if (lbl) lbl.textContent = v.toFixed(1);
-    } else {
-      st.gbell[key] = v;
-      const lbl = document.getElementById(`${prefix}-val-${key}`);
-      if (lbl) lbl.textContent = v.toFixed(1);
+    st[key] = v;
+    // 強制維持嚴格遞增 t1 < t2 < t3，確保模糊分割連續且無除以零
+    if (key === 't1') {
+      st.t1 = Math.max(preset.xMin + minGap, Math.min(preset.xMax - 3 * minGap, st.t1));
+      if (st.t2 <= st.t1) st.t2 = st.t1 + minGap;
+      if (st.t3 <= st.t2) st.t3 = st.t2 + minGap;
+    } else if (key === 't2') {
+      st.t2 = Math.max(preset.xMin + 2 * minGap, Math.min(preset.xMax - 2 * minGap, st.t2));
+      if (st.t1 >= st.t2) st.t1 = st.t2 - minGap;
+      if (st.t3 <= st.t2) st.t3 = st.t2 + minGap;
+    } else if (key === 't3') {
+      st.t3 = Math.max(preset.xMin + 3 * minGap, Math.min(preset.xMax - minGap, st.t3));
+      if (st.t2 >= st.t3) st.t2 = st.t3 - minGap;
+      if (st.t1 >= st.t2) st.t1 = st.t2 - minGap;
     }
 
-    updateShapeBSimulator(prefix);
+    ['t1', 't2', 't3'].forEach(k => {
+      const inp = document.getElementById(`${prefix}-in-${k}`);
+      const lbl = document.getElementById(`${prefix}-val-${k}`);
+      if (inp) inp.value = st[k];
+      if (lbl) lbl.textContent = `${st[k]} ${preset.unit}`;
+    });
+
+    updateFig28Simulator(prefix);
   }
 
-  function updateShapeBSimulator(prefix) {
-    const st = getShapeBState(prefix);
-    const xs = [], ys = [];
-    const evalFn = (x) => {
-      if (st.type === 'tri') {
-        const { a, b, c } = st.tri;
-        if (x <= a || x >= c) return 0;
-        if (x === b) return 1;
-        if (x < b) return (b === a) ? 1 : (x - a) / (b - a);
-        return (c === b) ? 1 : (c - x) / (c - b);
-      } else if (st.type === 'trap') {
-        const { a, b, c, d } = st.trap;
-        if (x <= a || x >= d) return 0;
-        if (x >= b && x <= c) return 1;
-        if (x < b) return (b === a) ? 1 : (x - a) / (b - a);
-        return (d === c) ? 1 : (d - x) / (d - c);
-      } else if (st.type === 'gauss') {
-        const { c, sigma } = st.gauss;
-        return Math.exp(-Math.pow(x - c, 2) / (2 * sigma * sigma));
-      } else {
-        const { a, b, c } = st.gbell;
-        return 1 / (1 + Math.pow(Math.abs((x - c) / a), 2 * b));
-      }
-    };
+  function updateFig28Simulator(prefix) {
+    const st = getFig28State(prefix);
+    const preset = FIG28_PRESETS[st.presetId] || FIG28_PRESETS.age;
+    const { xMin, xMax, unit, varLabel, sets, extraRefs } = preset;
+    const { t1, t2, t3, x } = st;
 
-    for (let i = 0; i <= 400; i++) {
-      const xv = (i / 400) * 10;
-      xs.push(Number(xv.toFixed(3)));
-      ys.push(evalFn(xv));
-    }
+    // 精確轉折點取樣，使三條分段線性歸屬函數折角銳利無誤差
+    const keyPoints = [xMin, t1, t2, t3, xMax];
+    const y1Arr = [], y2Arr = [], y3Arr = [];
+    keyPoints.forEach(px => {
+      const [m1, m2, m3] = evalFig28Memberships(px, t1, t2, t3);
+      y1Arr.push(m1);
+      y2Arr.push(m2);
+      y3Arr.push(m3);
+    });
 
-    // 計算幾何特徵：Core, Support, Crossover (μ=0.5)
-    let coreText = '', supportText = '', crossL = 0, crossR = 0;
+    const [mu1, mu2, mu3] = evalFig28Memberships(x, t1, t2, t3);
+    const mus = [mu1, mu2, mu3];
+    const sumMu = mu1 + mu2 + mu3;
+
     const traces = [
-      { x: xs, y: ys, name: '歸屬函數 μ(x)', fill: 'tozeroy', fillcolor: 'rgba(45, 212, 191, 0.16)', line: { color: '#2dd4bf', width: 3 } },
-      { x: [0, 10], y: [0.5, 0.5], name: 'μ = 0.5 交越參考線', mode: 'lines', line: { color: '#f59e0b', width: 1.5, dash: 'dash' } }
+      {
+        x: keyPoints, y: y1Arr, name: sets[0].name,
+        mode: 'lines', line: { color: sets[0].color, width: 3 },
+        fill: 'tozeroy', fillcolor: 'rgba(56, 189, 248, 0.08)'
+      },
+      {
+        x: keyPoints, y: y2Arr, name: sets[1].name,
+        mode: 'lines', line: { color: sets[1].color, width: 3 },
+        fill: 'tozeroy', fillcolor: 'rgba(52, 211, 153, 0.08)'
+      },
+      {
+        x: keyPoints, y: y3Arr, name: sets[2].name,
+        mode: 'lines', line: { color: sets[2].color, width: 3 },
+        fill: 'tozeroy', fillcolor: 'rgba(245, 158, 11, 0.08)'
+      },
+      {
+        x: [xMin, xMax], y: [0.5, 0.5], name: 'μ = 0.5 交越參考線',
+        mode: 'lines', line: { color: '#94a3b8', width: 1.5, dash: 'dash' },
+        hoverinfo: 'skip'
+      },
+      {
+        x: [x, x], y: [0, 1.06], name: `探針 x = ${x} ${unit}`,
+        mode: 'lines', line: { color: '#f8fafc', width: 2, dash: 'dot' },
+        hoverinfo: 'skip'
+      },
+      {
+        x: [x, x, x],
+        y: [mu1, mu2, mu3],
+        name: '即時交點',
+        mode: 'markers+text',
+        showlegend: false,
+        text: mus.map((v, idx) => `${sets[idx].short}: ${v.toFixed(2)}`),
+        textposition: ['top right', 'middle right', 'bottom right'],
+        textfont: { color: '#f8fafc', size: 11 },
+        marker: {
+          color: sets.map(s => s.color),
+          size: 10,
+          line: { color: '#0f172a', width: 2 }
+        }
+      }
     ];
 
-    if (st.type === 'tri') {
-      const { a, b, c } = st.tri;
-      crossL = (a + b) / 2;
-      crossR = (b + c) / 2;
-      coreText = `{ ${b.toFixed(1)} }`;
-      supportText = `(${a.toFixed(1)}, ${c.toFixed(1)})`;
-      traces.push({ x: [b], y: [1], name: `Core: x=${b.toFixed(1)}`, mode: 'markers+text', text: [`Core (${b.toFixed(1)})`], textposition: 'top center', textfont: { color: '#34d399', size: 11 }, marker: { color: '#34d399', size: 10, symbol: 'diamond' } });
-      traces.push({ x: [a, c], y: [0, 0], name: `Support: (${a.toFixed(1)}, ${c.toFixed(1)})`, mode: 'lines+markers', line: { color: '#38bdf8', width: 4 }, marker: { color: '#38bdf8', size: 8, symbol: 'circle-open' } });
-    } else if (st.type === 'trap') {
-      const { a, b, c, d } = st.trap;
-      crossL = (a + b) / 2;
-      crossR = (c + d) / 2;
-      coreText = `[${b.toFixed(1)}, ${c.toFixed(1)}]`;
-      supportText = `(${a.toFixed(1)}, ${d.toFixed(1)})`;
-      traces.push({ x: [b, c], y: [1, 1], name: `Core 平台: [${b.toFixed(1)}, ${c.toFixed(1)}]`, mode: 'lines+markers', line: { color: '#34d399', width: 5 }, marker: { color: '#34d399', size: 8 } });
-      traces.push({ x: [a, d], y: [0, 0], name: `Support 跨距: (${a.toFixed(1)}, ${d.toFixed(1)})`, mode: 'lines+markers', line: { color: '#38bdf8', width: 4 }, marker: { color: '#38bdf8', size: 8, symbol: 'circle-open' } });
-    } else if (st.type === 'gauss') {
-      const { c, sigma } = st.gauss;
-      const half = sigma * Math.sqrt(2 * Math.LN2);
-      crossL = c - half;
-      crossR = c + half;
-      coreText = `{ ${c.toFixed(1)} }`;
-      supportText = '(-∞, +∞)（全實數軸漸近 > 0）';
-      traces.push({ x: [c], y: [1], name: `Core: x=${c.toFixed(1)}`, mode: 'markers+text', text: [`Core (${c.toFixed(1)})`], textposition: 'top center', textfont: { color: '#34d399', size: 11 }, marker: { color: '#34d399', size: 10, symbol: 'diamond' } });
-      traces.push({ x: [0, 10], y: [0.008, 0.008], name: 'Support: (-∞, +∞)', mode: 'lines', line: { color: '#38bdf8', width: 2.5, dash: 'dot' } });
-    } else {
-      const { a, b, c } = st.gbell;
-      crossL = c - a;
-      crossR = c + a;
-      coreText = `{ ${c.toFixed(1)} }`;
-      supportText = '(-∞, +∞)（全實數軸漸近 > 0）';
-      traces.push({ x: [c], y: [1], name: `Core: x=${c.toFixed(1)}`, mode: 'markers+text', text: [`Core (${c.toFixed(1)})`], textposition: 'top center', textfont: { color: '#34d399', size: 11 }, marker: { color: '#34d399', size: 10, symbol: 'diamond' } });
-      traces.push({ x: [0, 10], y: [0.008, 0.008], name: 'Support: (-∞, +∞)', mode: 'lines', line: { color: '#38bdf8', width: 2.5, dash: 'dot' } });
-    }
+    // 垂直參考虛線（預設年齡案例為 x = 20, 40, 60, 80）
+    const refXs = Array.from(new Set([t1, t2, t3, ...(extraRefs || [])])).filter(rx => rx > xMin && rx < xMax);
+    const shapes = refXs.map(rx => ({
+      type: 'line',
+      x0: rx, x1: rx, y0: 0, y1: 1,
+      line: { color: 'rgba(148, 163, 184, 0.35)', width: 1.2, dash: 'dash' }
+    }));
 
-    traces.push({
-      x: [crossL, crossR],
-      y: [0.5, 0.5],
-      name: `交越點 (${crossL.toFixed(2)}, ${crossR.toFixed(2)})`,
-      mode: 'markers+text',
-      text: [crossL.toFixed(2), crossR.toFixed(2)],
-      textposition: ['bottom left', 'bottom right'],
-      textfont: { color: '#fbbf24', size: 11 },
-      marker: { color: '#f59e0b', size: 9, line: { color: '#0f172a', width: 1.5 } }
-    });
+    const tickVals = Array.from(new Set([xMin, t1, t2, t3, ...(extraRefs || []), xMax])).sort((a, b) => a - b);
 
     const plotEl = document.getElementById(`${prefix}-plot`);
     if (plotEl && window.Plotly) {
@@ -10037,53 +10123,59 @@ window.FuzzyWidgets = (function () {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(15, 23, 42, 0.78)',
         font: { color: '#e2e8f0', size: 11 },
-        margin: { t: 34, r: 18, b: 42, l: 48 },
-        legend: { orientation: 'h', y: 1.15, x: 0 },
-        xaxis: { title: '論域 x ∈ [0, 10]', range: [0, 10], gridcolor: 'rgba(148, 163, 184, 0.14)' },
-        yaxis: { title: '歸屬度 μ(x)', range: [-0.06, 1.14], gridcolor: 'rgba(148, 163, 184, 0.14)' }
+        margin: { t: 36, r: 22, b: 44, l: 50 },
+        legend: { orientation: 'h', y: 1.16, x: 0 },
+        xaxis: {
+          title: `${varLabel} X ∈ [${xMin}, ${xMax}] (${unit})`,
+          range: [xMin, xMax],
+          tickvals: tickVals,
+          gridcolor: 'rgba(148, 163, 184, 0.12)'
+        },
+        yaxis: {
+          title: '歸屬度 μ(x)',
+          range: [-0.06, 1.14],
+          tickvals: [0, 0.5, 1],
+          gridcolor: 'rgba(148, 163, 184, 0.14)'
+        },
+        shapes: shapes
       }, { responsive: true, displayModeBar: false });
     }
 
-    const badgesEl = document.getElementById(`${prefix}-badges`);
-    if (badgesEl) {
-      badgesEl.innerHTML = `
-        <div class="bg-slate-950/80 border border-emerald-500/30 rounded-xl px-3.5 py-2.5 text-xs">
-          <div class="text-emerald-300 font-bold">Core 核心 (μ = 1)</div>
-          <div class="font-mono text-white font-bold mt-0.5">${coreText}</div>
-        </div>
-        <div class="bg-slate-950/80 border border-sky-500/30 rounded-xl px-3.5 py-2.5 text-xs">
-          <div class="text-sky-300 font-bold">Support 支撐集 (μ &gt; 0)</div>
-          <div class="font-mono text-white font-bold mt-0.5">${supportText}</div>
-        </div>
-        <div class="bg-slate-950/80 border border-amber-500/30 rounded-xl px-3.5 py-2.5 text-xs">
-          <div class="text-amber-300 font-bold">Crossover 交越點 (μ = 0.5)</div>
-          <div class="font-mono text-white font-bold mt-0.5">x = ${crossL.toFixed(2)}, ${crossR.toFixed(2)}</div>
+    const readoutEl = document.getElementById(`${prefix}-readout`);
+    if (readoutEl) {
+      const cardsHtml = sets.map((s, idx) => {
+        const val = mus[idx];
+        const pct = Math.max(0, Math.min(100, val * 100));
+        const tex = formatFig28FormulaTex(idx, x, t1, t2, t3, val, s.texSym);
+        return `
+          <div class="bg-slate-950/85 border ${s.borderCls} rounded-xl p-3.5 space-y-2">
+            <div class="flex items-center justify-between text-xs sm:text-sm">
+              <span class="font-bold ${s.textCls}">${s.name}</span>
+              <span class="font-mono font-bold text-white text-sm">${val.toFixed(2)}</span>
+            </div>
+            <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+              <div class="h-full ${s.barCls} transition-all duration-150" style="width: ${pct.toFixed(1)}%"></div>
+            </div>
+            <div class="text-slate-200 text-xs overflow-x-auto pt-0.5">${tex}</div>
+          </div>
+        `;
+      }).join('');
+
+      readoutEl.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">${cardsHtml}</div>
+        <div class="bg-slate-950/85 border border-teal-500/25 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm">
+          <div class="text-slate-200">
+            $$\\sum_{i=1}^{3} \\mu_{A_i}(${x}) = ${mu1.toFixed(2)} + ${mu2.toFixed(2)} + ${mu3.toFixed(2)} = \\mathbf{${sumMu.toFixed(2)}}$$
+          </div>
+          <span class="text-xs text-teal-300/90 font-semibold">Ruspini 模糊分割：論域上任一點歸屬度總和恆為 1.00</span>
         </div>
       `;
-    }
 
-    const formulaEl = document.getElementById(`${prefix}-formula`);
-    if (formulaEl) {
-      let tex = '';
-      if (st.type === 'tri') {
-        const { a, b, c } = st.tri;
-        tex = `$$\\text{tri}(x; ${a.toFixed(1)}, ${b.toFixed(1)}, ${c.toFixed(1)}) = \\max\\left(\\min\\left(\\frac{x - ${a.toFixed(1)}}{${Math.max(0.01, b - a).toFixed(1)}},\\; \\frac{${c.toFixed(1)} - x}{${Math.max(0.01, c - b).toFixed(1)}}\\right),\\; 0\\right)$$`;
-      } else if (st.type === 'trap') {
-        const { a, b, c, d } = st.trap;
-        tex = `$$\\text{trap}(x; ${a.toFixed(1)}, ${b.toFixed(1)}, ${c.toFixed(1)}, ${d.toFixed(1)}) = \\max\\left(\\min\\left(\\frac{x - ${a.toFixed(1)}}{${Math.max(0.01, b - a).toFixed(1)}},\\; 1,\\; \\frac{${d.toFixed(1)} - x}{${Math.max(0.01, d - c).toFixed(1)}}\\right),\\; 0\\right)$$`;
-      } else if (st.type === 'gauss') {
-        const { c, sigma } = st.gauss;
-        tex = `$$\\text{gauss}(x; ${c.toFixed(1)}, ${sigma.toFixed(1)}) = \\exp\\left(-\\frac{(x - ${c.toFixed(1)})^2}{2 \\times ${sigma.toFixed(1)}^2}\\right)$$`;
-      } else {
-        const { a, b, c } = st.gbell;
-        tex = `$$\\text{gbell}(x; ${a.toFixed(1)}, ${b.toFixed(1)}, ${c.toFixed(1)}) = \\frac{1}{1 + \\left|\\frac{x - ${c.toFixed(1)}}{${a.toFixed(1)}}\\right|^{${(2 * b).toFixed(1)}}}$$`;
-      }
-      formulaEl.innerHTML = tex;
-      if (shapeBMathTimers[prefix]) clearTimeout(shapeBMathTimers[prefix]);
-      shapeBMathTimers[prefix] = setTimeout(() => {
+      if (fig28MathTimers[prefix]) clearTimeout(fig28MathTimers[prefix]);
+      fig28MathTimers[prefix] = setTimeout(() => {
         if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
-          if (typeof window.MathJax.typesetClear === 'function') window.MathJax.typesetClear([formulaEl]);
-          window.MathJax.typesetPromise([formulaEl]).catch(() => {});
+          if (typeof window.MathJax.typesetClear === 'function') window.MathJax.typesetClear([readoutEl]);
+          window.MathJax.typesetPromise([readoutEl]).catch(() => {});
         }
       }, 70);
     }
@@ -10487,10 +10579,13 @@ window.FuzzyWidgets = (function () {
     onNearCCChange: onNearCCChange,
     resetNearCCenter: resetNearCCenter,
     resetNearCAll: resetNearCAll,
-    renderShapeShifterSimulator: renderShapeShifterSimulator,
-    setShapeBType: setShapeBType,
-    onShapeBSlider: onShapeBSlider,
-    updateShapeBSimulator: updateShapeBSimulator,
+    renderFig28LinguisticSimulator: renderFig28LinguisticSimulator,
+    renderShapeShifterSimulator: renderFig28LinguisticSimulator,
+    setFig28Preset: setFig28Preset,
+    resetFig28Simulator: resetFig28Simulator,
+    onFig28Probe: onFig28Probe,
+    onFig28Threshold: onFig28Threshold,
+    updateFig28Simulator: updateFig28Simulator,
     renderAlphaCutLabSimulator: renderAlphaCutLabSimulator,
     setAlphaCPreset: setAlphaCPreset,
     setAlphaCMode: setAlphaCMode,
