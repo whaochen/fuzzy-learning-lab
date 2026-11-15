@@ -23,6 +23,29 @@
         renderActions: {
           addMenu: []
         }
+      },
+      startup: {
+        ready: () => {
+          MathJax.startup.defaultReady();
+          if (MathJax.startup.promise) {
+            MathJax.startup.promise.then(() => {
+              if (typeof window.attachFormulaCopyButtons === 'function') {
+                window.attachFormulaCopyButtons();
+              }
+            }).catch(() => {});
+          }
+          if (typeof MathJax.typesetPromise === 'function') {
+            const origTypesetPromise = MathJax.typesetPromise.bind(MathJax);
+            MathJax.typesetPromise = function (...args) {
+              return origTypesetPromise(...args).then((res) => {
+                if (typeof window.attachFormulaCopyButtons === 'function') {
+                  setTimeout(() => window.attachFormulaCopyButtons(), 20);
+                }
+                return res;
+              });
+            };
+          }
+        }
       }
     };
   </script>
@@ -107,6 +130,7 @@
 
     /* 獨立置中數學公式展示盒 */
     .formula-display-card {
+      position: relative;
       background: rgba(9, 14, 28, 0.78);
       border: 1px solid rgba(56, 189, 248, 0.22);
       border-radius: 1rem;
@@ -118,6 +142,67 @@
       text-align: center;
       color: #e0f2fe;
       font-size: 1.125rem;
+    }
+
+    .formula-display-card.has-copy-toolbar {
+      padding-top: 2.6rem;
+    }
+
+    .formula-standalone-box {
+      position: relative;
+      background: rgba(9, 14, 28, 0.45);
+      border: 1px solid rgba(56, 189, 248, 0.16);
+      border-radius: 0.85rem;
+      padding: 2.45rem 1rem 0.65rem;
+      margin: 0.65rem 0;
+      overflow-x: auto;
+      text-align: center;
+    }
+
+    .formula-copy-toolbar {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.65rem;
+      z-index: 15;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      opacity: 0.55;
+      transition: opacity 0.2s ease;
+    }
+
+    .formula-display-card:hover .formula-copy-toolbar,
+    .formula-standalone-box:hover .formula-copy-toolbar,
+    .formula-copy-toolbar:hover,
+    .formula-copy-toolbar:focus-within {
+      opacity: 1;
+    }
+
+    .formula-copy-btn {
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 600;
+      padding: 0.28rem 0.6rem;
+      border-radius: 9999px;
+      background: rgba(15, 23, 42, 0.88);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.32);
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .formula-copy-btn:hover {
+      background: rgba(20, 184, 166, 0.24);
+      color: #5eead4;
+      border-color: rgba(45, 212, 191, 0.65);
+    }
+
+    .formula-copy-btn.is-copied {
+      background: rgba(16, 185, 129, 0.26);
+      color: #6ee7b7;
+      border-color: rgba(52, 211, 153, 0.8);
     }
 
     /* 學習地圖節點樣式 */
@@ -994,14 +1079,180 @@
       try {
         if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
           const p = elements ? window.MathJax.typesetPromise(elements) : window.MathJax.typesetPromise();
-          if (p && typeof p.catch === 'function') {
-            p.catch(err => console.warn('MathJax typeset warning:', err));
+          if (p && typeof p.then === 'function') {
+            p.then(() => {
+              if (typeof window.attachFormulaCopyButtons === 'function') {
+                window.attachFormulaCopyButtons();
+              }
+            }).catch(err => console.warn('MathJax typeset warning:', err));
           }
         }
       } catch (err) {
         console.warn('MathJax error:', err);
       }
     }
+
+    // =========================================================================
+    // 全站獨立數學公式區塊：一鍵複製到 Word/PPT (MathML) 與 LaTeX 工具列
+    // =========================================================================
+    function extractMathFromBox(box) {
+      let latex = '';
+      let mathml = '';
+      try {
+        if (window.MathJax && MathJax.startup && MathJax.startup.document &&
+            typeof MathJax.startup.document.getMathItemsWithin === 'function') {
+          const items = MathJax.startup.document.getMathItemsWithin(box) || [];
+          if (items.length > 0) {
+            latex = items.map(it => (it.math || '').trim()).filter(Boolean).join('\n');
+            if (typeof MathJax.startup.toMML === 'function') {
+              mathml = items.map(it => (it.root ? MathJax.startup.toMML(it.root) : '')).filter(Boolean).join('\n');
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('extractMathFromBox warning:', e);
+      }
+      if (!latex) {
+        latex = (box.getAttribute('data-raw-latex') || box.textContent || '').trim();
+      }
+      return { latex, mathml };
+    }
+
+    async function writePlainTextFallback(text) {
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+
+    function flashCopyBtn(btnEl, msg) {
+      if (!btnEl) return;
+      if (!btnEl.dataset.origLabel) btnEl.dataset.origLabel = btnEl.textContent;
+      if (btnEl._copyTimer) clearTimeout(btnEl._copyTimer);
+      btnEl.textContent = msg;
+      btnEl.classList.add('is-copied');
+      const bar = btnEl.closest('.formula-copy-toolbar');
+      if (bar) bar.style.opacity = '1';
+      btnEl._copyTimer = setTimeout(() => {
+        btnEl.textContent = btnEl.dataset.origLabel;
+        btnEl.classList.remove('is-copied');
+        if (bar) bar.style.opacity = '';
+      }, 2000);
+    }
+
+    function createFormulaCopyToolbar(box) {
+      const toolbar = document.createElement('div');
+      toolbar.className = 'formula-copy-toolbar';
+
+      const btnWord = document.createElement('button');
+      btnWord.type = 'button';
+      btnWord.className = 'formula-copy-btn';
+      btnWord.textContent = '📋 複製方程式 (Word/PPT)';
+      btnWord.title = '複製標準 MathML 與 LaTeX，可直接貼上 Word 或 PowerPoint';
+      btnWord.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        const { latex, mathml } = extractMathFromBox(box);
+        try {
+          if (mathml && navigator.clipboard && typeof navigator.clipboard.write === 'function' && typeof ClipboardItem !== 'undefined') {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'text/html': new Blob([mathml], { type: 'text/html' }),
+                'text/plain': new Blob([latex], { type: 'text/plain' })
+              })
+            ]);
+            flashCopyBtn(btnWord, '✅ 已複製！可直接貼上 Word/PPT');
+            return;
+          }
+        } catch (err) {
+          console.warn('MathML clipboard write failed, falling back to LaTeX:', err);
+        }
+        try {
+          await writePlainTextFallback(latex);
+          flashCopyBtn(btnWord, '✅ 已複製 LaTeX（Word 按 Alt+= 貼上）');
+        } catch (err2) {
+          console.warn('Fallback copy failed:', err2);
+        }
+      });
+
+      const btnLatex = document.createElement('button');
+      btnLatex.type = 'button';
+      btnLatex.className = 'formula-copy-btn';
+      btnLatex.textContent = '{ } 複製 LaTeX';
+      btnLatex.title = '複製純文字 LaTeX 語法';
+      btnLatex.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        const { latex } = extractMathFromBox(box);
+        try {
+          await writePlainTextFallback(latex);
+          flashCopyBtn(btnLatex, '✅ 已複製！可直接貼上 Word/PPT');
+        } catch (err) {
+          console.warn('LaTeX copy failed:', err);
+        }
+      });
+
+      toolbar.appendChild(btnWord);
+      toolbar.appendChild(btnLatex);
+      return toolbar;
+    }
+
+    function attachFormulaCopyButtons() {
+      try {
+        // 1. 所有 .formula-display-card 獨立方程式框
+        document.querySelectorAll('.formula-display-card').forEach((card) => {
+          if (!card.querySelector('mjx-container')) return;
+          if (card.querySelector(':scope > .formula-copy-toolbar')) return;
+          card.classList.add('has-copy-toolbar');
+          card.insertBefore(createFormulaCopyToolbar(card), card.firstChild);
+        });
+
+        // 2. 其他獨立展示公式 ($$ ... $$ 或 \[ ... \] 產生的 mjx-container[display="true"])
+        document.querySelectorAll('mjx-container[display="true"]').forEach((mjx) => {
+          if (mjx.closest('.formula-display-card') || mjx.closest('.formula-standalone-box')) return;
+          if (mjx.closest('.js-plotly-plot')) return;
+          const parent = mjx.parentNode;
+          if (!parent) return;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'formula-standalone-box has-copy-toolbar';
+          parent.insertBefore(wrapper, mjx);
+          wrapper.appendChild(createFormulaCopyToolbar(wrapper));
+          wrapper.appendChild(mjx);
+        });
+      } catch (e) {
+        console.warn('attachFormulaCopyButtons warning:', e);
+      }
+    }
+    window.attachFormulaCopyButtons = attachFormulaCopyButtons;
+
+    (function initFormulaCopyObserver() {
+      let timer = null;
+      const scheduleAttach = () => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => attachFormulaCopyButtons(), 80);
+      };
+      if (typeof MutationObserver !== 'undefined' && document.body) {
+        const observer = new MutationObserver((mutations) => {
+          for (const m of mutations) {
+            if (m.addedNodes && m.addedNodes.length > 0) {
+              for (const n of m.addedNodes) {
+                if (n.nodeType === 1 && (n.tagName === 'MJX-CONTAINER' || (n.querySelector && n.querySelector('mjx-container')))) {
+                  scheduleAttach();
+                  return;
+                }
+              }
+            }
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      }
+    })();
 
     function safePlotlyReact(target, traces, layout, config) {
       try {
