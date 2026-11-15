@@ -33336,6 +33336,504 @@ window.FuzzyWidgets = (function () {
     }
   }
 
+  // =========================================================================
+  // 希臘字母與模糊控制常用符號字典 (Greek Alphabet & Fuzzy Math Dictionary)
+  // =========================================================================
+  const GREEK_SYMBOLS_DATA = [
+    // --- 24 個完整希臘字母 (Alpha 至 Omega) ---
+    {
+      id: 'alpha', order: 1, core: true, category: 'greek',
+      upper: 'Α', lower: 'α', en: 'Alpha', ipa: '/ˈælfə/', zh: '阿爾法',
+      speech: 'Alpha', latex: '\\alpha', latexExample: '{}^\\alpha A = \\{x \\in X \\mid \\mu_A(x) \\ge \\alpha\\}',
+      fuzzyMeaning: 'α-截集門檻值 (Alpha-Cut Level)、學習/步進係數',
+      bookRef: 'Ch.02 頁 2-11 (α-截集定義)、Ch.04 模糊數區間運算',
+      exampleTex: '$$A_\\alpha = {}^\\alpha A = \\{x \\in X \\mid \\mu_A(x) \\ge \\alpha\\}$$',
+      keywords: 'alpha 阿爾法 截集 alpha-cut 門檻值'
+    },
+    {
+      id: 'beta', order: 2, core: false, category: 'greek',
+      upper: 'Β', lower: 'β', en: 'Beta', ipa: '/ˈbeɪtə/', zh: '貝塔',
+      speech: 'Beta', latex: '\\beta', latexExample: '\\mu(x) = \\frac{1}{1 + \\beta (x - c)^2}',
+      fuzzyMeaning: '形狀調節係數 / 第二特徵參數 / 貝塔分佈參數',
+      bookRef: 'Ch.02 鐘形歸屬函數參數化設計',
+      exampleTex: '$$\\mu_A(x) = \\frac{1}{1 + \\beta (x - c)^2}$$',
+      keywords: 'beta 貝塔 係數 鐘形'
+    },
+    {
+      id: 'gamma', order: 3, core: false, category: 'greek',
+      upper: 'Γ', lower: 'γ', en: 'Gamma', ipa: '/ˈɡæmə/', zh: '伽瑪',
+      speech: 'Gamma', latex: '\\gamma', latexExample: 'A \\cup_\\gamma B',
+      fuzzyMeaning: '補償運算子參數 (γ-Operator) / 折扣因子',
+      bookRef: 'Ch.03 廣義模糊聯集與補償算子',
+      exampleTex: '$$\\mu_{A \\cup_\\gamma B}(x) = (\\mu_A \\cdot \\mu_B)^{1-\\gamma} (1 - (1-\\mu_A)(1-\\mu_B))^\\gamma$$',
+      keywords: 'gamma 伽瑪 補償運算子 折扣因子'
+    },
+    {
+      id: 'delta', order: 4, core: true, category: 'greek',
+      upper: 'Δ', lower: 'δ', en: 'Delta', ipa: '/ˈdɛltə/', zh: '德爾塔',
+      speech: 'Delta', latex: '\\Delta', latexExample: '\\Delta e(k) = e(k) - e(k-1)',
+      fuzzyMeaning: '誤差變化量 (Error Change Δe)、增量、克羅內克函數',
+      bookRef: 'Ch.10 模糊控制器雙輸入 (e, Δe)、Ch.11 航向誤差變化率',
+      exampleTex: '$$\\Delta e(k) = e(k) - e(k-1),\\quad \\Delta u = \\text{FIS}(e, \\Delta e)$$',
+      keywords: 'delta 德爾塔 誤差變化量 增量 微分'
+    },
+    {
+      id: 'epsilon', order: 5, core: true, category: 'greek',
+      upper: 'Ε', lower: 'ε', en: 'Epsilon', ipa: '/ˈɛpsɪlɒn/', zh: '艾普西隆',
+      speech: 'Epsilon', latex: '\\epsilon', latexExample: '\\|U^{(t+1)} - U^{(t)}\\| < \\epsilon',
+      fuzzyMeaning: '收斂容許誤差門檻 (FCM 聚類終止條件 / 穩定界線)',
+      bookRef: 'Ch.17 Fuzzy C-Means (FCM) 迭代收斂準則',
+      exampleTex: '$$\\max_{i,k} |u_{ik}^{(t+1)} - u_{ik}^{(t)}| < \\epsilon$$',
+      keywords: 'epsilon 艾歐塔 收斂 誤差 門檻 FCM 聚類'
+    },
+    {
+      id: 'zeta', order: 6, core: false, category: 'greek',
+      upper: 'Ζ', lower: 'ζ', en: 'Zeta', ipa: '/ˈzeɪtə/', zh: '澤塔',
+      speech: 'Zeta', latex: '\\zeta', latexExample: '\\zeta = \\text{damping ratio}',
+      fuzzyMeaning: '阻尼比 (Damping Ratio)、系統暫態響應指標',
+      bookRef: 'Ch.13–14 模糊控制系統穩定度與暫態響應分析',
+      exampleTex: '$$G(s) = \\frac{\\omega_n^2}{s^2 + 2\\zeta\\omega_n s + \\omega_n^2}$$',
+      keywords: 'zeta 澤塔 阻尼比 暫態響應'
+    },
+    {
+      id: 'eta', order: 7, core: true, category: 'greek',
+      upper: 'Η', lower: 'η', en: 'Eta', ipa: '/ˈiːtə/', zh: '伊塔',
+      speech: 'Eta', latex: '\\eta', latexExample: '\\theta(t+1) = \\theta(t) - \\eta \\frac{\\partial E}{\\partial \\theta}',
+      fuzzyMeaning: '類神經模糊學習率 (Learning Rate)、系統效率',
+      bookRef: 'Ch.18 ANFIS 倒傳遞參數調校學習率',
+      exampleTex: '$$\\theta_{\\text{new}} = \\theta_{\\text{old}} - \\eta \\frac{\\partial E}{\\partial \\theta}$$',
+      keywords: 'eta 伊塔 學習率 ANFIS 類神經 效率'
+    },
+    {
+      id: 'theta', order: 8, core: true, category: 'greek',
+      upper: 'Θ', lower: 'θ', en: 'Theta', ipa: '/ˈθiːtə/', zh: '西塔',
+      speech: 'Theta', latex: '\\theta', latexExample: '\\theta(t),\\; \\dot{\\theta}(t)',
+      fuzzyMeaning: '船舶航向角 / 倒單擺偏角 / 待辨識參數向量',
+      bookRef: 'Ch.07 倒單擺平衡角度 θ、Ch.11 船舶自動舵航向角',
+      exampleTex: '$$\\text{IF } \\theta \\text{ is } PB \\text{ AND } \\dot{\\theta} \\text{ is } PS \\text{ THEN } u \\text{ is } NB$$',
+      keywords: 'theta 西塔 航向角 角度 倒單擺 船舶 參數'
+    },
+    {
+      id: 'iota', order: 9, core: false, category: 'greek',
+      upper: 'Ι', lower: 'ι', en: 'Iota', ipa: '/aɪˈoʊtə/', zh: '艾歐塔',
+      speech: 'Iota', latex: '\\iota', latexExample: '\\iota: A \\hookrightarrow X',
+      fuzzyMeaning: '索引標記 / 嵌入映射符號 (Inclusion Map)',
+      bookRef: '一般數學集合論與指標表示',
+      exampleTex: '$$\\iota(x) = x,\\quad x \\in A \\subseteq X$$',
+      keywords: 'iota 艾歐塔 索引 映射'
+    },
+    {
+      id: 'kappa', order: 10, core: false, category: 'greek',
+      upper: 'Κ', lower: 'κ', en: 'Kappa', ipa: '/ˈkæpə/', zh: '卡帕',
+      speech: 'Kappa', latex: '\\kappa', latexExample: 'K_e, K_d, K_u \\text{ or } \\kappa',
+      fuzzyMeaning: '曲率參數 / 比例縮放常數',
+      bookRef: 'Ch.14 比例增益與量化因子',
+      exampleTex: '$$e_n = \\kappa \\cdot e(t)$$',
+      keywords: 'kappa 卡帕 比例 常數 曲率'
+    },
+    {
+      id: 'lambda', order: 11, core: true, category: 'greek',
+      upper: 'Λ', lower: 'λ', en: 'Lambda', ipa: '/ˈlæmdə/', zh: '蘭姆達',
+      speech: 'Lambda', latex: '\\lambda', latexExample: 'c_\\lambda(a) = \\frac{1 - a}{1 + \\lambda a}',
+      fuzzyMeaning: 'Sugeno 模糊補集參數 λ / 規則激發權重 / 特徵值',
+      bookRef: 'Ch.03 Sugeno λ-補集、Ch.12 T-S 模型權重',
+      exampleTex: '$$c_\\lambda(\\mu_A(x)) = \\frac{1 - \\mu_A(x)}{1 + \\lambda \\mu_A(x)},\\quad \\lambda > -1$$',
+      keywords: 'lambda 蘭姆達 Sugeno 補集 權重 特徵值'
+    },
+    {
+      id: 'mu', order: 12, core: true, category: 'greek',
+      upper: 'Μ', lower: 'μ', en: 'Mu', ipa: '/mjuː/', zh: '謬',
+      speech: 'Mu', latex: '\\mu_A(x)', latexExample: '\\mu_A(x) \\in [0, 1]',
+      fuzzyMeaning: '模糊集合歸屬度函數 (Membership Function) — 全書最核心符號',
+      bookRef: 'Ch.01–19 全書核心：Ch.02 歸屬度 μ_A(x)、圖 2.7/2.8',
+      exampleTex: '$$A = \\{(x, \\mu_A(x)) \\mid x \\in X\\},\\quad \\mu_A : X \\to [0, 1]$$',
+      keywords: 'mu 謬 歸屬度 隸屬度 membership function Ch.02'
+    },
+    {
+      id: 'nu', order: 13, core: false, category: 'greek',
+      upper: 'Ν', lower: 'ν', en: 'Nu', ipa: '/njuː/', zh: '紐',
+      speech: 'Nu', latex: '\\nu', latexExample: '\\nu_A(x) \\le 1 - \\mu_A(x)',
+      fuzzyMeaning: '直覺模糊集非歸屬度 (Non-membership) / 頻率',
+      bookRef: '直覺模糊集合延伸概念與動態系統頻率',
+      exampleTex: '$$0 \\le \\mu_A(x) + \\nu_A(x) \\le 1$$',
+      keywords: 'nu 紐 非歸屬度 頻率'
+    },
+    {
+      id: 'xi', order: 14, core: false, category: 'greek',
+      upper: 'Ξ', lower: 'ξ', en: 'Xi', ipa: '/ksaɪ/', zh: '克西',
+      speech: 'Xi', latex: '\\xi', latexExample: '\\xi(x) = \\frac{w_i(x)}{\\sum_j w_j(x)}',
+      fuzzyMeaning: '正規化模糊基底函數 (Fuzzy Basis Function) / 狀態向量',
+      bookRef: 'Ch.12 T-S 模糊系統正規化激發強度、Ch.18 ANFIS Layer 3',
+      exampleTex: '$$\\xi_i(x) = \\frac{w_i(x)}{\\sum_{j=1}^M w_j(x)}$$',
+      keywords: 'xi 克西 基底函數 正規化 狀態向量'
+    },
+    {
+      id: 'omicron', order: 15, core: false, category: 'greek',
+      upper: 'Ο', lower: 'ο', en: 'Omicron', ipa: '/ˈɒmɪkrɒn/', zh: '歐密克戎',
+      speech: 'Omicron', latex: 'o', latexExample: 'o(h) \\to 0',
+      fuzzyMeaning: '高階無窮小量記號 (Little-o notation)',
+      bookRef: '系統線性化與誤差近似階數',
+      exampleTex: '$$f(x + h) = f(x) + f\'(x)h + o(h)$$',
+      keywords: 'omicron 歐密克戎 無窮小'
+    },
+    {
+      id: 'pi', order: 16, core: false, category: 'greek',
+      upper: 'Π', lower: 'π', en: 'Pi', ipa: '/paɪ/', zh: '派',
+      speech: 'Pi', latex: '\\pi', latexExample: '\\prod_{i=1}^n \\mu_{A_i}(x_i)',
+      fuzzyMeaning: '圓周率 π / 大寫 Π 表連乘積 (T-Norm 乘積推論)',
+      bookRef: 'Ch.08 Larsen 乘積推論、Ch.18 ANFIS Layer 2 連乘節點',
+      exampleTex: '$$w_k = \\prod_{i=1}^n \\mu_{A_{ki}}(x_i)$$',
+      keywords: 'pi 派 連乘 乘積 圓周率 Larsen ANFIS'
+    },
+    {
+      id: 'rho', order: 17, core: false, category: 'greek',
+      upper: 'Ρ', lower: 'ρ', en: 'Rho', ipa: '/roʊ/', zh: '柔',
+      speech: 'Rho', latex: '\\rho', latexExample: '\\rho(x, y)',
+      fuzzyMeaning: '相關係數 / 距離度量 / 模糊關係強度',
+      bookRef: 'Ch.05 模糊關係矩陣、Ch.17 聚類距離度量',
+      exampleTex: '$$\\rho(x, v_i) = \\|x - v_i\\|_2$$',
+      keywords: 'rho 柔 距離 相關係數 聚類'
+    },
+    {
+      id: 'sigma', order: 18, core: true, category: 'greek',
+      upper: 'Σ', lower: 'σ', en: 'Sigma', ipa: '/ˈsɪɡmə/', zh: '西格瑪',
+      speech: 'Sigma', latex: '\\sigma', latexExample: '\\mu(x) = \\exp\\left(-\\frac{(x-c)^2}{2\\sigma^2}\\right)',
+      fuzzyMeaning: '小寫 σ：高斯歸屬函數寬度（標準差）；大寫 Σ：總和 / 重心法分母',
+      bookRef: 'Ch.02 高斯歸屬函數 σ、Ch.09 重心法 (COA) 總和 Σ',
+      exampleTex: '$$\\mu(x) = e^{-\\frac{(x-c)^2}{2\\sigma^2}},\\quad z_{\\text{COA}} = \\frac{\\sum x_i \\mu(x_i)}{\\sum \\mu(x_i)}$$',
+      keywords: 'sigma 西格瑪 高斯 標準差 寬度 總和 重心法'
+    },
+    {
+      id: 'tau', order: 19, core: true, category: 'greek',
+      upper: 'Τ', lower: 'τ', en: 'Tau', ipa: '/taʊ/', zh: '陶',
+      speech: 'Tau', latex: '\\tau', latexExample: '\\tau \\dot{y}(t) + y(t) = K u(t)',
+      fuzzyMeaning: '系統時間常數 τ / 規則激發度 / 控制力矩',
+      bookRef: 'Ch.10–13 受控系統時間常數 τ 與時間延遲',
+      exampleTex: '$$\\tau \\dot{y}(t) + y(t) = K u(t - \\tau_d)$$',
+      keywords: 'tau 陶 時間常數 延遲 力矩 激發度'
+    },
+    {
+      id: 'upsilon', order: 20, core: false, category: 'greek',
+      upper: 'Υ', lower: 'υ', en: 'Upsilon', ipa: '/ˈʌpsɪlɒn/', zh: '宇普西隆',
+      speech: 'Upsilon', latex: '\\upsilon', latexExample: '\\Upsilon(x)',
+      fuzzyMeaning: '系統輸出空間 / 輔助變數符號',
+      bookRef: '一般多變數控制系統狀態符號',
+      exampleTex: '$$\\Upsilon : X \\times U \\to Y$$',
+      keywords: 'upsilon 宇普西隆 輔助變數'
+    },
+    {
+      id: 'phi', order: 21, core: false, category: 'greek',
+      upper: 'Φ', lower: 'φ', en: 'Phi', ipa: '/faɪ/', zh: '斐',
+      speech: 'Phi', latex: '\\phi', latexExample: '\\phi(x) = [\\xi_1(x), \\dots, \\xi_M(x)]^T',
+      fuzzyMeaning: '特徵映射向量 / 相角 / 黃金比例',
+      bookRef: 'Ch.12–13 模糊基底向量、Ch.19 最佳化',
+      exampleTex: '$$y(x) = \\theta^T \\phi(x)$$',
+      keywords: 'phi 斐 相角 映射 向量'
+    },
+    {
+      id: 'chi', order: 22, core: false, category: 'greek',
+      upper: 'Χ', lower: 'χ', en: 'Chi', ipa: '/kaɪ/', zh: '凱',
+      speech: 'Chi', latex: '\\chi', latexExample: '\\chi_A(x) \\in \\{0, 1\\}',
+      fuzzyMeaning: '傳統明確集合的特徵函數 (Characteristic Function)',
+      bookRef: 'Ch.01 Crisp 二值集合 χ_A(x) ∈ {0, 1} 與 Fuzzy μ_A(x) 對比',
+      exampleTex: '$$\\chi_A(x) = \\begin{cases} 1, & x \\in A \\\\ 0, & x \\notin A \\end{cases}$$',
+      keywords: 'chi 凱 特徵函數 Crisp 二值集合 Ch.01'
+    },
+    {
+      id: 'psi', order: 23, core: false, category: 'greek',
+      upper: 'Ψ', lower: 'ψ', en: 'Psi', ipa: '/saɪ/', zh: '普賽',
+      speech: 'Psi', latex: '\\psi', latexExample: '\\psi(t) \\text{ 偏航角}',
+      fuzzyMeaning: '偏航角 (Yaw Angle) / Lyapunov 輔助函數',
+      bookRef: 'Ch.11 船舶航向動力學偏航角、Ch.13 穩定性分析',
+      exampleTex: '$$\\dot{\\psi}(t) = r(t),\\quad e_\\psi = \\psi_{\\text{ref}} - \\psi$$',
+      keywords: 'psi 普賽 偏航角 船舶 Lyapunov'
+    },
+    {
+      id: 'omega', order: 24, core: true, category: 'greek',
+      upper: 'Ω', lower: 'ω', en: 'Omega', ipa: '/oʊˈmeɪɡə/', zh: '歐米伽',
+      speech: 'Omega', latex: '\\omega', latexExample: '\\omega_i = \\min(\\mu_{A_i}(x), \\mu_{B_i}(y))',
+      fuzzyMeaning: '角速度 ω / Yager 補集參數 w / 大寫 Ω 表全體論域或歐姆',
+      bookRef: 'Ch.03 Yager 補集參數、Ch.07 轉速角速度 ω、Ch.11 舵角速率',
+      exampleTex: '$$c_w(a) = (1 - a^w)^{1/w},\\quad \\omega = \\frac{d\\theta}{dt}$$',
+      keywords: 'omega 歐米伽 角速度 Yager 補集 論域'
+    },
+    // --- 模糊邏輯與集合常用運算符號 ---
+    {
+      id: 'op_union_inter', order: 101, core: true, category: 'fuzzy_op',
+      upper: '∪ / ∩', lower: '∨ / ∧', en: 'Union & Intersection', ipa: '/ˈjuːnjən/', zh: '聯集 (Max) / 交集 (Min)',
+      speech: 'Union and Intersection', latex: '\\mu_{A \\cup B}(x) = \\max(\\mu_A(x), \\mu_B(x))',
+      fuzzyMeaning: 'Zadeh 標準模糊聯集 (∨ / max) 與模糊交集 (∧ / min)',
+      bookRef: 'Ch.03 模糊集合基本運算',
+      exampleTex: '$$\\mu_{A \\cup B}(x) = \\mu_A(x) \\vee \\mu_B(x),\\quad \\mu_{A \\cap B}(x) = \\mu_A(x) \\wedge \\mu_B(x)$$',
+      keywords: '聯集 交集 union intersection max min Zadeh Ch.03 運算符號'
+    },
+    {
+      id: 'op_comp', order: 102, core: true, category: 'fuzzy_op',
+      upper: '∘', lower: 'Max-Min', en: 'Composition', ipa: '/ˌkɒmpəˈzɪʃən/', zh: '模糊關係合成',
+      speech: 'Composition', latex: 'R \\circ S',
+      fuzzyMeaning: 'Max-Min / Max-Product 模糊關係合成運算子',
+      bookRef: 'Ch.06 模糊關係合成、Ch.16 綜合評判 W ∘ R',
+      exampleTex: '$$(R \\circ S)(x, z) = \\max_{y \\in Y} \\min\\bigl(R(x, y), S(y, z)\\bigr)$$',
+      keywords: '合成 composition Max-Min Max-Product Ch.06 Ch.16 運算符號'
+    },
+    {
+      id: 'op_arith', order: 103, core: true, category: 'fuzzy_op',
+      upper: '⊕ ⊖', lower: '⊗ ⊘', en: 'Fuzzy Arithmetic', ipa: '/əˈrɪθmətɪk/', zh: '模糊數四則運算',
+      speech: 'Fuzzy Arithmetic', latex: 'A \\oplus B',
+      fuzzyMeaning: '由擴展原理推導之模糊數加、減、乘、除運算子',
+      bookRef: 'Ch.04 擴展原理與模糊數四則計算',
+      exampleTex: '$$\\mu_{A \\oplus B}(z) = \\sup_{z = x + y} \\min\\bigl(\\mu_A(x), \\mu_B(y)\\bigr)$$',
+      keywords: '模糊數 四則運算 加減乘除 擴展原理 Ch.04 運算符號'
+    },
+    {
+      id: 'op_subset', order: 104, core: true, category: 'fuzzy_op',
+      upper: '⊆ / ∈', lower: '∀ / ∃', en: 'Set & Quantifiers', ipa: '/ˈsʌbsɛt/', zh: '包含於 / 屬於 / 全稱 / 存在',
+      speech: 'Subset and Quantifiers', latex: 'A \\subseteq B',
+      fuzzyMeaning: '模糊子集包含關係 (μ_A ≤ μ_B)、元素屬於與量詞',
+      bookRef: 'Ch.02 模糊子集包含定義、Ch.07 模糊邏輯量詞',
+      exampleTex: '$$A \\subseteq B \\iff \\forall x \\in X,\\; \\mu_A(x) \\le \\mu_B(x)$$',
+      keywords: '子集 包含 屬於 全稱 存在 subset quantifier Ch.02 運算符號'
+    }
+  ];
+
+  let greekDictQuery = '';
+  let greekDictMathTimer = null;
+
+  function renderGreekSymbolsDictionary(containerId) {
+    const root = document.getElementById(containerId);
+    if (!root) return;
+
+    root.innerHTML = `
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 border-b border-slate-800 pb-6">
+          <div class="space-y-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">
+              <span>🔤 教學投影 & 隨查字典</span>
+              <span>•</span>
+              <span>Web Speech API 真人發音</span>
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">希臘字母與模糊數學符號字典</h2>
+            <p class="text-sm text-slate-300 leading-relaxed max-w-3xl">
+              完整收錄 24 個希臘字母大小寫、國際音標 (IPA)、台灣學術界常用中文讀音、一鍵 <strong class="text-teal-300">🔊 聽發音</strong>、LaTeX 代碼複製，以及在《認識 Fuzzy》各章節中的實際物理意義與公式範例。
+            </p>
+          </div>
+          <div class="w-full lg:w-96 shrink-0">
+            <label for="greek-dict-search" class="block text-xs font-bold text-slate-400 mb-1.5">🔍 即時搜尋（英文名 / 中文音譯 / 符號 / 用途）</label>
+            <div class="relative">
+              <input id="greek-dict-search" type="text" value="${greekDictQuery.replace(/"/g, '&quot;')}"
+                oninput="FuzzyWidgets.filterGreekSymbols(this.value)"
+                placeholder="例如：Mu、謬、歸屬度、截集、航向角、Ch.02..."
+                class="w-full bg-slate-950/90 border border-slate-700 focus:border-teal-400 rounded-xl pl-4 pr-20 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none">
+              <button type="button" onclick="FuzzyWidgets.filterGreekSymbols('')"
+                class="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-semibold">
+                清除
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="greek-dict-status" class="text-xs text-slate-400"></div>
+
+        <div class="space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🔥</span>
+            <h3 class="text-lg sm:text-xl font-bold text-amber-300">模糊控制最高頻核心字母與運算符號</h3>
+            <span class="text-xs text-slate-400">（課堂公式最常見：μ, α, σ, θ, Δ, λ, η, ω, ε, τ 及模糊運算子）</span>
+          </div>
+          <div id="greek-dict-core-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        </div>
+
+        <div class="space-y-4 pt-4 border-t border-slate-800/80">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">📜</span>
+            <h3 class="text-lg sm:text-xl font-bold text-sky-300">完整 24 個希臘字母總表（Alpha 至 Omega）</h3>
+          </div>
+          <div id="greek-dict-all-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        </div>
+      </div>
+    `;
+
+    updateGreekSymbolsGrid();
+  }
+
+  function filterGreekSymbols(query) {
+    greekDictQuery = String(query || '');
+    const inp = document.getElementById('greek-dict-search');
+    if (inp && inp.value !== greekDictQuery) inp.value = greekDictQuery;
+    updateGreekSymbolsGrid();
+  }
+
+  function buildGreekSymbolCardHtml(item, zone) {
+    const isOp = item.category === 'fuzzy_op';
+    const borderCls = item.core ? 'border-amber-500/30 hover:border-amber-400/60' : 'border-slate-800 hover:border-sky-500/50';
+    const badgeCls = isOp
+      ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
+      : (item.core ? 'bg-amber-500/15 text-amber-300 border-amber-500/30' : 'bg-sky-500/15 text-sky-300 border-sky-500/30');
+    const badgeText = isOp ? '模糊運算符號' : (item.core ? `高頻核心 #${item.order}` : `希臘字母 #${item.order}`);
+
+    return `
+      <div class="bg-slate-950/85 border ${borderCls} rounded-2xl p-4 flex flex-col justify-between gap-3 transition-all">
+        <div class="space-y-2.5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-14 h-14 rounded-2xl bg-slate-900 border border-slate-700/80 flex items-center justify-center shrink-0">
+                <span class="text-xl sm:text-2xl font-serif font-bold text-white tracking-tight">${isOp ? item.upper : `${item.upper} ${item.lower}`}</span>
+              </div>
+              <div>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h4 class="text-base font-extrabold text-white">${item.en}</h4>
+                  <span class="px-2 py-0.5 rounded-md text-[11px] font-bold border ${badgeCls}">${badgeText}</span>
+                </div>
+                <div class="text-xs text-slate-300 mt-0.5">
+                  <span class="font-mono text-teal-300">${item.ipa}</span>
+                  <span class="mx-1.5 text-slate-600">|</span>
+                  <span>中文讀音：<strong class="text-amber-200">${item.zh}</strong></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="greek-speak-${zone}-${item.id}" onclick="FuzzyWidgets.speakGreekLetter('${item.id}', this)"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/15 hover:bg-teal-500/30 border border-teal-500/40 text-teal-200 text-xs font-bold transition">
+              <span>🔊</span>
+              <span>聽發音</span>
+            </button>
+            <button type="button" onclick="FuzzyWidgets.copyGreekLatex('${item.id}', this)"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 text-xs font-mono transition"
+              title="點擊複製 LaTeX 語法">
+              <span>📋</span>
+              <span>${item.latex}</span>
+            </button>
+          </div>
+
+          <div class="bg-slate-900/75 border border-slate-800/90 rounded-xl p-3 space-y-1">
+            <div class="text-xs font-bold text-sky-300">模糊控制 / 數學意義</div>
+            <div class="text-xs text-slate-200 leading-relaxed">${item.fuzzyMeaning}</div>
+            <div class="text-[11px] text-amber-300/90 pt-0.5">📖 ${item.bookRef}</div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/90 border border-slate-800 rounded-xl px-3 py-2 text-xs text-teal-200 overflow-x-auto">
+          ${item.exampleTex}
+        </div>
+      </div>
+    `;
+  }
+
+  function updateGreekSymbolsGrid() {
+    const coreGrid = document.getElementById('greek-dict-core-grid');
+    const allGrid = document.getElementById('greek-dict-all-grid');
+    const statusEl = document.getElementById('greek-dict-status');
+    if (!coreGrid || !allGrid) return;
+
+    const q = greekDictQuery.trim().toLowerCase();
+    const matches = (item) => {
+      if (!q) return true;
+      const haystack = [
+        item.upper, item.lower, item.en, item.zh, item.ipa,
+        item.latex, item.fuzzyMeaning, item.bookRef, item.keywords
+      ].join(' ').toLowerCase();
+      return haystack.includes(q);
+    };
+
+    const coreItems = GREEK_SYMBOLS_DATA.filter(item => item.core && matches(item));
+    const allGreekItems = GREEK_SYMBOLS_DATA.filter(item => item.category === 'greek' && matches(item));
+
+    coreGrid.innerHTML = coreItems.length
+      ? coreItems.map(it => buildGreekSymbolCardHtml(it, 'core')).join('')
+      : '<div class="col-span-full text-sm text-slate-400 bg-slate-950/60 border border-slate-800 rounded-xl p-4">無符合搜尋條件的核心字母或運算符號。</div>';
+
+    allGrid.innerHTML = allGreekItems.length
+      ? allGreekItems.map(it => buildGreekSymbolCardHtml(it, 'all')).join('')
+      : '<div class="col-span-full text-sm text-slate-400 bg-slate-950/60 border border-slate-800 rounded-xl p-4">無符合搜尋條件的希臘字母。</div>';
+
+    if (statusEl) {
+      statusEl.innerHTML = q
+        ? `搜尋「<strong class="text-teal-300">${q}</strong>」結果：核心高頻區 <strong class="text-white">${coreItems.length}</strong> 項、完整 24 字母區 <strong class="text-white">${allGreekItems.length}</strong> 項。`
+        : `共收錄 <strong class="text-white">24</strong> 個希臘字母與 <strong class="text-white">4</strong> 組常用模糊運算符號（點擊 🔊 立即朗讀學術英文發音）。`;
+    }
+
+    if (greekDictMathTimer) clearTimeout(greekDictMathTimer);
+    greekDictMathTimer = setTimeout(() => {
+      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+        if (typeof window.MathJax.typesetClear === 'function') window.MathJax.typesetClear([coreGrid, allGrid]);
+        window.MathJax.typesetPromise([coreGrid, allGrid]).catch(() => {});
+      }
+    }, 60);
+  }
+
+  function speakGreekLetter(itemId, btnEl) {
+    const item = GREEK_SYMBOLS_DATA.find(x => x.id === itemId);
+    if (!item) return;
+
+    if (btnEl) {
+      const origHtml = btnEl.innerHTML;
+      btnEl.innerHTML = '<span>🔊</span><span>朗讀中...</span>';
+      btnEl.classList.add('bg-teal-500', 'text-slate-950');
+      setTimeout(() => {
+        btnEl.innerHTML = origHtml;
+        btnEl.classList.remove('bg-teal-500', 'text-slate-950');
+      }, 950);
+    }
+
+    try {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(item.speech || item.en);
+        utter.lang = 'en-US';
+        utter.rate = 0.88;
+        utter.pitch = 1.0;
+        const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+        const enVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en-us'))
+          || voices.find(v => v.lang && v.lang.toLowerCase().startsWith('en'));
+        if (enVoice) utter.voice = enVoice;
+        window.speechSynthesis.speak(utter);
+      } else {
+        alert(`您的瀏覽器不支援語音朗讀，標準英文讀音為：${item.en} (${item.ipa})`);
+      }
+    } catch (e) {
+      console.warn('speechSynthesis error:', e);
+    }
+  }
+
+  function copyGreekLatex(itemId, btnEl) {
+    const item = GREEK_SYMBOLS_DATA.find(x => x.id === itemId);
+    if (!item) return;
+    const textToCopy = item.latex;
+
+    const showCopied = () => {
+      if (!btnEl) return;
+      const orig = btnEl.innerHTML;
+      btnEl.innerHTML = '<span class="text-emerald-300">✓ 已複製</span>';
+      btnEl.classList.add('border-emerald-500/60', 'bg-emerald-950/60');
+      setTimeout(() => {
+        btnEl.innerHTML = orig;
+        btnEl.classList.remove('border-emerald-500/60', 'bg-emerald-950/60');
+      }, 1200);
+    };
+
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(textToCopy).then(showCopied).catch(() => {
+        showCopied();
+      });
+    } else {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = textToCopy;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showCopied();
+      } catch (e) {
+        console.warn('copy fallback failed:', e);
+      }
+    }
+  }
+
   return {
     getChapterInteractiveHtml: getChapterInteractiveHtml,
     initChapterWidgets: initChapterWidgets,
@@ -33440,7 +33938,12 @@ window.FuzzyWidgets = (function () {
     updateAlphaCSimulator: updateAlphaCSimulator,
     fcmStep19: fcmStep19,
     fcmAuto19: fcmAuto19,
-    fcmReset19: fcmReset19
+    fcmReset19: fcmReset19,
+    // 希臘字母與符號字典
+    renderGreekSymbolsDictionary: renderGreekSymbolsDictionary,
+    filterGreekSymbols: filterGreekSymbols,
+    speakGreekLetter: speakGreekLetter,
+    copyGreekLatex: copyGreekLatex
   };
 })();
 
@@ -36670,6 +37173,10 @@ window.WebFISStudio = (function () {
           <span>🛠️</span>
           <span>Web FIS Studio</span>
         </button>
+        <button id="tab-btn-symbols" onclick="switchTab('symbols')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
+          <span>🔤</span>
+          <span>希臘字母與符號字典</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -37355,6 +37862,13 @@ window.WebFISStudio = (function () {
 
     </section>
 
+    <!-- ===================================================================== -->
+    <!-- 【核心模組 5：希臘字母與模糊數學符號字典】                               -->
+    <!-- ===================================================================== -->
+    <section id="tab-panel-symbols" class="hidden space-y-8">
+      <div id="greek-symbols-dict-root"></div>
+    </section>
+
   </main>
 
   <!-- 原書圖檔與 Lightbox 燈箱已全數升級為實體課本重點導讀與頁碼對照指引 (Textbook Companion Guide) -->
@@ -37626,7 +38140,7 @@ window.WebFISStudio = (function () {
     function switchTab(tabName) {
       try {
         const normalizedTab = tabName === 'theory' ? 'roadmap' : tabName;
-        const tabs = ['roadmap', 'notes', 'lab', 'fis'];
+        const tabs = ['roadmap', 'notes', 'lab', 'fis', 'symbols'];
         tabs.forEach(t => {
           const btn = document.getElementById(`tab-btn-${t}`);
           const panel = document.getElementById(`tab-panel-${t}`);
@@ -37664,6 +38178,14 @@ window.WebFISStudio = (function () {
               }
             } catch (e) { console.warn('WebFISStudio error:', e); }
           }, 60);
+        } else if (normalizedTab === 'symbols') {
+          setTimeout(() => {
+            try {
+              if (window.FuzzyWidgets && typeof window.FuzzyWidgets.renderGreekSymbolsDictionary === 'function') {
+                window.FuzzyWidgets.renderGreekSymbolsDictionary('greek-symbols-dict-root');
+              }
+            } catch (e) { console.warn('GreekSymbolsDict error:', e); }
+          }, 40);
         } else {
           safeTypesetMath();
         }

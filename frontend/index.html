@@ -221,6 +221,10 @@
           <span>🛠️</span>
           <span>Web FIS Studio</span>
         </button>
+        <button id="tab-btn-symbols" onclick="switchTab('symbols')" class="text-slate-300 hover:text-white px-4 py-2.5 rounded-xl text-sm sm:text-base font-semibold transition-all flex items-center gap-2">
+          <span>🔤</span>
+          <span>希臘字母與符號字典</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -906,6 +910,13 @@
 
     </section>
 
+    <!-- ===================================================================== -->
+    <!-- 【核心模組 5：希臘字母與模糊數學符號字典】                               -->
+    <!-- ===================================================================== -->
+    <section id="tab-panel-symbols" class="hidden space-y-8">
+      <div id="greek-symbols-dict-root"></div>
+    </section>
+
   </main>
 
   <!-- 原書圖檔與 Lightbox 燈箱已全數升級為實體課本重點導讀與頁碼對照指引 (Textbook Companion Guide) -->
@@ -1177,7 +1188,7 @@
     function switchTab(tabName) {
       try {
         const normalizedTab = tabName === 'theory' ? 'roadmap' : tabName;
-        const tabs = ['roadmap', 'notes', 'lab', 'fis'];
+        const tabs = ['roadmap', 'notes', 'lab', 'fis', 'symbols'];
         tabs.forEach(t => {
           const btn = document.getElementById(`tab-btn-${t}`);
           const panel = document.getElementById(`tab-panel-${t}`);
@@ -1215,6 +1226,14 @@
               }
             } catch (e) { console.warn('WebFISStudio error:', e); }
           }, 60);
+        } else if (normalizedTab === 'symbols') {
+          setTimeout(() => {
+            try {
+              if (window.FuzzyWidgets && typeof window.FuzzyWidgets.renderGreekSymbolsDictionary === 'function') {
+                window.FuzzyWidgets.renderGreekSymbolsDictionary('greek-symbols-dict-root');
+              }
+            } catch (e) { console.warn('GreekSymbolsDict error:', e); }
+          }, 40);
         } else {
           safeTypesetMath();
         }
