@@ -28,7 +28,8 @@ LOCAL_SCRIPTS = [
     'chapters_19_data.js',
     'book_pages.js',
     'interactive_widgets.js',
-    'fis_studio.js'
+    'fis_studio.js',
+    'formula_spoken.js'
 ]
 
 def sanitize_js_for_inline(js_code):
