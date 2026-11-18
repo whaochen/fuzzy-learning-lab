@@ -31439,7 +31439,7 @@ window.FuzzyWidgets = (function () {
   const LAB_19_META = {
     1:  { shortTitle: '緒論與概念對比', count: 1, badge: '原書第 1 章 · 課本圖 1.1 高個子/室溫 Crisp vs. Fuzzy', title: 'Ch.01 二值邏輯 (Crisp) vs. 模糊集合 (Fuzzy) 對比滑桿' },
     2:  { shortTitle: '圖 2.7/2.8 & α-cut', count: 3, badge: '原書第 2 章 · 圖 2.7 四函數對比 · 圖 2.8 年齡語意變數分割 · α-Cut 切片實驗室', title: 'Ch.02 三大互動模擬器：圖 2.7 靠近 c 函數對比 ＋ 圖 2.8 年齡語意變數模糊分割 ＋ α-Cut 切片實驗室' },
-    3:  { shortTitle: '模糊集合運算', count: 1, badge: '原書第 3 章 · 標準 Min/Max & Sugeno/Yager 參數補集', title: 'Ch.03 交集、聯集、補集與參數化運算動態疊圖' },
+    3:  { shortTitle: '模糊集合運算', count: 4, badge: '原書第 3 章 · 基本運算 / T-norm & S-norm / Sugeno-Yager / 語意修飾詞', title: 'Ch.03 四大互動實驗室：交聯補與排中律驗證 ＋ T/S-norm 四家族對比 ＋ Sugeno/Yager 補集 ＋ 語意修飾詞' },
     4:  { shortTitle: '擴展原理與模糊數', count: 2, badge: '原書第 4 章 · 模糊數加減乘除 & y=f(x) 映射', title: 'Ch.04 模糊數四則計算器 (A⊕B, A⊖B, A⊗B, A⊘B) ＋ 函數映射' },
     5:  { shortTitle: '模糊關係矩陣', count: 1, badge: '原書第 5 章 · 卡迪興乘積與關係強度熱力圖', title: 'Ch.05 模糊關係矩陣 R(X×Y) 互動編輯與 2D 熱力圖' },
     6:  { shortTitle: '關係合成計算器', count: 1, badge: '原書第 6 章 · Max-Min / Max-Product 逐步合成計算', title: 'Ch.06 Max-Min & Max-Product 關係矩陣合成計算器（高亮每格步驟）' },
@@ -31797,6 +31797,11 @@ window.FuzzyWidgets = (function () {
       renderNearCSimulator(simAId, { prefix: 'lab2a_' + cleanId, showFormulas: true });
       renderFig28LinguisticSimulator(simBId, { prefix: 'lab2b_' + cleanId });
       renderAlphaCutLabSimulator(simCId, { prefix: 'lab2c_' + cleanId });
+      return;
+    }
+
+    if (chNum === 3) {
+      renderCh3AllSimulators(containerId);
       return;
     }
 
@@ -33619,6 +33624,588 @@ window.FuzzyWidgets = (function () {
     }
   ];
 
+  // =========================================================================
+  // 第 3 章（模糊集合基本運算、T-norm/S-norm、Sugeno/Yager 補集與語意修飾詞）
+  // 四大互動實驗室 (雙向掛載於「伴讀地圖 Ch.03」與「Fuzzy 互動實驗室 Ch.03」)
+  // =========================================================================
+  const ch3SimStateStore = {};
+
+  function getCh3SimState(prefix) {
+    if (!ch3SimStateStore[prefix]) {
+      ch3SimStateStore[prefix] = {
+        sim1Mode: 'inter',   // 'inter' | 'union' | 'excl' | 'contra'
+        sim2Family: 'tnorm'  // 'tnorm' | 'snorm'
+      };
+    }
+    return ch3SimStateStore[prefix];
+  }
+
+  function renderCh3AllSimulators(containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const prefix = 'ch3s_' + String(containerId).replace(/[^a-zA-Z0-9]/g, '');
+    const st = getCh3SimState(prefix);
+
+    el.innerHTML = `
+      <div class="space-y-7">
+        <!-- 模擬器 3-1：標準交集/聯集/補集與排中律/矛盾律失效驗證器 -->
+        <div class="bg-slate-900/85 border border-sky-500/30 rounded-2xl p-4 sm:p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-300 text-xs font-bold">模擬器 3-1</span>
+              <h4 class="text-sm sm:text-base font-bold text-white">標準交集 (Min)・聯集 (Max)・補集與「排中律／矛盾律失效」視覺驗證器</h4>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button type="button" id="${prefix}-s1-btn-inter" onclick="FuzzyWidgets.setCh3Sim1Mode('${prefix}', 'inter')"
+              class="px-2.5 py-2 rounded-xl text-xs font-bold border transition ${st.sim1Mode === 'inter' ? 'bg-sky-500 text-slate-950 border-sky-400' : 'bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800'}">
+              $A \\cap B$ (標準交集 Min)
+            </button>
+            <button type="button" id="${prefix}-s1-btn-union" onclick="FuzzyWidgets.setCh3Sim1Mode('${prefix}', 'union')"
+              class="px-2.5 py-2 rounded-xl text-xs font-bold border transition ${st.sim1Mode === 'union' ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800'}">
+              $A \\cup B$ (標準聯集 Max)
+            </button>
+            <button type="button" id="${prefix}-s1-btn-excl" onclick="FuzzyWidgets.setCh3Sim1Mode('${prefix}', 'excl')"
+              class="px-2.5 py-2 rounded-xl text-xs font-bold border transition ${st.sim1Mode === 'excl' ? 'bg-amber-500 text-slate-950 border-amber-400' : 'bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800'}">
+              $A \\cup \\bar{A}$ (排中律失效)
+            </button>
+            <button type="button" id="${prefix}-s1-btn-contra" onclick="FuzzyWidgets.setCh3Sim1Mode('${prefix}', 'contra')"
+              class="px-2.5 py-2 rounded-xl text-xs font-bold border transition ${st.sim1Mode === 'contra' ? 'bg-rose-500 text-white border-rose-400' : 'bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800'}">
+              $A \\cap \\bar{A}$ (矛盾律失效)
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <label class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 block">
+              <div class="flex justify-between"><span>集合 $A$ 中心 $c_A$：</span><span id="${prefix}-s1-ca-val" class="font-mono font-bold text-sky-300">3.5</span></div>
+              <input id="${prefix}-s1-ca" type="range" min="1.5" max="8.5" step="0.1" value="3.5" oninput="FuzzyWidgets.updateCh3Sim1('${prefix}')" class="w-full accent-sky-400 mt-1.5">
+            </label>
+            <label class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 block">
+              <div class="flex justify-between"><span>集合 $A$ 寬度 $\\sigma_A$：</span><span id="${prefix}-s1-sa-val" class="font-mono font-bold text-sky-300">1.5</span></div>
+              <input id="${prefix}-s1-sa" type="range" min="0.6" max="3.0" step="0.1" value="1.5" oninput="FuzzyWidgets.updateCh3Sim1('${prefix}')" class="w-full accent-sky-400 mt-1.5">
+            </label>
+            <label class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 block">
+              <div class="flex justify-between"><span>集合 $B$ 中心 $c_B$：</span><span id="${prefix}-s1-cb-val" class="font-mono font-bold text-purple-300">6.0</span></div>
+              <input id="${prefix}-s1-cb" type="range" min="1.5" max="8.5" step="0.1" value="6.0" oninput="FuzzyWidgets.updateCh3Sim1('${prefix}')" class="w-full accent-purple-400 mt-1.5">
+            </label>
+            <label class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 block">
+              <div class="flex justify-between"><span>集合 $B$ 寬度 $\\sigma_B$：</span><span id="${prefix}-s1-sb-val" class="font-mono font-bold text-purple-300">1.5</span></div>
+              <input id="${prefix}-s1-sb" type="range" min="0.6" max="3.0" step="0.1" value="1.5" oninput="FuzzyWidgets.updateCh3Sim1('${prefix}')" class="w-full accent-purple-400 mt-1.5">
+            </label>
+          </div>
+
+          <div id="${prefix}-s1-plot" class="w-full h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+          <div id="${prefix}-s1-readout" class="bg-slate-950/85 border border-sky-500/25 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 leading-relaxed"></div>
+          <div class="formula-display-card text-teal-200 text-sm">
+            $$\\mu_{A \\cap \\bar{A}}(x) = \\min\\big(\\mu_A(x),\\, 1 - \\mu_A(x)\\big) \\le 0.5, \\qquad \\mu_{A \\cup \\bar{A}}(x) = \\max\\big(\\mu_A(x),\\, 1 - \\mu_A(x)\\big) \\ge 0.5$$
+          </div>
+        </div>
+
+        <!-- 模擬器 3-2：廣義交集 (T-norm) 與廣義聯集 (S-norm) 四大家族同圖對比計算器 -->
+        <div class="bg-slate-900/85 border border-indigo-500/30 rounded-2xl p-4 sm:p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-bold">模擬器 3-2</span>
+              <h4 class="text-sm sm:text-base font-bold text-white">廣義交集（T-norm）與廣義聯集（S-norm）四大家族同圖對比計算器</h4>
+            </div>
+            <div class="grid grid-cols-2 gap-1.5">
+              <button type="button" id="${prefix}-s2-btn-tnorm" onclick="FuzzyWidgets.setCh3Sim2Family('${prefix}', 'tnorm')"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${st.sim2Family === 'tnorm' ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-slate-950 text-slate-300 border-slate-700'}">
+                交集家族 (T-norm)
+              </button>
+              <button type="button" id="${prefix}-s2-btn-snorm" onclick="FuzzyWidgets.setCh3Sim2Family('${prefix}', 'snorm')"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${st.sim2Family === 'snorm' ? 'bg-teal-500 text-slate-950 border-teal-400' : 'bg-slate-950 text-slate-300 border-slate-700'}">
+                聯集家族 (S-norm)
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-slate-950/75 border border-slate-800 rounded-xl p-3">
+            <div class="flex items-center justify-between text-xs mb-1">
+              <span class="font-bold text-amber-300">🔍 測試點 $x$ 探針滑桿（即時計算四算子精確數值）：</span>
+              <span id="${prefix}-s2-probe-val" class="font-mono font-bold text-amber-300 text-sm">x = 4.6</span>
+            </div>
+            <input id="${prefix}-s2-probe" type="range" min="0" max="10" step="0.1" value="4.6"
+              oninput="FuzzyWidgets.updateCh3Sim2('${prefix}')" class="w-full accent-amber-400">
+          </div>
+
+          <div id="${prefix}-s2-plot" class="w-full h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+          <div id="${prefix}-s2-readout" class="bg-slate-950/85 border border-indigo-500/25 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 space-y-2"></div>
+          <div class="formula-display-card text-teal-200 text-sm">
+            $$T_{\\text{drastic}}(a,b) \\le T_{\\text{bounded}}(a,b) \\le T_{\\text{alg}}(a,b) \\le \\min(a,b) \\le \\max(a,b) \\le S_{\\text{alg}}(a,b) \\le S_{\\text{bounded}}(a,b) \\le S_{\\text{drastic}}(a,b)$$
+          </div>
+        </div>
+
+        <!-- 模擬器 3-3：Sugeno λ-補集與 Yager 參數化運算子動態形變器 -->
+        <div class="bg-slate-900/85 border border-amber-500/30 rounded-2xl p-4 sm:p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">模擬器 3-3</span>
+              <h4 class="text-sm sm:text-base font-bold text-white">Sugeno $\\lambda$-補集與 Yager 參數化運算子動態形變器</h4>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <button type="button" onclick="FuzzyWidgets.setCh3Sim3Preset('${prefix}', -0.8, 1.0)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono">λ = -0.8</button>
+              <button type="button" onclick="FuzzyWidgets.setCh3Sim3Preset('${prefix}', 0.0, 1.0)" class="px-2 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/35 text-xs font-bold">λ = 0 (標準補集)</button>
+              <button type="button" onclick="FuzzyWidgets.setCh3Sim3Preset('${prefix}', 3.0, 2.0)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono">λ = 3, w = 2</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <label class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 block">
+              <div class="flex justify-between"><span>Sugeno 參數 $\\lambda \\in [-0.9, 10]$：</span><span id="${prefix}-s3-lam-val" class="font-mono font-bold text-amber-300">0.0</span></div>
+              <input id="${prefix}-s3-lam" type="range" min="-0.9" max="10.0" step="0.1" value="0.0" oninput="FuzzyWidgets.updateCh3Sim3('${prefix}')" class="w-full accent-amber-400 mt-1.5">
+            </label>
+            <label class="bg-slate-950/75 border border-slate-800 rounded-xl p-3 text-xs text-slate-300 block">
+              <div class="flex justify-between"><span>Yager 參數 $w \\in [0.3, 5.0]$：</span><span id="${prefix}-s3-w-val" class="font-mono font-bold text-cyan-300">1.0</span></div>
+              <input id="${prefix}-s3-w" type="range" min="0.3" max="5.0" step="0.1" value="1.0" oninput="FuzzyWidgets.updateCh3Sim3('${prefix}')" class="w-full accent-cyan-400 mt-1.5">
+            </label>
+          </div>
+
+          <div id="${prefix}-s3-plot" class="w-full h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+          <div id="${prefix}-s3-readout" class="bg-slate-950/85 border border-amber-500/25 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 leading-relaxed"></div>
+          <div class="formula-display-card text-teal-200 text-sm">
+            $$c_\\lambda(a) = \\frac{1 - a}{1 + \\lambda a} \\;(\\lambda > -1), \\qquad c_w(a) = (1 - a^w)^{1/w} \\;(w > 0)$$
+          </div>
+        </div>
+
+        <!-- 模擬器 3-4：語意修飾詞 (Very / Extremely / Somewhat / INT 對比強化) 曲線變形器 -->
+        <div class="bg-slate-900/85 border border-emerald-500/30 rounded-2xl p-4 sm:p-5 space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-slate-800">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">模擬器 3-4</span>
+              <h4 class="text-sm sm:text-base font-bold text-white">語意修飾詞（Very 濃度平方 / Somewhat 擴張開根號 / INT 對比強化）曲線變形器</h4>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <label class="flex items-center gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 cursor-pointer hover:border-amber-500/50">
+              <input id="${prefix}-s4-very" type="checkbox" checked onchange="FuzzyWidgets.updateCh3Sim4('${prefix}')" class="accent-amber-400 w-4 h-4">
+              <span><b class="text-amber-300">Very A</b> ($\\mu^2$)</span>
+            </label>
+            <label class="flex items-center gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 cursor-pointer hover:border-rose-500/50">
+              <input id="${prefix}-s4-ext" type="checkbox" onchange="FuzzyWidgets.updateCh3Sim4('${prefix}')" class="accent-rose-400 w-4 h-4">
+              <span><b class="text-rose-300">Extremely A</b> ($\\mu^4$)</span>
+            </label>
+            <label class="flex items-center gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 cursor-pointer hover:border-emerald-500/50">
+              <input id="${prefix}-s4-some" type="checkbox" checked onchange="FuzzyWidgets.updateCh3Sim4('${prefix}')" class="accent-emerald-400 w-4 h-4">
+              <span><b class="text-emerald-300">Somewhat A</b> ($\\mu^{0.5}$)</span>
+            </label>
+            <label class="flex items-center gap-2 bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 cursor-pointer hover:border-purple-500/50">
+              <input id="${prefix}-s4-int" type="checkbox" checked onchange="FuzzyWidgets.updateCh3Sim4('${prefix}')" class="accent-purple-400 w-4 h-4">
+              <span><b class="text-purple-300">INT 對比強化</b></span>
+            </label>
+          </div>
+
+          <div id="${prefix}-s4-plot" class="w-full h-80 rounded-xl overflow-hidden bg-slate-950/60 border border-slate-800/80"></div>
+          <div id="${prefix}-s4-readout" class="bg-slate-950/85 border border-emerald-500/25 rounded-xl px-4 py-3 text-xs sm:text-sm text-slate-200 leading-relaxed"></div>
+          <div class="formula-display-card text-teal-200 text-sm">
+            $$\\mu_{\\text{INT}(A)}(x) = \\begin{cases} 2[\\mu_A(x)]^2, & 0 \\le \\mu_A(x) \\le 0.5 \\\\ 1 - 2[1 - \\mu_A(x)]^2, & 0.5 < \\mu_A(x) \\le 1 \\end{cases}$$
+          </div>
+        </div>
+      </div>
+    `;
+
+    updateCh3Sim1(prefix);
+    updateCh3Sim2(prefix);
+    updateCh3Sim3(prefix);
+    updateCh3Sim4(prefix);
+
+    if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([el]).catch(() => {});
+    }
+  }
+
+  function setCh3Sim1Mode(prefix, mode) {
+    const st = getCh3SimState(prefix);
+    st.sim1Mode = mode;
+    const styles = {
+      inter: 'bg-sky-500 text-slate-950 border-sky-400',
+      union: 'bg-emerald-500 text-slate-950 border-emerald-400',
+      excl: 'bg-amber-500 text-slate-950 border-amber-400',
+      contra: 'bg-rose-500 text-white border-rose-400'
+    };
+    ['inter', 'union', 'excl', 'contra'].forEach(m => {
+      const btn = document.getElementById(`${prefix}-s1-btn-${m}`);
+      if (btn) {
+        btn.className = `px-2.5 py-2 rounded-xl text-xs font-bold border transition ${m === mode ? styles[m] : 'bg-slate-950/80 text-slate-300 border-slate-700 hover:bg-slate-800'}`;
+      }
+    });
+    updateCh3Sim1(prefix);
+  }
+
+  function updateCh3Sim1(prefix) {
+    if (!window.Plotly) return;
+    const plotEl = document.getElementById(`${prefix}-s1-plot`);
+    const readoutEl = document.getElementById(`${prefix}-s1-readout`);
+    if (!plotEl) return;
+
+    const st = getCh3SimState(prefix);
+    const mode = st.sim1Mode;
+    const ca = parseFloat((document.getElementById(`${prefix}-s1-ca`) || {}).value || 3.5);
+    const sa = parseFloat((document.getElementById(`${prefix}-s1-sa`) || {}).value || 1.5);
+    const cb = parseFloat((document.getElementById(`${prefix}-s1-cb`) || {}).value || 6.0);
+    const sb = parseFloat((document.getElementById(`${prefix}-s1-sb`) || {}).value || 1.5);
+
+    const setT = (id, txt) => { const n = document.getElementById(id); if (n) n.textContent = txt; };
+    setT(`${prefix}-s1-ca-val`, ca.toFixed(1));
+    setT(`${prefix}-s1-sa-val`, sa.toFixed(1));
+    setT(`${prefix}-s1-cb-val`, cb.toFixed(1));
+    setT(`${prefix}-s1-sb-val`, sb.toFixed(1));
+
+    const xs = [], yA = [], yB = [], yNotA = [], yRes = [], yOne = [];
+    for (let x = 0; x <= 10.001; x += 0.05) {
+      const xv = Number(x.toFixed(2));
+      const a = Math.exp(-Math.pow(xv - ca, 2) / (2 * sa * sa));
+      const b = Math.exp(-Math.pow(xv - cb, 2) / (2 * sb * sb));
+      const na = 1 - a;
+      xs.push(xv);
+      yA.push(a);
+      yB.push(b);
+      yNotA.push(na);
+      yOne.push(1);
+      if (mode === 'inter') yRes.push(Math.min(a, b));
+      else if (mode === 'union') yRes.push(Math.max(a, b));
+      else if (mode === 'excl') yRes.push(Math.max(a, na));
+      else yRes.push(Math.min(a, na));
+    }
+
+    let traces = [];
+    if (mode === 'inter' || mode === 'union') {
+      const isInter = mode === 'inter';
+      const maxRes = Math.max(...yRes);
+      traces = [
+        { x: xs, y: yA, name: '集合 A', line: { color: '#38bdf8', width: 2, dash: 'dot' } },
+        { x: xs, y: yB, name: '集合 B', line: { color: '#a855f7', width: 2, dash: 'dot' } },
+        {
+          x: xs, y: yRes,
+          name: isInter ? 'A ∩ B = min(μ_A, μ_B)' : 'A ∪ B = max(μ_A, μ_B)',
+          fill: 'tozeroy',
+          fillcolor: isInter ? 'rgba(56, 189, 248, 0.25)' : 'rgba(16, 185, 129, 0.22)',
+          line: { color: isInter ? '#38bdf8' : '#10b981', width: 3.5 }
+        }
+      ];
+      if (readoutEl) {
+        readoutEl.innerHTML = isInter
+          ? `<b>標準交集 $A \\cap B$ (Min)：</b>以半透明藍色填滿交疊包絡線，當前最高交集歸屬度為 <b class="text-sky-300">${maxRes.toFixed(3)}</b>（調整 $c_A, c_B$ 距離可觀察交疊程度變化）。`
+          : `<b>標準聯集 $A \\cup B$ (Max)：</b>以半透明綠色填滿雙峰聯集包絡線，最高歸屬度為 <b class="text-emerald-300">${maxRes.toFixed(3)}</b>。`;
+      }
+    } else if (mode === 'excl') {
+      const minVal = Math.min(...yRes);
+      const minIdx = yRes.indexOf(minVal);
+      const minX = xs[minIdx];
+      traces = [
+        { x: xs, y: yA, name: '集合 A', line: { color: '#38bdf8', width: 2, dash: 'dot' } },
+        { x: xs, y: yNotA, name: '補集 Ā = 1 - μ_A', line: { color: '#f43f5e', width: 2, dash: 'dot' } },
+        {
+          x: xs, y: yRes,
+          name: 'A ∪ Ā = max(μ_A, 1-μ_A)',
+          fill: 'tozeroy',
+          fillcolor: 'rgba(245, 158, 11, 0.18)',
+          line: { color: '#f59e0b', width: 3.5 }
+        },
+        {
+          x: xs, y: yOne,
+          name: '古典排中律基準 (y = 1) / 偏差缺口',
+          fill: 'tonexty',
+          fillcolor: 'rgba(244, 63, 94, 0.22)',
+          line: { color: '#94a3b8', width: 2, dash: 'dash' }
+        },
+        {
+          x: [minX], y: [minVal],
+          name: `極小值 (${minX.toFixed(2)}, ${minVal.toFixed(3)})`,
+          mode: 'markers+text',
+          text: [`min = ${minVal.toFixed(3)}`],
+          textposition: 'bottom center',
+          marker: { color: '#fbbf24', size: 10, symbol: 'diamond' }
+        }
+      ];
+      if (readoutEl) {
+        readoutEl.innerHTML = `<b class="text-amber-300">⚠️ 排中律失效驗證 ($A \\cup \\bar{A} \\neq 1$)：</b>紅色陰影處即為 $A \\cup \\bar{A}$ 低於古典基準線 $y=1$ 的「非確定偏差區」！在交越點 $x = ${minX.toFixed(2)}$ 處取得極小值 <b class="text-amber-300">${minVal.toFixed(3)}</b>（最大偏差量達 <b>${(1 - minVal).toFixed(3)}</b>）。`;
+      }
+    } else {
+      const maxVal = Math.max(...yRes);
+      const maxIdx = yRes.indexOf(maxVal);
+      const maxX = xs[maxIdx];
+      traces = [
+        { x: xs, y: yA, name: '集合 A', line: { color: '#38bdf8', width: 2, dash: 'dot' } },
+        { x: xs, y: yNotA, name: '補集 Ā = 1 - μ_A', line: { color: '#fb923c', width: 2, dash: 'dot' } },
+        {
+          x: xs, y: yRes,
+          name: 'A ∩ Ā = min(μ_A, 1-μ_A)',
+          fill: 'tozeroy',
+          fillcolor: 'rgba(244, 63, 94, 0.28)',
+          line: { color: '#f43f5e', width: 3.5 }
+        },
+        {
+          x: [0, 10], y: [0, 0],
+          name: '古典矛盾律基準 (y = 0)',
+          line: { color: '#94a3b8', width: 1.5, dash: 'dash' }
+        },
+        {
+          x: [maxX], y: [maxVal],
+          name: `極大值 (${maxX.toFixed(2)}, ${maxVal.toFixed(3)})`,
+          mode: 'markers+text',
+          text: [`max = ${maxVal.toFixed(3)}`],
+          textposition: 'top center',
+          marker: { color: '#f43f5e', size: 10, symbol: 'diamond' }
+        }
+      ];
+      if (readoutEl) {
+        readoutEl.innerHTML = `<b class="text-rose-300">⚠️ 矛盾律失效驗證 ($A \\cap \\bar{A} \\neq 0$)：</b>紅色陰影山丘代表「亦此亦彼」的模糊矛盾區域！在交越點 $x = ${maxX.toFixed(2)}$ 處達到極大值 <b class="text-rose-300">${maxVal.toFixed(3)}</b>（嚴格滿足 $\\le 0.5$）。`;
+      }
+    }
+
+    Plotly.react(plotEl, traces, {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(15, 23, 42, 0.75)',
+      font: { color: '#e2e8f0', size: 11 },
+      margin: { t: 30, r: 18, b: 40, l: 48 },
+      legend: { orientation: 'h', y: 1.16, x: 0 },
+      xaxis: { title: '論域 x', range: [0, 10] },
+      yaxis: { title: '歸屬度 μ(x)', range: [-0.06, 1.12] }
+    }, { responsive: true, displayModeBar: false });
+
+    if (readoutEl && window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+      window.MathJax.typesetPromise([readoutEl]).catch(() => {});
+    }
+  }
+
+  function setCh3Sim2Family(prefix, family) {
+    const st = getCh3SimState(prefix);
+    st.sim2Family = family;
+    const tBtn = document.getElementById(`${prefix}-s2-btn-tnorm`);
+    const sBtn = document.getElementById(`${prefix}-s2-btn-snorm`);
+    if (tBtn && sBtn) {
+      tBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border transition ${family === 'tnorm' ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-slate-950 text-slate-300 border-slate-700'}`;
+      sBtn.className = `px-3 py-1.5 rounded-lg text-xs font-bold border transition ${family === 'snorm' ? 'bg-teal-500 text-slate-950 border-teal-400' : 'bg-slate-950 text-slate-300 border-slate-700'}`;
+    }
+    updateCh3Sim2(prefix);
+  }
+
+  function updateCh3Sim2(prefix) {
+    if (!window.Plotly) return;
+    const plotEl = document.getElementById(`${prefix}-s2-plot`);
+    const readoutEl = document.getElementById(`${prefix}-s2-readout`);
+    if (!plotEl) return;
+
+    const st = getCh3SimState(prefix);
+    const isT = st.sim2Family === 'tnorm';
+    const xProbe = parseFloat((document.getElementById(`${prefix}-s2-probe`) || {}).value || 4.6);
+    const pSpan = document.getElementById(`${prefix}-s2-probe-val`);
+    if (pSpan) pSpan.textContent = `x = ${xProbe.toFixed(1)}`;
+
+    const mfA = (x) => Math.exp(-Math.pow(x - 3.6, 2) / (2 * 1.45 * 1.45));
+    const mfB = (x) => Math.exp(-Math.pow(x - 5.8, 2) / (2 * 1.45 * 1.45));
+    const calcOps = (a, b) => {
+      if (isT) {
+        return [
+          Math.min(a, b),
+          a * b,
+          Math.max(0, a + b - 1),
+          a >= 0.999 ? b : (b >= 0.999 ? a : 0)
+        ];
+      }
+      return [
+        Math.max(a, b),
+        a + b - a * b,
+        Math.min(1, a + b),
+        a <= 0.001 ? b : (b <= 0.001 ? a : 1)
+      ];
+    };
+
+    const xs = [], yA = [], yB = [], c0 = [], c1 = [], c2 = [], c3 = [];
+    for (let x = 0; x <= 10.001; x += 0.08) {
+      const xv = Number(x.toFixed(2));
+      const a = mfA(xv), b = mfB(xv);
+      const [v0, v1, v2, v3] = calcOps(a, b);
+      xs.push(xv); yA.push(a); yB.push(b);
+      c0.push(v0); c1.push(v1); c2.push(v2); c3.push(v3);
+    }
+
+    const pA = mfA(xProbe), pB = mfB(xProbe);
+    const pVals = calcOps(pA, pB);
+
+    const names = isT
+      ? ['Min 標準交集', '代數積 (a·b)', '有界積 max(0, a+b-1)', '劇烈積 (Drastic)']
+      : ['Max 標準聯集', '代數和 (a+b-ab)', '有界和 min(1, a+b)', '劇烈和 (Drastic)'];
+    const colors = ['#38bdf8', '#10b981', '#f59e0b', '#f43f5e'];
+
+    const traces = [
+      { x: xs, y: yA, name: 'A (參考)', line: { color: '#64748b', width: 1.5, dash: 'dot' } },
+      { x: xs, y: yB, name: 'B (參考)', line: { color: '#94a3b8', width: 1.5, dash: 'dot' } },
+      { x: xs, y: c0, name: names[0], line: { color: colors[0], width: 3 } },
+      { x: xs, y: c1, name: names[1], line: { color: colors[1], width: 2.8 } },
+      { x: xs, y: c2, name: names[2], line: { color: colors[2], width: 2.5 } },
+      { x: xs, y: c3, name: names[3], line: { color: colors[3], width: 2, dash: 'dashdot' } },
+      { x: [xProbe, xProbe], y: [0, 1.05], name: `探針 x=${xProbe.toFixed(1)}`, line: { color: '#fbbf24', width: 1.8, dash: 'dash' } },
+      { x: [xProbe, xProbe, xProbe, xProbe], y: pVals, name: '探針數值', mode: 'markers', marker: { color: colors, size: 9, line: { color: '#0f172a', width: 1.5 } }, showlegend: false }
+    ];
+
+    Plotly.react(plotEl, traces, {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(15, 23, 42, 0.75)',
+      font: { color: '#e2e8f0', size: 11 },
+      margin: { t: 30, r: 18, b: 40, l: 48 },
+      legend: { orientation: 'h', y: 1.18, x: 0 },
+      xaxis: { title: '論域 x', range: [0, 10] },
+      yaxis: { title: '算子輸出值', range: [-0.05, 1.1] }
+    }, { responsive: true, displayModeBar: false });
+
+    if (readoutEl) {
+      const orderStr = isT
+        ? `${pVals[3].toFixed(4)} (劇烈積) ≤ ${pVals[2].toFixed(4)} (有界積) ≤ ${pVals[1].toFixed(4)} (代數積) ≤ ${pVals[0].toFixed(4)} (Min)`
+        : `${pVals[0].toFixed(4)} (Max) ≤ ${pVals[1].toFixed(4)} (代數和) ≤ ${pVals[2].toFixed(4)} (有界和) ≤ ${pVals[3].toFixed(4)} (劇烈和)`;
+      readoutEl.innerHTML = `
+        <div class="flex flex-wrap items-center gap-3 text-xs">
+          <span class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 font-mono">探針 $x = ${xProbe.toFixed(1)}$：$\\mu_A = ${pA.toFixed(4)}$, $\\mu_B = ${pB.toFixed(4)}$</span>
+        </div>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+          ${names.map((nm, i) => `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-lg px-2.5 py-2">
+              <div class="text-[11px] text-slate-400">${nm}</div>
+              <div class="font-mono font-bold text-sm" style="color:${colors[i]}">${pVals[i].toFixed(4)}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="text-xs text-emerald-300 font-mono pt-1">✅ 嚴格大小不等式驗證：${orderStr}</div>
+      `;
+      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+        window.MathJax.typesetPromise([readoutEl]).catch(() => {});
+      }
+    }
+  }
+
+  function setCh3Sim3Preset(prefix, lam, w) {
+    const lIn = document.getElementById(`${prefix}-s3-lam`);
+    const wIn = document.getElementById(`${prefix}-s3-w`);
+    if (lIn) lIn.value = lam;
+    if (wIn) wIn.value = w;
+    updateCh3Sim3(prefix);
+  }
+
+  function updateCh3Sim3(prefix) {
+    if (!window.Plotly) return;
+    const plotEl = document.getElementById(`${prefix}-s3-plot`);
+    const readoutEl = document.getElementById(`${prefix}-s3-readout`);
+    if (!plotEl) return;
+
+    const lam = parseFloat((document.getElementById(`${prefix}-s3-lam`) || {}).value || 0.0);
+    const w = parseFloat((document.getElementById(`${prefix}-s3-w`) || {}).value || 1.0);
+    const setT = (id, txt) => { const n = document.getElementById(id); if (n) n.textContent = txt; };
+    setT(`${prefix}-s3-lam-val`, lam.toFixed(1));
+    setT(`${prefix}-s3-w-val`, w.toFixed(1));
+
+    const as = [], yStd = [], ySug = [], yYag = [];
+    for (let a = 0; a <= 1.0001; a += 0.01) {
+      const av = Number(a.toFixed(2));
+      as.push(av);
+      yStd.push(1 - av);
+      ySug.push((1 - av) / (1 + lam * av));
+      yYag.push(Math.pow(Math.max(0, 1 - Math.pow(av, w)), 1 / w));
+    }
+
+    const eqSug = Math.abs(lam) < 1e-6 ? 0.5 : (Math.sqrt(1 + lam) - 1) / lam;
+    const eqYag = Math.pow(0.5, 1 / w);
+
+    const traces = [
+      { x: as, y: yStd, name: '標準補集 C₀(a) = 1 - a', line: { color: '#94a3b8', width: 2, dash: 'dot' } },
+      { x: [0, 1], y: [0, 1], name: '參考線 y = x (平衡線)', line: { color: '#10b981', width: 2, dash: 'dash' } },
+      { x: as, y: ySug, name: `Sugeno 補集 (λ=${lam.toFixed(1)})`, line: { color: '#f59e0b', width: 3.5 } },
+      { x: as, y: yYag, name: `Yager 補集 (w=${w.toFixed(1)})`, line: { color: '#22d3ee', width: 3 } },
+      {
+        x: [eqSug], y: [eqSug],
+        name: `Sugeno 平衡點 (${eqSug.toFixed(3)}, ${eqSug.toFixed(3)})`,
+        mode: 'markers+text',
+        text: [`Sugeno (${eqSug.toFixed(3)})`],
+        textposition: 'top left',
+        marker: { color: '#fbbf24', size: 11, symbol: 'circle', line: { color: '#0f172a', width: 2 } }
+      },
+      {
+        x: [eqYag], y: [eqYag],
+        name: `Yager 平衡點 (${eqYag.toFixed(3)}, ${eqYag.toFixed(3)})`,
+        mode: 'markers+text',
+        text: [`Yager (${eqYag.toFixed(3)})`],
+        textposition: 'bottom right',
+        marker: { color: '#22d3ee', size: 11, symbol: 'diamond', line: { color: '#0f172a', width: 2 } }
+      }
+    ];
+
+    Plotly.react(plotEl, traces, {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(15, 23, 42, 0.75)',
+      font: { color: '#e2e8f0', size: 11 },
+      margin: { t: 30, r: 18, b: 42, l: 48 },
+      legend: { orientation: 'h', y: 1.18, x: 0 },
+      xaxis: { title: '原始歸屬度 a = μ_A(x)', range: [-0.03, 1.03] },
+      yaxis: { title: '補集輸出 C(a)', range: [-0.03, 1.05] }
+    }, { responsive: true, displayModeBar: false });
+
+    if (readoutEl) {
+      readoutEl.innerHTML = `
+        <div>🎯 <b>平衡點自動計算 (Equilibrium Point, $C(a^*)=a^*$)：</b></div>
+        <div class="mt-1 flex flex-wrap gap-4 font-mono text-xs sm:text-sm">
+          <span class="text-amber-300">Sugeno ($\\lambda=${lam.toFixed(1)}$)：$a^* = ${eqSug.toFixed(4)}$</span>
+          <span class="text-cyan-300">Yager ($w=${w.toFixed(1)}$)：$a^* = ${eqYag.toFixed(4)}$</span>
+          <span class="text-slate-400">標準補集 ($\\lambda=0, w=1$)：$a^* = 0.5000$</span>
+        </div>
+      `;
+      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+        window.MathJax.typesetPromise([readoutEl]).catch(() => {});
+      }
+    }
+  }
+
+  function updateCh3Sim4(prefix) {
+    if (!window.Plotly) return;
+    const plotEl = document.getElementById(`${prefix}-s4-plot`);
+    const readoutEl = document.getElementById(`${prefix}-s4-readout`);
+    if (!plotEl) return;
+
+    const showVery = !!(document.getElementById(`${prefix}-s4-very`) || {}).checked;
+    const showExt = !!(document.getElementById(`${prefix}-s4-ext`) || {}).checked;
+    const showSome = !!(document.getElementById(`${prefix}-s4-some`) || {}).checked;
+    const showInt = !!(document.getElementById(`${prefix}-s4-int`) || {}).checked;
+
+    const xs = [], yBase = [], yVery = [], yExt = [], ySome = [], yInt = [];
+    for (let x = 0; x <= 10.001; x += 0.05) {
+      const xv = Number(x.toFixed(2));
+      const m = Math.exp(-Math.pow(xv - 5.0, 2) / (2 * 1.8 * 1.8));
+      xs.push(xv);
+      yBase.push(m);
+      yVery.push(m * m);
+      yExt.push(Math.pow(m, 4));
+      ySome.push(Math.sqrt(m));
+      yInt.push(m <= 0.5 ? 2 * m * m : 1 - 2 * Math.pow(1 - m, 2));
+    }
+
+    const traces = [
+      { x: xs, y: yBase, name: '原始集合 A (μ)', line: { color: '#38bdf8', width: 3.5 } },
+      { x: [0, 10], y: [0.5, 0.5], name: '對比強化門檻 (y = 0.5)', line: { color: '#64748b', width: 1.5, dash: 'dot' } }
+    ];
+    if (showVery) traces.push({ x: xs, y: yVery, name: 'Very A (μ² · 濃度化)', line: { color: '#f59e0b', width: 2.8 } });
+    if (showExt) traces.push({ x: xs, y: yExt, name: 'Extremely A (μ⁴ · 極度集中)', line: { color: '#f43f5e', width: 2.5, dash: 'dash' } });
+    if (showSome) traces.push({ x: xs, y: ySome, name: 'Somewhat A (μ⁰·⁵ · 擴張化)', line: { color: '#10b981', width: 2.8 } });
+    if (showInt) traces.push({ x: xs, y: yInt, name: 'INT(A) (對比強化銳化)', line: { color: '#a855f7', width: 3 } });
+
+    Plotly.react(plotEl, traces, {
+      paper_bgcolor: 'rgba(0,0,0,0)',
+      plot_bgcolor: 'rgba(15, 23, 42, 0.75)',
+      font: { color: '#e2e8f0', size: 11 },
+      margin: { t: 30, r: 18, b: 40, l: 48 },
+      legend: { orientation: 'h', y: 1.18, x: 0 },
+      xaxis: { title: '論域 x', range: [0, 10] },
+      yaxis: { title: '修飾後歸屬度 μ(x)', range: [-0.04, 1.08] }
+    }, { responsive: true, displayModeBar: false });
+
+    if (readoutEl) {
+      readoutEl.innerHTML = `以 $\\mu_A(x) = 0.6$ 與 $0.3$ 為例：<b>Very</b> ($\\mu^2$) 將之壓縮變瘦為 <b>0.36</b> 與 <b>0.09</b>；<b>Somewhat</b> ($\\mu^{0.5}$) 擴張變胖為 <b>0.775</b> 與 <b>0.548</b>；而 <b>INT 對比強化</b>則以 $0.5$ 為界，將 $0.6$ 拉高至 <b>0.68</b>、將 $0.3$ 壓低至 <b>0.18</b>，使邊界更銳利！`;
+      if (window.MathJax && typeof window.MathJax.typesetPromise === 'function') {
+        window.MathJax.typesetPromise([readoutEl]).catch(() => {});
+      }
+    }
+  }
+
   let greekDictQuery = '';
   let greekDictMathTimer = null;
 
@@ -33962,6 +34549,15 @@ window.FuzzyWidgets = (function () {
     fcmStep19: fcmStep19,
     fcmAuto19: fcmAuto19,
     fcmReset19: fcmReset19,
+    // Chapter 03 四大互動實驗室
+    renderCh3AllSimulators: renderCh3AllSimulators,
+    setCh3Sim1Mode: setCh3Sim1Mode,
+    updateCh3Sim1: updateCh3Sim1,
+    setCh3Sim2Family: setCh3Sim2Family,
+    updateCh3Sim2: updateCh3Sim2,
+    setCh3Sim3Preset: setCh3Sim3Preset,
+    updateCh3Sim3: updateCh3Sim3,
+    updateCh3Sim4: updateCh3Sim4,
     // 希臘字母與符號字典
     renderGreekSymbolsDictionary: renderGreekSymbolsDictionary,
     filterGreekSymbols: filterGreekSymbols,
